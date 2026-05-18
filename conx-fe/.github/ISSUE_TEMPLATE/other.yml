@@ -1,0 +1,33 @@
+name: 📌 기타
+description: 위 카테고리에 없는 작업 (perf, test, style, build, ci 등)
+title: ""
+labels: ["triage"]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: 작업 타입
+      description: Conventional Commits 타입을 골라주세요
+      options:
+        - perf - 성능 개선
+        - test - 테스트 추가 / 수정
+        - style - 코드 스타일 / 포매팅
+        - build - 빌드 시스템 / 의존성
+        - ci - CI 설정
+        - revert - 이전 커밋 되돌리기
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 무슨 작업인가요?
+      description: 필요한 변경과 배경을 함께 적어주세요
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 참고 링크, 영향 범위, 관련 이슈/PR 등
