@@ -1,0 +1,77 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+
+jobs:
+  auto-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 15
+            --dangerously-skip-permissions
+          prompt: |
+            이 Pull Request의 코드 변경 사항을 리뷰해주세요.
+            이 저장소는 Next.js, React, TypeScript 기반 프론트엔드 프로젝트입니다.
+
+            다음 항목을 중점적으로 확인해주세요:
+            1. 렌더링/동작 정확성: Server Component와 Client Component 경계, hydration mismatch, 이벤트 핸들러, 폼/라우팅 흐름 오류
+            2. React 품질: 잘못된 hook 사용, 의존성 배열 누락, 불필요한 상태/리렌더링, key 처리 문제
+            3. TypeScript 안정성: 과도한 any, 잘못된 nullable 처리, props/type 계약 불일치
+            4. 접근성: semantic HTML, label/alt/aria, 키보드 접근, 포커스 흐름
+            5. 성능/UX: Next.js Image/Link 사용, 번들 증가, 불필요한 client component, 로딩/에러 상태 누락, layout shift 가능성
+            6. 프론트엔드 보안: XSS 위험, dangerouslySetInnerHTML, 민감한 값의 클라이언트 노출, 사용자 입력 처리
+
+            리뷰는 한국어로 작성해주세요.
+            심각한 문제만 지적하고, 사소한 스타일 이슈는 넘어가주세요.
+            변경된 코드와 직접 관련된 문제만 지적해주세요.
+
+            리뷰 결과는 반드시 PR에 코멘트로 남겨주세요.
+            문제를 발견하지 못한 경우에도 "검토 완료, 특이사항 없음" 코멘트를 남겨주세요.
+
+  interactive:
+    if: |
+      (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
+      contains(github.event.comment.body, '@claude')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          claude_args: |
+            --max-turns 10
+            --dangerously-skip-permissions
+          prompt: |
+            사용자가 PR에서 다음과 같이 Claude를 호출했습니다.
+
+            ${{ github.event.comment.body }}
+
+            요청에 답변하되, 이 저장소가 Next.js, React, TypeScript 기반 프론트엔드 프로젝트라는 점을 기준으로 판단해주세요.
+            코드 리뷰를 하는 경우에는 렌더링/상태 관리/타입 안정성/접근성/성능/클라이언트 보안을 우선 확인하고, 한국어로 답변해주세요.

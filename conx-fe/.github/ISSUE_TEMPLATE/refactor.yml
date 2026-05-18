@@ -1,0 +1,41 @@
+name: ♻️ Refactor
+description: 동작 변경 없이 코드 구조를 개선하는 작업
+title: "refactor: "
+labels: ["type: refactor", "triage"]
+body:
+  - type: input
+    id: target
+    attributes:
+      label: 리팩터링 대상
+      description: 파일 경로, 모듈명, 함수명 등
+      placeholder: "예: src/utils/auth.ts, UserService"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 무엇을 개선하나요?
+      description: 현재 불편한 점이나 바꾸고 싶은 방향을 적어주세요
+      placeholder: 예) 같은 로직이 여러 곳에 중복되어 있음 / 책임이 너무 많은 클래스 / 테스트하기 어려운 구조 등
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 개선 방향
+      description: 떠오르는 방향이 있다면 적어주세요
+
+  - type: checkboxes
+    id: behavior
+    attributes:
+      label: 동작 변경 여부
+      options:
+        - label: 외부 동작(API, UI, 결과)이 변하지 않습니다
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 영향 범위, 관련 이슈/PR 링크 등

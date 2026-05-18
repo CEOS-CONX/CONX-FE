@@ -1,0 +1,37 @@
+name: 📖 Docs
+description: 문서 추가 / 수정 / 오타 제보
+title: "docs: "
+labels: ["type: docs", "triage"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 어떤 종류의 문서 작업인가요?
+      options:
+        - 새 문서 추가
+        - 기존 문서 수정 / 보완
+        - 오타 / 링크 수정
+        - 번역
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: 대상 문서 위치
+      description: 파일 경로 또는 URL을 적어주세요
+      placeholder: "예: README.md, docs/getting-started.md"
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 무엇을 바꿔야 하나요?
+      description: 현재 어떤 내용이고, 어떻게 바뀌어야 하는지 적어주세요
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 추가 정보
+      description: 참고 자료나 관련 이슈 링크가 있다면 적어주세요
