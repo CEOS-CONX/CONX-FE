@@ -4,20 +4,6 @@
   --*: initial;
 }
 
-@font-face {
-  font-family: 'SUIT';
-  src: url('../assets/fonts/SUIT-Variable.woff2') format('woff2');
-  font-weight: 100 900;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Plus Jakarta Sans';
-  src: url('../assets/fonts/PlusJakartaSans-VariableFont_wght.ttf') format('truetype');
-  font-weight: 100 900;
-  font-display: swap;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #121212;
@@ -75,8 +61,8 @@
   --color-foreground: var(--foreground);
 
   /* ========== Fonts ========== */
-  --font-suit: 'SUIT', sans-serif;
-  --font-jakarta: 'Plus Jakarta Sans', sans-serif;
+  --font-suit: var(--font-suit-face), sans-serif;
+  --font-jakarta: var(--font-jakarta-face), sans-serif;
 
   /* ========================================================= */
   /* ========== KOR Typography (SUIT) ======================== */
