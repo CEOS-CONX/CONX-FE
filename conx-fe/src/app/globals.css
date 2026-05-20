@@ -1,9 +1,5 @@
 @import 'tailwindcss';
 
-@theme reference {
-  --*: initial;
-}
-
 :root {
   --background: #ffffff;
   --foreground: #121212;
@@ -17,44 +13,44 @@
   --color-common-white: #ffffff;
 
   /* Blue */
-  --color-blue-100: #e5e8ff;
-  --color-blue-150: #ccd2ff;
-  --color-blue-200: #b2bbff;
-  --color-blue-250: #99a5ff;
-  --color-blue-300: #808eff;
-  --color-blue-350: #6678ff;
-  --color-blue-400: #4d61ff;
-  --color-blue-450: #324aff;
-  --color-blue-500: #2239e5;
-  --color-blue-550: #1f33cc;
-  --color-blue-600: #192aa6;
-  --color-blue-650: #15238c;
+  --color-blue-10: #e5e8ff;
+  --color-blue-15: #ccd2ff;
+  --color-blue-20: #b2bbff;
+  --color-blue-25: #99a5ff;
+  --color-blue-30: #808eff;
+  --color-blue-35: #6678ff;
+  --color-blue-40: #4d61ff;
+  --color-blue-45: #324aff;
+  --color-blue-50: #2239e5;
+  --color-blue-55: #1f33cc;
+  --color-blue-60: #192aa6;
+  --color-blue-65: #15238c;
 
   /* Gray */
-  --color-gray-100: #ebeff5;
-  --color-gray-150: #dae2eb;
-  --color-gray-200: #c5d1de;
-  --color-gray-250: #b6c3d1;
-  --color-gray-300: #a3b1c2;
-  --color-gray-350: #94a2b2;
-  --color-gray-400: #808e9e;
-  --color-gray-450: #6d7a8a;
-  --color-gray-500: #566270;
-  --color-gray-550: #3d4752;
-  --color-gray-600: #2d343d;
-  --color-gray-650: #1d2229;
+  --color-gray-10: #ebeff5;
+  --color-gray-15: #dae2eb;
+  --color-gray-20: #c5d1de;
+  --color-gray-25: #b6c3d1;
+  --color-gray-30: #a3b1c2;
+  --color-gray-35: #94a2b2;
+  --color-gray-40: #808e9e;
+  --color-gray-45: #6d7a8a;
+  --color-gray-50: #566270;
+  --color-gray-55: #3d4752;
+  --color-gray-60: #2d343d;
+  --color-gray-65: #1d2229;
 
   /* Green */
-  --color-green-100: #d1fbe0;
-  --color-green-500: #0ea845;
+  --color-green-10: #d1fbe0;
+  --color-green-50: #0ea845;
 
   /* Red */
-  --color-red-100: #ffe4e4;
-  --color-red-500: #e22b2b;
+  --color-red-10: #ffe4e4;
+  --color-red-50: #e22b2b;
 
   /* Yellow */
-  --color-yellow-100: #fff6d0;
-  --color-yellow-500: #f17d08;
+  --color-yellow-10: #fff6d0;
+  --color-yellow-50: #f17d08;
 
   /* Background / Foreground */
   --color-background: var(--background);
