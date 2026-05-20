@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { Footer } from '@/components/layout/Footer';
 import './globals.css';
 
 const suit = localFont({
@@ -28,7 +29,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${suit.variable} ${plusJakartaSans.variable} h-full antialiased`}>
-      <body className="font-suit flex min-h-full flex-col">{children}</body>
+      <body className="font-suit flex min-h-full flex-col">
+        {children}
+        <Footer />
+      </body>
     </html>
   );
 }
