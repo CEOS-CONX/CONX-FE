@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import { Tag } from '@/components/common/Tag';
+import type { TagType } from '@/components/common/Tag';
 import ScrapButton from './ScrapButton';
-
-type TagType = 'red' | 'yellow' | 'green' | 'blue';
 
 interface ImageCardProps {
   src: string;

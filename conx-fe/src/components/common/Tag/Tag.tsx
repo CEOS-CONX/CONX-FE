@@ -5,7 +5,7 @@ const TAG_STYLES = {
   blue: 'bg-conx-blue-100 text-conx-blue-500',
 } as const;
 
-type TagType = keyof typeof TAG_STYLES;
+export type TagType = keyof typeof TAG_STYLES;
 
 export default function Tag({ type, label }: { type: TagType; label: string }) {
   return (

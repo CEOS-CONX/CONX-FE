@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import IconInstagram from '@/assets/icons/icon_instagram.svg';
 
 function Divider() {
@@ -22,6 +23,7 @@ export default function Footer() {
 
             {/* Instagram */}
             <a
+              aria-label="인스타그램"
               href="https://www.instagram.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -83,10 +85,12 @@ export default function Footer() {
 
           {/* Menu */}
           <div className="mt-2 flex gap-8">
-            <button className="text-kor-label-1-bold text-conx-gray-450 py-2">이용약관</button>
-            <button className="text-kor-label-1-bold text-conx-gray-450 py-2">
+            <Link href="#" className="text-kor-label-1-bold text-conx-gray-450 py-2">
+              이용약관
+            </Link>
+            <Link href="#" className="text-kor-label-1-bold text-conx-gray-450 py-2">
               개인정보 처리방침
-            </button>
+            </Link>
           </div>
         </div>
       </div>

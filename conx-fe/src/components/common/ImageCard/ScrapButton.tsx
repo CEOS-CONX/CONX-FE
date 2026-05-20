@@ -9,6 +9,7 @@ export default function ScrapButton({ defaultScraped = false }: { defaultScraped
 
   return (
     <button
+      aria-label={isScraped ? '스크랩 취소' : '스크랩'}
       onClick={() => setIsScraped((prev) => !prev)}
       className="flex cursor-pointer items-center justify-center p-[6px]"
     >

@@ -1,7 +1,6 @@
 import IconStar from '@/assets/icons/icon_star_fill.svg';
 import { ImageCard } from '@/components/common/ImageCard';
-
-type TagType = 'red' | 'yellow' | 'green' | 'blue';
+import type { TagType } from '@/components/common/Tag';
 
 interface CardProps {
   imageSrc: string;
