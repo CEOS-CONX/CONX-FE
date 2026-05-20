@@ -38,6 +38,7 @@ const ICON_BUTTONS: {
 ];
 
 export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
+  // TODO: 라우트 확정 후 usePathname()으로 전환하여 URL과 동기화
   const [activeLink, setActiveLink] = useState<string | null>(null);
   const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
 

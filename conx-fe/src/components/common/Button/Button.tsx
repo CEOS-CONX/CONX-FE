@@ -33,6 +33,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      type="button"
       className={`text-kor-body-1-semibold inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg px-3 py-2 disabled:pointer-events-none ${VARIANT_STYLES[variant]} ${className ?? ''}`}
       {...props}
     >
