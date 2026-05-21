@@ -1,7 +1,7 @@
 const VARIANT_STYLES = {
   ghost: [
     'bg-transparent text-conx-common-black',
-    'hover:bg-conx-gray-650/6 active:bg-transparent',
+    'hover:bg-conx-gray-650/6',
     'disabled:bg-transparent disabled:text-conx-gray-250',
   ].join(' '),
   primary: [
