@@ -1,0 +1,41 @@
+name: Build & Deploy to https://github.com/Yeobi00/CONX-FE
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Prepare output
+        run: |
+          rm -rf output
+          mkdir -p output
+          rsync -a \
+            --exclude='output' \
+            --exclude='.git' \
+            --exclude='.github' \
+            ./ output/
+
+      - name: Push to https://github.com/Yeobi00/CONX-FE
+        id: push
+        uses: cpina/github-action-push-to-another-repository@07c4d7b3def0a8ebe788a8f2c843a4e1de4f6900 # v1.7.2
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
+        with:
+          source-directory: "output"
+          destination-github-username: Yeobi00
+          destination-repository-name: CONX-FE
+          user-name: GitHub Actions
+          user-email: ${{ secrets.EMAIL }}
+          commit-message: "Deploy from build: ${{ github.sha }}"
+          target-branch: main
