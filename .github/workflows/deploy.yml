@@ -28,7 +28,7 @@ jobs:
 
       - name: Push to https://github.com/Yeobi00/CONX-FE
         id: push
-        uses: cpina/github-action-push-to-another-repository@v1.7.2
+        uses: cpina/github-action-push-to-another-repository@07c4d7b3def0a8ebe788a8f2c843a4e1de4f6900 # v1.7.2
         env:
           API_TOKEN_GITHUB: ${{ secrets.AUTO_ACTIONS }}
         with:
@@ -38,4 +38,4 @@ jobs:
           user-name: GitHub Actions
           user-email: ${{ secrets.EMAIL }}
           commit-message: "Deploy from build: ${{ github.sha }}"
-          target-branch: master
+          target-branch: main
