@@ -27,6 +27,12 @@ const SITE_DESCRIPTION =
 
 const OG_TITLE = 'CONX | 20대 타깃이면, 20대가 직접 움직여야 하니까';
 
+// 검색엔진 사이트 소유권 인증 코드 — 각 콘솔에서 발급받은 content 값
+// Google Search Console: https://search.google.com/search-console
+// Naver Search Advisor:  https://searchadvisor.naver.com
+const GOOGLE_VERIFICATION = '';
+const NAVER_VERIFICATION = '';
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
@@ -71,6 +77,10 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+  },
+  verification: {
+    ...(GOOGLE_VERIFICATION ? { google: GOOGLE_VERIFICATION } : {}),
+    ...(NAVER_VERIFICATION ? { other: { 'naver-site-verification': NAVER_VERIFICATION } } : {}),
   },
 };
 
