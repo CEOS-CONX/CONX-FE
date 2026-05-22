@@ -12,19 +12,19 @@
   --color-conx-common-black: #121212;
   --color-conx-common-white: #ffffff;
 
-  /* Blue */
-  --color-conx-blue-100: #e5e8ff;
-  --color-conx-blue-150: #ccd2ff;
-  --color-conx-blue-200: #b2bbff;
-  --color-conx-blue-250: #99a5ff;
-  --color-conx-blue-300: #808eff;
-  --color-conx-blue-350: #6678ff;
-  --color-conx-blue-400: #4d61ff;
-  --color-conx-blue-450: #324aff;
-  --color-conx-blue-500: #2239e5;
-  --color-conx-blue-550: #1f33cc;
-  --color-conx-blue-600: #192aa6;
-  --color-conx-blue-650: #15238c;
+  /* Primary */
+  --color-conx-primary-100: #c4fde5;
+  --color-conx-primary-150: #9cfcd4;
+  --color-conx-primary-200: #66f9bf;
+  --color-conx-primary-250: #0ef1ac;
+  --color-conx-primary-300: #0de7a5;
+  --color-conx-primary-350: #0dd99c;
+  --color-conx-primary-400: #0cca94;
+  --color-conx-primary-450: #0bbc8a;
+  --color-conx-primary-500: #0aae7f;
+  --color-conx-primary-550: #09956e;
+  --color-conx-primary-600: #087d5c;
+  --color-conx-primary-650: #066a4e;
 
   /* Gray */
   --color-conx-gray-100: #ebeff5;
@@ -44,6 +44,10 @@
   --color-conx-green-100: #d1fbe0;
   --color-conx-green-500: #0ea845;
 
+  /* Blue */
+  --color-conx-blue-100: #c6dfff;
+  --color-conx-blue-500: #0058cb;
+
   /* Red */
   --color-conx-red-100: #ffe4e4;
   --color-conx-red-500: #e22b2b;
@@ -51,6 +55,12 @@
   /* Yellow */
   --color-conx-yellow-100: #fff6d0;
   --color-conx-yellow-500: #f17d08;
+
+  /* Effect */
+  --shadow-conx-drop-gray: 0 2px 8px 0 rgb(29 34 41 / 0.15);
+
+  /* Opacity */
+  --color-conx-opacity-gray: rgb(29 34 41 / 0.06);
 
   /* Background / Foreground */
   --color-background: var(--background);

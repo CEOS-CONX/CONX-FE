@@ -6,7 +6,7 @@ type SearchBarProps = React.InputHTMLAttributes<HTMLInputElement>;
 export default function SearchBar({ className, placeholder = '검색창', ...props }: SearchBarProps) {
   return (
     <label
-      className={`group bg-conx-common-white border-conx-gray-300 has-[input:not(:placeholder-shown):not(:focus)]:border-conx-gray-500 focus-within:border-conx-blue-400 flex h-11 w-full max-w-[457px] min-w-[200px] cursor-text items-center gap-3 rounded-md border px-4 ${className ?? ''}`}
+      className={`group bg-conx-common-white border-conx-gray-300 has-[input:not(:placeholder-shown):not(:focus)]:border-conx-gray-500 focus-within:border-conx-primary-300 flex h-11 w-full max-w-[457px] min-w-[200px] cursor-text items-center gap-3 rounded-md border px-4 ${className ?? ''}`}
     >
       <IconSearchStroke className="block h-6 w-6 shrink-0 group-focus-within:hidden group-has-[input:not(:placeholder-shown)]:hidden" />
       <IconSearchFill className="hidden h-6 w-6 shrink-0 group-focus-within:block group-has-[input:not(:placeholder-shown)]:block" />
