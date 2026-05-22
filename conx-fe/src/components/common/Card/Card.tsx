@@ -68,7 +68,7 @@ export default function Card({
           <div className="flex items-center gap-1">
             {rating !== undefined && (
               <div className="flex items-start gap-1">
-                <IconStar className="h-[18px] w-[18px]" />
+                <IconStar className="h-4.5 w-4.5" />
                 <span className="text-kor-label-1-semibold text-conx-gray-400">
                   {rating.toFixed(1)}
                 </span>

@@ -3,7 +3,7 @@ import IconInstagram from '@/assets/icons/icon_instagram.svg';
 
 function Divider() {
   return (
-    <div className="flex h-[18px] w-px items-center">
+    <div className="flex h-4.5 w-px items-center">
       <div className="h-[10.8px] w-px bg-[rgba(112,115,124,0.22)]" />
     </div>
   );
@@ -17,7 +17,7 @@ export default function Footer() {
           {/* Navigation */}
           <nav className="flex items-start justify-between">
             {/* Logo placeholder */}
-            <div className="bg-conx-gray-150 flex h-[38px] w-[120px] items-center justify-center">
+            <div className="bg-conx-gray-150 flex h-9.5 w-30 items-center justify-center">
               <span className="text-kor-label-1-semibold text-conx-gray-350">로고</span>
             </div>
 
