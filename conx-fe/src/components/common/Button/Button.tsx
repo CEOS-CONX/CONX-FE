@@ -5,13 +5,13 @@ const VARIANT_STYLES = {
     'disabled:bg-transparent disabled:text-conx-gray-250',
   ].join(' '),
   primary: [
-    'bg-conx-blue-450 text-conx-common-white',
-    'hover:bg-conx-blue-500 active:bg-conx-blue-550',
+    'bg-conx-gray-650 text-conx-primary-300',
+    'hover:bg-conx-gray-600 active:bg-conx-gray-500',
     'disabled:bg-conx-gray-100 disabled:text-conx-gray-250',
   ].join(' '),
   secondary: [
-    'bg-conx-blue-100 text-conx-blue-450',
-    'hover:bg-conx-blue-150 active:bg-conx-blue-200',
+    'bg-conx-primary-200 text-conx-common-black',
+    'hover:bg-conx-primary-300 active:bg-conx-primary-400',
     'disabled:bg-conx-gray-100 disabled:text-conx-gray-250',
   ].join(' '),
   tertiary: [

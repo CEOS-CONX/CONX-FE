@@ -40,7 +40,7 @@ export default function Card({
   totalCount,
 }: CardProps) {
   return (
-    <div className="flex w-[337px] max-w-[337px] min-w-[243px] flex-col gap-2">
+    <div className="flex w-84.25 max-w-84.25 min-w-60.75 flex-col gap-2">
       <ImageCard src={imageSrc} alt={imageAlt} tag={tag} defaultScraped={defaultScraped} />
 
       <div className="flex flex-col gap-1">
