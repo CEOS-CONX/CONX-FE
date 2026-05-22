@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import ogImage from '@/assets/images/OG_image.png';
 import { Footer } from '@/components/layout/Footer';
 import { Navbar } from '@/components/layout/Navbar';
 import { SITE_URL } from '@/lib/site';
@@ -52,13 +53,20 @@ export const metadata: Metadata = {
     siteName: 'CONX',
     title: OG_TITLE,
     description: SITE_DESCRIPTION,
-    // TODO: 디자인팀 OG 이미지 수령 시 추가 (권장 1200x630)
-    // images: ['/opengraph-image.png'],
+    images: [
+      {
+        url: ogImage.src,
+        width: ogImage.width,
+        height: ogImage.height,
+        alt: 'CONX | 기업과 대학생 크루를 연결하는 플랫폼',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: OG_TITLE,
     description: SITE_DESCRIPTION,
+    images: [ogImage.src],
   },
   robots: {
     index: true,
