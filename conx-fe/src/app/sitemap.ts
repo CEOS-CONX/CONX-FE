@@ -5,6 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
 
   // TODO: 기획팀에서 페이지별 priority / changeFrequency 확정되면 항목 추가
+  //login, signup, projects, crews, landing
+
   return [
     {
       url: SITE_URL,
