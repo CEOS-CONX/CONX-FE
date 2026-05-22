@@ -43,7 +43,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <header className="border-conx-gray-100 w-full border-b">
-      <div className="mx-auto max-w-[1600px] min-w-[992px] px-9 min-[1200px]:px-14 min-[1600px]:px-[66px]">
+      <div className="mx-auto max-w-400 min-w-248 px-9 min-[1200px]:px-14 min-[1600px]:px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo placeholder */}
           <div className="bg-conx-gray-150 flex h-9.5 w-30 shrink-0 items-center justify-center">

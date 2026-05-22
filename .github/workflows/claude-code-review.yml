@@ -25,7 +25,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
-          claude_args: "--max-turns 15 --dangerously-skip-permissions"
+          claude_args: "--max-turns 30 --dangerously-skip-permissions"
           prompt: |
             이 Pull Request의 코드 변경 사항을 리뷰해주세요.
             이 저장소는 Next.js, React, TypeScript 기반 프론트엔드 프로젝트입니다.
@@ -63,7 +63,7 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
-          claude_args: "--max-turns 10 --dangerously-skip-permissions"
+          claude_args: "--max-turns 25 --dangerously-skip-permissions"
           prompt: |
             사용자가 PR에서 다음과 같이 Claude를 호출했습니다.
 
