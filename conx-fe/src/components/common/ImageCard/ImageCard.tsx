@@ -12,7 +12,7 @@ interface ImageCardProps {
 
 export default function ImageCard({ src, alt, tag, defaultScraped = false }: ImageCardProps) {
   return (
-    <div className="group relative h-[203px] min-h-[120px] w-[337px] min-w-[200px] overflow-hidden rounded-md">
+    <div className="group relative h-50.75 min-h-30 w-84.25 min-w-50 overflow-hidden rounded-md">
       {/* Image */}
       <Image
         src={src}
