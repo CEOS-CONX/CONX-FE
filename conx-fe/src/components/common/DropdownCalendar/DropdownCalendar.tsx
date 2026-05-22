@@ -122,6 +122,9 @@ export default function DropdownCalendar({
       // 열 때 viewMonth를 현재 선택된 범위(또는 오늘)로 리셋
       const seed = currentRange?.start ?? new Date();
       setViewMonth({ year: seed.getFullYear(), month: seed.getMonth() });
+    } else {
+      // 닫을 때 mid-selection 상태 초기화 (다음 세션에 영향 X)
+      setPickingStart(null);
     }
     setIsOpen((prev) => !prev);
   }
