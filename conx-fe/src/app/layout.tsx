@@ -19,6 +19,8 @@ const plusJakartaSans = localFont({
   display: 'swap',
 });
 
+/* ========== Metadata ========== */
+
 const SITE_DESCRIPTION =
   'CONX는 기업·브랜드와 대학생 크루를 연결해 20대 인사이트 확보, 콘텐츠 제작, 기업 연계 프로젝트를 빠르게 실행하도록 돕는 매칭 플랫폼입니다.';
 
