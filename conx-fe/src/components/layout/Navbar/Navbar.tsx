@@ -16,8 +16,7 @@ const NAV_LINKS = [
   { label: '워크스페이스', href: '#' },
 ] as const;
 
-const NAV_LINK_BASE =
-  'text-conx-common-black rounded-[6px] px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
+const NAV_LINK_BASE = 'text-conx-common-black rounded-md px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
 
 type IconName = 'notification' | 'scrap' | 'profile';
 
@@ -44,10 +43,10 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <header className="border-conx-gray-100 w-full border-b">
-      <div className="mx-auto max-w-[1600px] min-w-[992px] px-[36px] min-[1200px]:px-[56px] min-[1600px]:px-[66px]">
-        <nav className="flex items-center gap-[60px] px-6 py-4">
+      <div className="mx-auto max-w-[1600px] min-w-[992px] px-9 min-[1200px]:px-14 min-[1600px]:px-[66px]">
+        <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo placeholder */}
-          <div className="bg-conx-gray-150 flex h-[38px] w-[120px] shrink-0 items-center justify-center">
+          <div className="bg-conx-gray-150 flex h-9.5 w-30 shrink-0 items-center justify-center">
             <span className="text-kor-label-1-semibold text-conx-gray-350">로고</span>
           </div>
 
@@ -76,12 +75,12 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                       key={name}
                       aria-label={label}
                       onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
-                      className="flex cursor-pointer items-center justify-center rounded-[6px] p-[6px] hover:bg-[rgba(29,34,41,0.06)]"
+                      className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                     >
                       {activeIcon === name ? (
-                        <Fill className="h-[26px] w-[26px]" />
+                        <Fill className="h-6.5 w-6.5" />
                       ) : (
-                        <Stroke className="h-[26px] w-[26px]" />
+                        <Stroke className="h-6.5 w-6.5" />
                       )}
                     </button>
                   ))}
