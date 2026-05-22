@@ -40,7 +40,7 @@ export default function Card({
   totalCount,
 }: CardProps) {
   return (
-    <div className="flex w-[337px] max-w-[337px] min-w-[243px] flex-col gap-2">
+    <div className="flex w-84.25 max-w-84.25 min-w-60.75 flex-col gap-2">
       <ImageCard src={imageSrc} alt={imageAlt} tag={tag} defaultScraped={defaultScraped} />
 
       <div className="flex flex-col gap-1">
@@ -68,7 +68,7 @@ export default function Card({
           <div className="flex items-center gap-1">
             {rating !== undefined && (
               <div className="flex items-start gap-1">
-                <IconStar className="h-[18px] w-[18px]" />
+                <IconStar className="h-4.5 w-4.5" />
                 <span className="text-kor-label-1-semibold text-conx-gray-400">
                   {rating.toFixed(1)}
                 </span>
