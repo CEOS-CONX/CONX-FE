@@ -8,6 +8,7 @@ import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
+import LogoConx from '@/assets/icons/logo_conx.svg';
 
 const NAV_LINKS = [
   { label: '홈', href: '#' },
@@ -45,10 +46,10 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
     <header className="border-conx-gray-100 w-full border-b">
       <div className="mx-auto max-w-400 min-w-248 px-9 min-[1200px]:px-14 min-[1600px]:px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
-          {/* Logo placeholder */}
-          <div className="bg-conx-gray-150 flex h-9.5 w-30 shrink-0 items-center justify-center">
-            <span className="text-kor-label-1-semibold text-conx-gray-350">로고</span>
-          </div>
+          {/* Logo */}
+          <Link href="/" className="shrink-0">
+            <LogoConx className="h-6.5 w-30" />
+          </Link>
 
           {/* Right frame */}
           <div className="flex flex-1 items-center justify-between">
