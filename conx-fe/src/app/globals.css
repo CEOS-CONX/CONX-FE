@@ -2,21 +2,359 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #121212;
 }
 
 @theme {
+  /* ========== Colors ========== */
+
+  /* Common */
+  --color-conx-common-black: #121212;
+  --color-conx-common-white: #ffffff;
+
+  /* Blue */
+  --color-conx-blue-100: #e5e8ff;
+  --color-conx-blue-150: #ccd2ff;
+  --color-conx-blue-200: #b2bbff;
+  --color-conx-blue-250: #99a5ff;
+  --color-conx-blue-300: #808eff;
+  --color-conx-blue-350: #6678ff;
+  --color-conx-blue-400: #4d61ff;
+  --color-conx-blue-450: #324aff;
+  --color-conx-blue-500: #2239e5;
+  --color-conx-blue-550: #1f33cc;
+  --color-conx-blue-600: #192aa6;
+  --color-conx-blue-650: #15238c;
+
+  /* Gray */
+  --color-conx-gray-100: #ebeff5;
+  --color-conx-gray-150: #dae2eb;
+  --color-conx-gray-200: #c5d1de;
+  --color-conx-gray-250: #b6c3d1;
+  --color-conx-gray-300: #a3b1c2;
+  --color-conx-gray-350: #94a2b2;
+  --color-conx-gray-400: #808e9e;
+  --color-conx-gray-450: #6d7a8a;
+  --color-conx-gray-500: #566270;
+  --color-conx-gray-550: #3d4752;
+  --color-conx-gray-600: #2d343d;
+  --color-conx-gray-650: #1d2229;
+
+  /* Green */
+  --color-conx-green-100: #d1fbe0;
+  --color-conx-green-500: #0ea845;
+
+  /* Red */
+  --color-conx-red-100: #ffe4e4;
+  --color-conx-red-500: #e22b2b;
+
+  /* Yellow */
+  --color-conx-yellow-100: #fff6d0;
+  --color-conx-yellow-500: #f17d08;
+
+  /* Background / Foreground */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* ========== Fonts ========== */
+  --font-suit: var(--font-suit-face), sans-serif;
+  --font-jakarta: var(--font-jakarta-face), sans-serif;
+
+  /* ========================================================= */
+  /* ========== KOR Typography (SUIT) ======================== */
+  /* ========================================================= */
+
+  /* KOR/Display 1/Bold — 56px Bold 140% -2% */
+  --text-kor-display-1-bold: 3.5rem;
+  --text-kor-display-1-bold--line-height: 140%;
+  --text-kor-display-1-bold--letter-spacing: -0.02em;
+  --text-kor-display-1-bold--font-weight: 700;
+
+  /* KOR/Display 2/Bold — 40px Bold 140% -2% */
+  --text-kor-display-2-bold: 2.5rem;
+  --text-kor-display-2-bold--line-height: 140%;
+  --text-kor-display-2-bold--letter-spacing: -0.02em;
+  --text-kor-display-2-bold--font-weight: 700;
+
+  /* KOR/Display 3/Bold — 36px Bold 140% -2% */
+  --text-kor-display-3-bold: 2.25rem;
+  --text-kor-display-3-bold--line-height: 140%;
+  --text-kor-display-3-bold--letter-spacing: -0.02em;
+  --text-kor-display-3-bold--font-weight: 700;
+
+  /* KOR/Title 1/Bold — 32px Bold 140% -2% */
+  --text-kor-title-1-bold: 2rem;
+  --text-kor-title-1-bold--line-height: 140%;
+  --text-kor-title-1-bold--letter-spacing: -0.02em;
+  --text-kor-title-1-bold--font-weight: 700;
+
+  /* KOR/Title 1/Semibold — 32px SemiBold 140% -2% */
+  --text-kor-title-1-semibold: 2rem;
+  --text-kor-title-1-semibold--line-height: 140%;
+  --text-kor-title-1-semibold--letter-spacing: -0.02em;
+  --text-kor-title-1-semibold--font-weight: 600;
+
+  /* KOR/Title 2/Bold — 28px Bold 140% -2% */
+  --text-kor-title-2-bold: 1.75rem;
+  --text-kor-title-2-bold--line-height: 140%;
+  --text-kor-title-2-bold--letter-spacing: -0.02em;
+  --text-kor-title-2-bold--font-weight: 700;
+
+  /* KOR/Title 2/Semibold — 28px SemiBold 140% -2% */
+  --text-kor-title-2-semibold: 1.75rem;
+  --text-kor-title-2-semibold--line-height: 140%;
+  --text-kor-title-2-semibold--letter-spacing: -0.02em;
+  --text-kor-title-2-semibold--font-weight: 600;
+
+  /* KOR/Title 3/Bold — 24px Bold 140% 0 */
+  --text-kor-title-3-bold: 1.5rem;
+  --text-kor-title-3-bold--line-height: 140%;
+  --text-kor-title-3-bold--letter-spacing: 0;
+  --text-kor-title-3-bold--font-weight: 700;
+
+  /* KOR/Title 3/Semibold — 24px SemiBold 140% 0 */
+  --text-kor-title-3-semibold: 1.5rem;
+  --text-kor-title-3-semibold--line-height: 140%;
+  --text-kor-title-3-semibold--letter-spacing: 0;
+  --text-kor-title-3-semibold--font-weight: 600;
+
+  /* KOR/Heading 1/Bold — 22px Bold 150% 0 */
+  --text-kor-heading-1-bold: 1.375rem;
+  --text-kor-heading-1-bold--line-height: 150%;
+  --text-kor-heading-1-bold--letter-spacing: 0;
+  --text-kor-heading-1-bold--font-weight: 700;
+
+  /* KOR/Heading 1/Semibold — 22px SemiBold 150% 0 */
+  --text-kor-heading-1-semibold: 1.375rem;
+  --text-kor-heading-1-semibold--line-height: 150%;
+  --text-kor-heading-1-semibold--letter-spacing: 0;
+  --text-kor-heading-1-semibold--font-weight: 600;
+
+  /* KOR/Heading 2/Bold — 20px Bold 150% 0 */
+  --text-kor-heading-2-bold: 1.25rem;
+  --text-kor-heading-2-bold--line-height: 150%;
+  --text-kor-heading-2-bold--letter-spacing: 0;
+  --text-kor-heading-2-bold--font-weight: 700;
+
+  /* KOR/Heading 2/Semibold — 20px SemiBold 150% 0 */
+  --text-kor-heading-2-semibold: 1.25rem;
+  --text-kor-heading-2-semibold--line-height: 150%;
+  --text-kor-heading-2-semibold--letter-spacing: 0;
+  --text-kor-heading-2-semibold--font-weight: 600;
+
+  /* KOR/Heading 3/Bold — 18px Bold 150% 0 */
+  --text-kor-heading-3-bold: 1.125rem;
+  --text-kor-heading-3-bold--line-height: 150%;
+  --text-kor-heading-3-bold--letter-spacing: 0;
+  --text-kor-heading-3-bold--font-weight: 700;
+
+  /* KOR/Heading 3/Semibold — 18px SemiBold 150% 0 */
+  --text-kor-heading-3-semibold: 1.125rem;
+  --text-kor-heading-3-semibold--line-height: 150%;
+  --text-kor-heading-3-semibold--letter-spacing: 0;
+  --text-kor-heading-3-semibold--font-weight: 600;
+
+  /* KOR/Body 1/Normal_Bold — 16px Bold 150% 0 */
+  --text-kor-body-1-bold: 1rem;
+  --text-kor-body-1-bold--line-height: 150%;
+  --text-kor-body-1-bold--letter-spacing: 0;
+  --text-kor-body-1-bold--font-weight: 700;
+
+  /* KOR/Body 1/Normal_Semibold — 16px SemiBold 150% 0 */
+  --text-kor-body-1-semibold: 1rem;
+  --text-kor-body-1-semibold--line-height: 150%;
+  --text-kor-body-1-semibold--letter-spacing: 0;
+  --text-kor-body-1-semibold--font-weight: 600;
+
+  /* KOR/Body 1/Normal_Medium — 16px Medium 150% 0 */
+  --text-kor-body-1-medium: 1rem;
+  --text-kor-body-1-medium--line-height: 150%;
+  --text-kor-body-1-medium--letter-spacing: 0;
+  --text-kor-body-1-medium--font-weight: 500;
+
+  /* KOR/Label 1/Normal_Bold — 14px Bold 150% 1% */
+  --text-kor-label-1-bold: 0.875rem;
+  --text-kor-label-1-bold--line-height: 150%;
+  --text-kor-label-1-bold--letter-spacing: 0.01em;
+  --text-kor-label-1-bold--font-weight: 700;
+
+  /* KOR/Label 1/Normal_Semibold — 14px SemiBold 150% 1% */
+  --text-kor-label-1-semibold: 0.875rem;
+  --text-kor-label-1-semibold--line-height: 150%;
+  --text-kor-label-1-semibold--letter-spacing: 0.01em;
+  --text-kor-label-1-semibold--font-weight: 600;
+
+  /* KOR/Label 1/Normal_Medium — 14px Medium 150% 1% */
+  --text-kor-label-1-medium: 0.875rem;
+  --text-kor-label-1-medium--line-height: 150%;
+  --text-kor-label-1-medium--letter-spacing: 0.01em;
+  --text-kor-label-1-medium--font-weight: 500;
+
+  /* KOR/Caption 1/Bold — 12px Bold 150% 1% */
+  --text-kor-caption-1-bold: 0.75rem;
+  --text-kor-caption-1-bold--line-height: 150%;
+  --text-kor-caption-1-bold--letter-spacing: 0.01em;
+  --text-kor-caption-1-bold--font-weight: 700;
+
+  /* KOR/Caption 1/Semibold — 12px SemiBold 150% 1% */
+  --text-kor-caption-1-semibold: 0.75rem;
+  --text-kor-caption-1-semibold--line-height: 150%;
+  --text-kor-caption-1-semibold--letter-spacing: 0.01em;
+  --text-kor-caption-1-semibold--font-weight: 600;
+
+  /* KOR/Caption 1/Medium — 12px Medium 150% 1% */
+  --text-kor-caption-1-medium: 0.75rem;
+  --text-kor-caption-1-medium--line-height: 150%;
+  --text-kor-caption-1-medium--letter-spacing: 0.01em;
+  --text-kor-caption-1-medium--font-weight: 500;
+
+  /* ========================================================= */
+  /* ========== ENG Typography (Plus Jakarta Sans) =========== */
+  /* ========================================================= */
+
+  /* ENG/Display 1/Bold — 56px bold 140% 0 */
+  --text-eng-display-1-bold: 3.5rem;
+  --text-eng-display-1-bold--line-height: 140%;
+  --text-eng-display-1-bold--letter-spacing: 0;
+  --text-eng-display-1-bold--font-weight: 700;
+
+  /* ENG/Display 2/Bold — 40px bold 140% 0 */
+  --text-eng-display-2-bold: 2.5rem;
+  --text-eng-display-2-bold--line-height: 140%;
+  --text-eng-display-2-bold--letter-spacing: 0;
+  --text-eng-display-2-bold--font-weight: 700;
+
+  /* ENG/Display 3/Bold — 36px bold 140% 0 */
+  --text-eng-display-3-bold: 2.25rem;
+  --text-eng-display-3-bold--line-height: 140%;
+  --text-eng-display-3-bold--letter-spacing: 0;
+  --text-eng-display-3-bold--font-weight: 700;
+
+  /* ENG/Title 1/Bold — 32px bold 140% 0 */
+  --text-eng-title-1-bold: 2rem;
+  --text-eng-title-1-bold--line-height: 140%;
+  --text-eng-title-1-bold--letter-spacing: 0;
+  --text-eng-title-1-bold--font-weight: 700;
+
+  /* ENG/Title 1/SemiBold — 32px SemiBold 140% 0 */
+  --text-eng-title-1-semibold: 2rem;
+  --text-eng-title-1-semibold--line-height: 140%;
+  --text-eng-title-1-semibold--letter-spacing: 0;
+  --text-eng-title-1-semibold--font-weight: 600;
+
+  /* ENG/Title 2/Bold — 28px bold 140% 0 */
+  --text-eng-title-2-bold: 1.75rem;
+  --text-eng-title-2-bold--line-height: 140%;
+  --text-eng-title-2-bold--letter-spacing: 0;
+  --text-eng-title-2-bold--font-weight: 700;
+
+  /* ENG/Title 2/SemiBold — 28px SemiBold 140% 0 */
+  --text-eng-title-2-semibold: 1.75rem;
+  --text-eng-title-2-semibold--line-height: 140%;
+  --text-eng-title-2-semibold--letter-spacing: 0;
+  --text-eng-title-2-semibold--font-weight: 600;
+
+  /* ENG/Title 3/Bold — 24px bold 140% 0 */
+  --text-eng-title-3-bold: 1.5rem;
+  --text-eng-title-3-bold--line-height: 140%;
+  --text-eng-title-3-bold--letter-spacing: 0;
+  --text-eng-title-3-bold--font-weight: 700;
+
+  /* ENG/Title 3/SemiBold — 24px SemiBold 140% 0 */
+  --text-eng-title-3-semibold: 1.5rem;
+  --text-eng-title-3-semibold--line-height: 140%;
+  --text-eng-title-3-semibold--letter-spacing: 0;
+  --text-eng-title-3-semibold--font-weight: 600;
+
+  /* ENG/Heading 1/Bold — 22px bold 150% 0 */
+  --text-eng-heading-1-bold: 1.375rem;
+  --text-eng-heading-1-bold--line-height: 150%;
+  --text-eng-heading-1-bold--letter-spacing: 0;
+  --text-eng-heading-1-bold--font-weight: 700;
+
+  /* ENG/Heading 1/Semibold — 22px SemiBold 150% 0 */
+  --text-eng-heading-1-semibold: 1.375rem;
+  --text-eng-heading-1-semibold--line-height: 150%;
+  --text-eng-heading-1-semibold--letter-spacing: 0;
+  --text-eng-heading-1-semibold--font-weight: 600;
+
+  /* ENG/Heading 2/Bold — 20px bold 150% 0 */
+  --text-eng-heading-2-bold: 1.25rem;
+  --text-eng-heading-2-bold--line-height: 150%;
+  --text-eng-heading-2-bold--letter-spacing: 0;
+  --text-eng-heading-2-bold--font-weight: 700;
+
+  /* ENG/Heading 2/SemiBold — 20px SemiBold 150% 0 */
+  --text-eng-heading-2-semibold: 1.25rem;
+  --text-eng-heading-2-semibold--line-height: 150%;
+  --text-eng-heading-2-semibold--letter-spacing: 0;
+  --text-eng-heading-2-semibold--font-weight: 600;
+
+  /* ENG/Heading 3/Bold — 18px bold 150% 0 */
+  --text-eng-heading-3-bold: 1.125rem;
+  --text-eng-heading-3-bold--line-height: 150%;
+  --text-eng-heading-3-bold--letter-spacing: 0;
+  --text-eng-heading-3-bold--font-weight: 700;
+
+  /* ENG/Heading 3/SemiBold — 18px SemiBold 150% 0 */
+  --text-eng-heading-3-semibold: 1.125rem;
+  --text-eng-heading-3-semibold--line-height: 150%;
+  --text-eng-heading-3-semibold--letter-spacing: 0;
+  --text-eng-heading-3-semibold--font-weight: 600;
+
+  /* ENG/Body 1/Normal_Bold — 16px bold 150% 0 */
+  --text-eng-body-1-bold: 1rem;
+  --text-eng-body-1-bold--line-height: 150%;
+  --text-eng-body-1-bold--letter-spacing: 0;
+  --text-eng-body-1-bold--font-weight: 700;
+
+  /* ENG/Body 1/Normal_SemiBold — 16px SemiBold 150% 0 */
+  --text-eng-body-1-semibold: 1rem;
+  --text-eng-body-1-semibold--line-height: 150%;
+  --text-eng-body-1-semibold--letter-spacing: 0;
+  --text-eng-body-1-semibold--font-weight: 600;
+
+  /* ENG/Body 1/Normal_Medium — 16px Medium 150% 0 */
+  --text-eng-body-1-medium: 1rem;
+  --text-eng-body-1-medium--line-height: 150%;
+  --text-eng-body-1-medium--letter-spacing: 0;
+  --text-eng-body-1-medium--font-weight: 500;
+
+  /* ENG/Label 1/Normal_Bold — 14px bold 150% 0 */
+  --text-eng-label-1-bold: 0.875rem;
+  --text-eng-label-1-bold--line-height: 150%;
+  --text-eng-label-1-bold--letter-spacing: 0;
+  --text-eng-label-1-bold--font-weight: 700;
+
+  /* ENG/Label 1/Normal_SemiBold — 14px SemiBold 150% 0 */
+  --text-eng-label-1-semibold: 0.875rem;
+  --text-eng-label-1-semibold--line-height: 150%;
+  --text-eng-label-1-semibold--letter-spacing: 0;
+  --text-eng-label-1-semibold--font-weight: 600;
+
+  /* ENG/Label 1/Normal_Medium — 14px Medium 150% 0 */
+  --text-eng-label-1-medium: 0.875rem;
+  --text-eng-label-1-medium--line-height: 150%;
+  --text-eng-label-1-medium--letter-spacing: 0;
+  --text-eng-label-1-medium--font-weight: 500;
+
+  /* ENG/Caption 1/Bold — 12px bold 150% 0 */
+  --text-eng-caption-1-bold: 0.75rem;
+  --text-eng-caption-1-bold--line-height: 150%;
+  --text-eng-caption-1-bold--letter-spacing: 0;
+  --text-eng-caption-1-bold--font-weight: 700;
+
+  /* ENG/Caption 1/SemiBold — 12px SemiBold 150% 0 */
+  --text-eng-caption-1-semibold: 0.75rem;
+  --text-eng-caption-1-semibold--line-height: 150%;
+  --text-eng-caption-1-semibold--letter-spacing: 0;
+  --text-eng-caption-1-semibold--font-weight: 600;
+
+  /* ENG/Caption 1/Medium — 12px Medium 150% 0 */
+  --text-eng-caption-1-medium: 0.75rem;
+  --text-eng-caption-1-medium--line-height: 150%;
+  --text-eng-caption-1-medium--letter-spacing: 0;
+  --text-eng-caption-1-medium--font-weight: 500;
 }
 
 body {
