@@ -97,7 +97,7 @@ export default function Dropdown({
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex min-w-[120px] cursor-pointer items-center justify-between gap-2 px-4 py-2`}
+        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex min-w-30 cursor-pointer items-center justify-between gap-2 px-4 py-2`}
       >
         <span className="truncate">{selectedOption?.label ?? placeholder}</span>
         {isOpen ? (
@@ -110,7 +110,7 @@ export default function Dropdown({
       {isOpen && (
         <ul
           role="listbox"
-          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 max-h-[360px] w-full min-w-[120px] overflow-y-auto rounded-md p-2"
+          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 max-h-90 w-full min-w-30 overflow-y-auto rounded-md p-2"
         >
           {options.map((opt) => (
             <li
