@@ -3,16 +3,16 @@ import { useEffect, useRef, useState } from 'react';
 import IconArrowDownStroke from '@/assets/icons/icon_arrowDown_stroke.svg';
 import IconArrowUpFill from '@/assets/icons/icon_arrowUp_fill.svg';
 
-export type DropdownOption = {
+export type DropdownCompactOption = {
   value: string;
   label: string;
 };
 
-type DropdownVariant = 'line' | 'ghost';
+type DropdownCompactType = 'line' | 'ghost';
 
-interface DropdownProps {
-  variant?: DropdownVariant;
-  options: DropdownOption[];
+interface DropdownCompactProps {
+  type: DropdownCompactType;
+  options: DropdownCompactOption[];
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
@@ -20,33 +20,36 @@ interface DropdownProps {
   className?: string;
 }
 
-const TRIGGER_BASE: Record<DropdownVariant, string> = {
+const TRIGGER_BASE: Record<DropdownCompactType, string> = {
   line: 'bg-conx-common-white rounded-md border',
   ghost: 'rounded-md',
 };
 
-const TRIGGER_STATE: Record<DropdownVariant, { closed: string; open: string; selected: string }> = {
+const TRIGGER_STATE: Record<
+  DropdownCompactType,
+  { closed: string; open: string; selected: string }
+> = {
   line: {
-    closed: 'border-conx-gray-200 hover:border-conx-gray-450',
+    closed: 'border-conx-gray-150 hover:border-conx-gray-300',
     open: 'border-conx-primary-300',
-    selected: 'border-conx-gray-650',
+    selected: 'border-conx-gray-600',
   },
   ghost: {
-    closed: 'hover:bg-conx-gray-100',
+    closed: 'hover:bg-conx-opacity-gray-6',
     open: '',
     selected: '',
   },
 };
 
-export default function Dropdown({
-  variant = 'line',
+export default function DropdownCompact({
+  type = 'line',
   options,
   value: controlledValue,
   defaultValue,
   onChange,
   placeholder = '레이블',
   className,
-}: DropdownProps) {
+}: DropdownCompactProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [internalValue, setInternalValue] = useState<string | undefined>(defaultValue);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,30 +90,34 @@ export default function Dropdown({
     : isSelected
       ? 'selected'
       : 'closed';
-  const stateClass = TRIGGER_STATE[variant][stateKey];
+  const stateClass = TRIGGER_STATE[type][stateKey];
   const textClass = isOpen || isSelected ? 'text-conx-common-black' : 'text-conx-gray-450';
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className ?? ''}`}>
+    <div
+      ref={containerRef}
+      // width 104~300px 사이에서만 가능
+      className={`relative inline-block max-w-75 min-w-26 ${className ?? ''}`}
+    >
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex min-w-30 cursor-pointer items-center justify-between gap-2 px-4 py-2`}
+        className={`text-kor-body-1-medium ${TRIGGER_BASE[type]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
       >
         <span className="truncate">{selectedOption?.label ?? placeholder}</span>
         {isOpen ? (
-          <IconArrowUpFill className="h-4 w-4 shrink-0" />
+          <IconArrowUpFill className="h-4.5 w-4.5 shrink-0" />
         ) : (
-          <IconArrowDownStroke className="h-4 w-4 shrink-0" />
+          <IconArrowDownStroke className="h-4.5 w-4.5 shrink-0" />
         )}
       </button>
 
       {isOpen && (
         <ul
           role="listbox"
-          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 max-h-90 w-full min-w-30 overflow-y-auto rounded-md p-2"
+          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
         >
           {options.map((opt) => (
             <li
@@ -118,7 +125,7 @@ export default function Dropdown({
               role="option"
               aria-selected={opt.value === value}
               onClick={() => handleSelect(opt.value)}
-              className="text-kor-body-1-medium text-conx-gray-450 hover:bg-conx-gray-100 active:text-conx-common-black cursor-pointer truncate rounded-md px-3 py-2"
+              className="text-kor-label-1-semibold text-conx-gray-500 hover:bg-conx-opacity-gray-6 active:text-conx-common-black cursor-pointer truncate rounded-md px-2 py-2"
             >
               {opt.label}
             </li>
