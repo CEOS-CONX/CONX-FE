@@ -5,6 +5,7 @@ import { TextLineButton } from '@/components/common/TextLineButton';
 import { SearchBar } from '@/components/common/SearchBar';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
+import { TextFieldInput } from '@/components/common/TextFieldInput';
 
 export default function Home() {
   const [agreed, setAgreed] = useState(false);
@@ -41,6 +42,40 @@ export default function Home() {
           }}
         />
       </div>
+
+      {/* TextFieldInput — 가로: 사이즈(lg/md/sm), 상태는 인터랙션/prop으로 */}
+      <section className="space-y-4">
+        <h2 className="text-kor-heading-3-bold">TextFieldInput</h2>
+        <div className="flex flex-wrap gap-6">
+          {/* Default → 마우스 올리면 Hover, 클릭하면 Focused, 입력하면 Type */}
+          <TextFieldInput
+            size="lg"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            placeholder="플레이스 홀더"
+          />
+          {/* Filled */}
+          <TextFieldInput
+            size="md"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            placeholder="플레이스 홀더"
+            defaultValue="입력한 정보"
+          />
+          {/* Error */}
+          <TextFieldInput
+            size="sm"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            defaultValue="입력 완료 정보"
+            error="에러메세지"
+          />
+        </div>
+      </section>
+
       <div className="space-y-10">
         {/* 1. 체크박스 용도 */}
         <section>
