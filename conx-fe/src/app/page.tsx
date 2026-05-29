@@ -6,6 +6,22 @@ import { SearchBar } from '@/components/common/SearchBar';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
+import { TextFieldMembership } from '@/components/common/TextFieldMembership';
+
+const Timer = <span className="text-kor-body-1-medium text-conx-gray-600">0:00</span>;
+
+const ValidCheck = (
+  <svg viewBox="0 0 24 24" fill="none" className="text-conx-primary-500 h-6 w-6">
+    <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+    <path
+      d="M8 12l3 3 5-6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 export default function Home() {
   const [agreed, setAgreed] = useState(false);
@@ -72,6 +88,45 @@ export default function Home() {
             helperText="도움말 텍스트"
             defaultValue="입력 완료 정보"
             error="에러메세지"
+          />
+        </div>
+      </section>
+
+      {/* TextFieldMembership — 좌: 인증번호(타이머+재전송), 우: 비밀번호 확인(체크) */}
+      <section className="space-y-4">
+        <h2 className="text-kor-heading-3-bold">TextFieldMembership</h2>
+        <div className="grid w-[1000px] grid-cols-2 gap-x-12 gap-y-6">
+          {/* 인증번호 - default */}
+          <TextFieldMembership
+            placeholder="인증번호 6자리를 입력해주세요"
+            suffix={Timer}
+            action={<TextLineButton>인증번호 재전송</TextLineButton>}
+          />
+          {/* 비밀번호 - default */}
+          <TextFieldMembership type="password" placeholder="비밀번호를 한 번 더 입력해주세요" />
+
+          {/* 인증번호 - filled */}
+          <TextFieldMembership
+            defaultValue="123456"
+            placeholder="인증번호 6자리를 입력해주세요"
+            suffix={Timer}
+            action={<TextLineButton>인증번호 재전송</TextLineButton>}
+          />
+          {/* 비밀번호 - filled + 일치 체크 */}
+          <TextFieldMembership type="password" defaultValue="123456" suffix={ValidCheck} />
+
+          {/* 인증번호 - error */}
+          <TextFieldMembership
+            defaultValue="입력 완료 정보"
+            error="인증번호가 맞지 않습니다"
+            suffix={Timer}
+            action={<TextLineButton>인증번호 재전송</TextLineButton>}
+          />
+          {/* 비밀번호 - error */}
+          <TextFieldMembership
+            type="password"
+            defaultValue="123456"
+            error="비밀번호가 서로 일치하지 않습니다"
           />
         </div>
       </section>
