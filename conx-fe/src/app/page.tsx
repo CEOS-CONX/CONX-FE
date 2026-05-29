@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { RadioButton } from '@/components/common/RadioButton';
 import { TextLineButton } from '@/components/common/TextLineButton';
 import { SearchBar } from '@/components/common/SearchBar';
-import { Dropdown } from '@/components/common/Dropdown';
+import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 
 export default function Home() {
@@ -17,16 +17,31 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-1 items-center justify-center">
+    <div className="flex flex-1 flex-col items-start gap-8 p-10">
       <h1 className="text-2xl font-semibold">CONX</h1>
       <SearchBar />
-      <Dropdown options={options} placeholder="유형 선택" onChange={(v) => console.log(v)} />
-      <DropdownCalendar
-        onChange={(range) => {
-          console.log(range.start, range.end);
-        }}
-      />
-      <div className="space-y-10 p-10">
+      {/* 드롭다운 컴팩트 */}
+      <div className="flex flex-wrap gap-4">
+        <DropdownCompact
+          type="line"
+          options={options}
+          placeholder="line"
+          className="w-60"
+          onChange={(v) => console.log(v)}
+        />
+        <DropdownCompact
+          type="ghost"
+          options={options}
+          placeholder="ghost"
+          onChange={(v) => console.log(v)}
+        />
+        <DropdownCalendar
+          onChange={(range) => {
+            console.log(range.start, range.end);
+          }}
+        />
+      </div>
+      <div className="space-y-10">
         {/* 1. 체크박스 용도 */}
         <section>
           <h2 className="text-kor-heading-3-bold mb-3">체크박스 패턴</h2>

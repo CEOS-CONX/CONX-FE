@@ -62,7 +62,7 @@
   --shadow-conx-drop-gray: 0 2px 8px 0 rgb(29 34 41 / 0.15);
 
   /* Opacity */
-  --color-conx-opacity-gray: rgb(29 34 41 / 0.06);
+  --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
 
   /* Background / Foreground */
   --color-background: var(--background);
