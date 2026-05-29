@@ -7,6 +7,7 @@ import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { TextFieldMembership } from '@/components/common/TextFieldMembership';
+import { DropdownForm } from '@/components/common/DropdownForm';
 
 const Timer = <span className="text-kor-body-1-medium text-conx-gray-600">0:00</span>;
 
@@ -127,6 +128,41 @@ export default function Home() {
             type="password"
             defaultValue="123456"
             error="비밀번호가 서로 일치하지 않습니다"
+          />
+        </div>
+      </section>
+
+      {/* DropdownForm — 가로: 사이즈(lg/md/sm) 고정폭, 클릭하면 열림 */}
+      <section className="space-y-4">
+        <h2 className="text-kor-heading-3-bold">DropdownForm</h2>
+        <div className="flex flex-wrap items-start gap-6">
+          {/* Default → 클릭하면 Focused(열림) */}
+          <DropdownForm
+            size="lg"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            options={options}
+            onChange={(v) => console.log(v)}
+          />
+          {/* Filled */}
+          <DropdownForm
+            size="md"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            options={options}
+            defaultValue="club"
+            onChange={(v) => console.log(v)}
+          />
+          {/* Error */}
+          <DropdownForm
+            size="sm"
+            required
+            label="레이블"
+            helperText="도움말 텍스트"
+            options={options}
+            error="에러메세지"
           />
         </div>
       </section>
