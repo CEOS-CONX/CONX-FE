@@ -11,7 +11,7 @@ export type DropdownCompactOption = {
 type DropdownCompactType = 'line' | 'ghost';
 
 interface DropdownCompactProps {
-  type: DropdownCompactType;
+  type?: DropdownCompactType;
   options: DropdownCompactOption[];
   value?: string;
   defaultValue?: string;
