@@ -171,13 +171,16 @@ export default function DropdownCalendar({
   const visualEnd = pickingStart ? null : (currentRange?.end ?? null);
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className ?? ''}`}>
+    <div
+      ref={containerRef}
+      className={`relative inline-block max-w-75 min-w-26 ${className ?? ''}`}
+    >
       <button
         type="button"
         onClick={handleTriggerClick}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex min-w-[220px] cursor-pointer items-center justify-between gap-2 px-4 py-2`}
+        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
       >
         <span className="truncate">{triggerText}</span>
         {isOpen ? (
