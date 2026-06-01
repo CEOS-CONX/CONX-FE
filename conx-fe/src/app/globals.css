@@ -62,7 +62,7 @@
   --shadow-conx-drop-gray: 0 2px 8px 0 rgb(29 34 41 / 0.15);
 
   /* Opacity */
-  --color-conx-opacity-gray: rgb(29 34 41 / 0.06);
+  --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
 
   /* Background / Foreground */
   --color-background: var(--background);
@@ -183,6 +183,12 @@
   --text-kor-body-1-medium--line-height: 150%;
   --text-kor-body-1-medium--letter-spacing: 0;
   --text-kor-body-1-medium--font-weight: 500;
+
+  /* KOR/Body 2/Normal_Medium — 15px Medium 150% 0 (임시) */
+  --text-kor-body-2-medium: 0.9375rem;
+  --text-kor-body-2-medium--line-height: 150%;
+  --text-kor-body-2-medium--letter-spacing: 0;
+  --text-kor-body-2-medium--font-weight: 500;
 
   /* KOR/Label 1/Normal_Bold — 14px Bold 150% 1% */
   --text-kor-label-1-bold: 0.875rem;
