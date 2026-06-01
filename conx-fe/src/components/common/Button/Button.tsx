@@ -1,11 +1,12 @@
 const VARIANT_STYLES = {
   ghost: [
     'bg-transparent text-conx-common-black',
-    'hover:bg-conx-gray-650/6',
+    'hover:bg-conx-opacity-gray-30/6',
     'disabled:bg-transparent disabled:text-conx-gray-250',
   ].join(' '),
   primary: [
-    'bg-conx-gray-650 text-conx-primary-300',
+    // 색 토큰 정의해야 함
+    'bg-[#1D2229] text-conx-primary-300',
     'hover:bg-conx-gray-600 active:bg-conx-gray-500',
     'disabled:bg-conx-gray-100 disabled:text-conx-gray-250',
   ].join(' '),
