@@ -63,6 +63,12 @@
 
   /* Opacity */
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
+  --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
+
+  /* ========== Z-Index ========== */
+  --z-index-conx-base: 1;
+  --z-index-conx-card-overlay: 10;
+  --z-index-conx-dropdown: 20;
 
   /* Background / Foreground */
   --color-background: var(--background);
