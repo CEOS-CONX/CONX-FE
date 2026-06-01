@@ -36,7 +36,7 @@ const NAVER_VERIFICATION = '';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: 'CONX | 기업과 대학생 크루를 연결하는 플랫폼',
+    default: 'CONX',
     template: '%s | CONX',
   },
   description: SITE_DESCRIPTION,
