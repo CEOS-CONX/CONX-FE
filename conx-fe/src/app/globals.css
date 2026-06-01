@@ -27,6 +27,7 @@
   --color-conx-primary-650: #066a4e;
 
   /* Gray */
+  --color-conx-gray-50: #f5f8fc;
   --color-conx-gray-100: #ebeff5;
   --color-conx-gray-150: #dae2eb;
   --color-conx-gray-200: #c5d1de;
@@ -38,7 +39,6 @@
   --color-conx-gray-500: #566270;
   --color-conx-gray-550: #3d4752;
   --color-conx-gray-600: #2d343d;
-  --color-conx-gray-650: #1d2229;
 
   /* Green */
   --color-conx-green-100: #d1fbe0;
@@ -63,6 +63,12 @@
 
   /* Opacity */
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
+  --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
+
+  /* ========== Z-Index ========== */
+  --z-index-conx-base: 1;
+  --z-index-conx-card-overlay: 10;
+  --z-index-conx-dropdown: 20;
 
   /* Background / Foreground */
   --color-background: var(--background);

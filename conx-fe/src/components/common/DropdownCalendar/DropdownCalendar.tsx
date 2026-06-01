@@ -171,13 +171,16 @@ export default function DropdownCalendar({
   const visualEnd = pickingStart ? null : (currentRange?.end ?? null);
 
   return (
-    <div ref={containerRef} className={`relative inline-block ${className ?? ''}`}>
+    <div
+      ref={containerRef}
+      className={`relative inline-block max-w-75 min-w-26 ${className ?? ''}`}
+    >
       <button
         type="button"
         onClick={handleTriggerClick}
         aria-haspopup="dialog"
         aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex min-w-[220px] cursor-pointer items-center justify-between gap-2 px-4 py-2`}
+        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
       >
         <span className="truncate">{triggerText}</span>
         {isOpen ? (
@@ -191,7 +194,7 @@ export default function DropdownCalendar({
         <div
           role="dialog"
           aria-label="날짜 범위 선택"
-          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 w-[360px] rounded-md p-4"
+          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
         >
           {/* 월 네비게이션 */}
           <div className="mb-4 flex items-center justify-between">

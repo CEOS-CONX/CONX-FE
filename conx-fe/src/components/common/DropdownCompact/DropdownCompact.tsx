@@ -11,7 +11,7 @@ export type DropdownCompactOption = {
 type DropdownCompactType = 'line' | 'ghost';
 
 interface DropdownCompactProps {
-  type: DropdownCompactType;
+  type?: DropdownCompactType;
   options: DropdownCompactOption[];
   value?: string;
   defaultValue?: string;
@@ -117,7 +117,7 @@ export default function DropdownCompact({
       {isOpen && (
         <ul
           role="listbox"
-          className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
+          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
         >
           {options.map((opt) => (
             <li

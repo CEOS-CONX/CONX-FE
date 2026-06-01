@@ -12,7 +12,7 @@ function Divider() {
 
 export default function Footer() {
   return (
-    <footer className="bg-conx-gray-100 w-full">
+    <footer className="bg-conx-gray-50 w-full">
       <div className="mx-auto max-w-400 min-w-248 px-16.5">
         <div className="px-6 pt-5 pb-14">
           <div className="flex items-start justify-between">

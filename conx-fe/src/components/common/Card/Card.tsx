@@ -40,27 +40,27 @@ export default function Card({
   totalCount,
 }: CardProps) {
   return (
-    <div className="flex w-84.25 max-w-84.25 min-w-60.75 flex-col gap-2">
+    <div className="flex w-full flex-col gap-2">
       <ImageCard src={imageSrc} alt={imageAlt} tag={tag} defaultScraped={defaultScraped} />
 
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <h3 className="text-kor-body-1-bold text-conx-common-black">{title}</h3>
 
-        {subtitle && <p className="text-kor-label-1-semibold text-conx-gray-400">{subtitle}</p>}
+        {subtitle && <p className="text-kor-label-1-semibold text-conx-gray-450">{subtitle}</p>}
 
         {category1 && category2 && (
           <div className="flex items-center gap-1">
-            <span className="text-kor-label-1-semibold text-conx-gray-400">{category1}</span>
+            <span className="text-kor-label-1-semibold text-conx-gray-450">{category1}</span>
             <Divider />
-            <span className="text-kor-label-1-semibold text-conx-gray-400">{category2}</span>
+            <span className="text-kor-label-1-semibold text-conx-gray-450">{category2}</span>
           </div>
         )}
 
         {startDate && endDate && (
           <div className="flex items-center gap-0.5">
-            <span className="text-kor-label-1-semibold text-conx-gray-400">{startDate}</span>
-            <span className="text-kor-label-1-semibold text-conx-gray-400">~</span>
-            <span className="text-kor-label-1-semibold text-conx-gray-400">{endDate}</span>
+            <span className="text-kor-label-1-semibold text-conx-gray-450">{startDate}</span>
+            <span className="text-kor-label-1-semibold text-conx-gray-450">~</span>
+            <span className="text-kor-label-1-semibold text-conx-gray-450">{endDate}</span>
           </div>
         )}
 
@@ -69,7 +69,7 @@ export default function Card({
             {rating !== undefined && (
               <div className="flex items-start gap-1">
                 <IconStar className="h-4.5 w-4.5" />
-                <span className="text-kor-label-1-semibold text-conx-gray-400">
+                <span className="text-kor-label-1-semibold text-conx-gray-450">
                   {rating.toFixed(1)}
                 </span>
               </div>
@@ -77,8 +77,8 @@ export default function Card({
             {rating !== undefined && totalCount !== undefined && <Divider />}
             {totalCount !== undefined && (
               <div className="flex items-center gap-1">
-                <span className="text-kor-label-1-semibold text-conx-gray-400">누적</span>
-                <span className="text-kor-label-1-semibold text-conx-gray-400">{totalCount}건</span>
+                <span className="text-kor-label-1-semibold text-conx-gray-450">누적</span>
+                <span className="text-kor-label-1-semibold text-conx-gray-450">{totalCount}건</span>
               </div>
             )}
           </div>

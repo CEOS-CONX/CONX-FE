@@ -8,12 +8,12 @@ import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
-import LogoConx from '@/assets/icons/logo_conx.svg';
+import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
 
 const NAV_LINKS = [
-  { label: '홈', href: '#' },
-  { label: '프로젝트 둘러보기', href: '#' },
-  { label: '크루 둘러보기', href: '#' },
+  { label: '홈', href: '/' },
+  { label: '프로젝트 둘러보기', href: '/projects' },
+  { label: '크루 둘러보기', href: '/crews' },
   { label: '워크스페이스', href: '#' },
 ] as const;
 
@@ -48,7 +48,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo */}
           <Link href="/" className="shrink-0">
-            <LogoConx className="h-6.5 w-30" />
+            <LogoConxHeader className="h-6.5 w-30" />
           </Link>
 
           {/* Right frame */}

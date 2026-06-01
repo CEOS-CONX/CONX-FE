@@ -23,7 +23,7 @@ export default function ImageCard({ src, alt, tag, defaultScraped = false }: Ima
 
       {/* Upper overlay */}
       <div
-        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between rounded-t-md pt-1.5 pr-1.5 pb-5.5 pl-2.5"
+        className="z-conx-card-overlay absolute inset-x-0 top-0 flex items-center justify-between rounded-t-md pt-1.5 pr-1.5 pb-5.5 pl-2.5"
         style={{
           background:
             'linear-gradient(180deg, rgba(29, 34, 41, 0.16) 0%, rgba(29, 34, 41, 0) 100%)',
