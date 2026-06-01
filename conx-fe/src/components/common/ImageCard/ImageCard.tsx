@@ -12,7 +12,7 @@ interface ImageCardProps {
 
 export default function ImageCard({ src, alt, tag, defaultScraped = false }: ImageCardProps) {
   return (
-    <div className="group relative h-[203px] min-h-[120px] w-[337px] min-w-[200px] overflow-hidden rounded-[6px]">
+    <div className="group relative h-30 w-full overflow-hidden rounded-md min-[1200px]:h-36.5 min-[1600px]:h-50.75">
       {/* Image */}
       <Image
         src={src}
@@ -23,7 +23,7 @@ export default function ImageCard({ src, alt, tag, defaultScraped = false }: Ima
 
       {/* Upper overlay */}
       <div
-        className="absolute inset-x-0 top-0 z-10 flex items-center justify-between rounded-t-[6px] pt-[6px] pr-[6px] pb-[22px] pl-[10px]"
+        className="z-conx-card-overlay absolute inset-x-0 top-0 flex items-center justify-between rounded-t-md pt-1.5 pr-1.5 pb-5.5 pl-2.5"
         style={{
           background:
             'linear-gradient(180deg, rgba(29, 34, 41, 0.16) 0%, rgba(29, 34, 41, 0) 100%)',

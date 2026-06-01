@@ -1,15 +1,4 @@
 const VARIANT_STYLES = {
-  ghost: [
-    'bg-transparent text-conx-common-black',
-    'hover:bg-conx-opacity-gray-30/6',
-    'disabled:bg-transparent disabled:text-conx-gray-250',
-  ].join(' '),
-  primary: [
-    // 색 토큰 정의해야 함
-    'bg-[#1D2229] text-conx-primary-300',
-    'hover:bg-conx-gray-600 active:bg-conx-gray-500',
-    'disabled:bg-conx-gray-100 disabled:text-conx-gray-250',
-  ].join(' '),
   secondary: [
     'bg-conx-primary-200 text-conx-common-black',
     'hover:bg-conx-primary-300 active:bg-conx-primary-400',
@@ -22,20 +11,20 @@ const VARIANT_STYLES = {
   ].join(' '),
 } as const;
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface CTAButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: keyof typeof VARIANT_STYLES;
 }
 
-export default function Button({
-  variant = 'primary',
+export default function CTAButton({
+  variant = 'secondary',
   children,
   className,
   ...props
-}: ButtonProps) {
+}: CTAButtonProps) {
   return (
     <button
       type="button"
-      className={`text-kor-body-1-semibold active:text-kor-body-1-bold inline-flex cursor-pointer items-center justify-center gap-1 rounded-md px-3 py-2 disabled:pointer-events-none ${VARIANT_STYLES[variant]} ${className ?? ''}`}
+      className={`text-kor-body-1-semibold active:text-kor-body-1-bold inline-flex w-full cursor-pointer items-center justify-center rounded-md px-11.75 py-3 disabled:pointer-events-none ${VARIANT_STYLES[variant]} ${className ?? ''}`}
       {...props}
     >
       <span className="grid items-center justify-center">

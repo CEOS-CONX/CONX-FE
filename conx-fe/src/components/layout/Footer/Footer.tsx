@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import IconInstagram from '@/assets/icons/icon_instagram.svg';
+import LogoConxFooter from '@/assets/icons/logo_conx_footer.svg';
 
 function Divider() {
   return (
-    <div className="flex h-[18px] w-px items-center">
+    <div className="flex h-4.5 w-px items-center">
       <div className="h-[10.8px] w-px bg-[rgba(112,115,124,0.22)]" />
     </div>
   );
@@ -11,15 +12,11 @@ function Divider() {
 
 export default function Footer() {
   return (
-    <footer className="bg-conx-gray-100 w-full">
-      <div className="mx-auto max-w-[1600px] min-w-[992px] px-[66px]">
+    <footer className="bg-conx-gray-50 w-full">
+      <div className="mx-auto max-w-400 min-w-248 px-16.5">
         <div className="px-6 pt-5 pb-14">
-          {/* Navigation */}
-          <nav className="flex items-start justify-between">
-            {/* Logo placeholder */}
-            <div className="bg-conx-gray-150 flex h-[38px] w-[120px] items-center justify-center">
-              <span className="text-kor-label-1-semibold text-conx-gray-350">로고</span>
-            </div>
+          <div className="flex items-start justify-between">
+            <LogoConxFooter className="h-6.5 w-30" />
 
             {/* Instagram */}
             <a
@@ -31,7 +28,7 @@ export default function Footer() {
             >
               <IconInstagram className="h-9 w-9" />
             </a>
-          </nav>
+          </div>
 
           {/* Description */}
           <div className="mt-7">

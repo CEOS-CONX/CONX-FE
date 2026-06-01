@@ -8,16 +8,16 @@ import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
+import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
 
 const NAV_LINKS = [
-  { label: '홈', href: '#' },
-  { label: '프로젝트 둘러보기', href: '#' },
-  { label: '크루 둘러보기', href: '#' },
+  { label: '홈', href: '/' },
+  { label: '프로젝트 둘러보기', href: '/projects' },
+  { label: '크루 둘러보기', href: '/crews' },
   { label: '워크스페이스', href: '#' },
 ] as const;
 
-const NAV_LINK_BASE =
-  'text-conx-common-black rounded-[6px] px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
+const NAV_LINK_BASE = 'text-conx-common-black rounded-md px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
 
 type IconName = 'notification' | 'scrap' | 'profile';
 
@@ -44,12 +44,12 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <header className="border-conx-gray-100 w-full border-b">
-      <div className="mx-auto max-w-[1600px] min-w-[992px] px-[36px] min-[1200px]:px-[56px] min-[1600px]:px-[66px]">
-        <nav className="flex items-center gap-[60px] px-6 py-4">
-          {/* Logo placeholder */}
-          <div className="bg-conx-gray-150 flex h-[38px] w-[120px] shrink-0 items-center justify-center">
-            <span className="text-kor-label-1-semibold text-conx-gray-350">로고</span>
-          </div>
+      <div className="mx-auto max-w-400 min-w-248 px-9 min-[1200px]:px-14 min-[1600px]:px-16.5">
+        <nav className="flex items-center gap-15 px-6 py-4">
+          {/* Logo */}
+          <Link href="/" className="shrink-0">
+            <LogoConxHeader className="h-6.5 w-30" />
+          </Link>
 
           {/* Right frame */}
           <div className="flex flex-1 items-center justify-between">
@@ -76,12 +76,12 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                       key={name}
                       aria-label={label}
                       onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
-                      className="flex cursor-pointer items-center justify-center rounded-[6px] p-[6px] hover:bg-[rgba(29,34,41,0.06)]"
+                      className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                     >
                       {activeIcon === name ? (
-                        <Fill className="h-[26px] w-[26px]" />
+                        <Fill className="h-6.5 w-6.5" />
                       ) : (
-                        <Stroke className="h-[26px] w-[26px]" />
+                        <Stroke className="h-6.5 w-6.5" />
                       )}
                     </button>
                   ))}
