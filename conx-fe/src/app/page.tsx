@@ -8,6 +8,9 @@ import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { TextFieldMembership } from '@/components/common/TextFieldMembership';
 import { DropdownForm } from '@/components/common/DropdownForm';
+import { HomeTextButton } from '@/components/home/HomeTextButton';
+import { HomeBookmarkButton } from '@/components/home/HomeBookmarkButton';
+import { HomeTextIconButton } from '@/components/home/HomeTextIconButton';
 
 const Timer = <span className="text-kor-body-1-medium text-conx-gray-600">0:00</span>;
 
@@ -216,6 +219,35 @@ export default function Home() {
             </RadioButton>
             <TextLineButton disabled>비활성 링크</TextLineButton>
           </div>
+        </section>
+
+        {/* 5. 홈 텍스트 버튼 */}
+        <section>
+          <HomeTextButton variant="white" onClick={() => console.log('white')}>
+            프로젝트 둘러보기
+          </HomeTextButton>
+
+          <HomeTextButton variant="black" onClick={() => console.log('black')}>
+            지금 시작하기
+          </HomeTextButton>
+        </section>
+
+        {/* 6. 홈 북마크 버튼 */}
+        <section>
+          <h2 className="text-kor-heading-3-bold mb-3">HomeBookmarkButton</h2>
+          <HomeBookmarkButton onClick={() => console.log('bookmark')}>레이블</HomeBookmarkButton>
+          <p className="text-conx-gray-450 mt-2 text-sm">
+            마우스 올리면 hover(초록 텍스트), 누르고 있으면 active(어두운 배경)
+          </p>
+        </section>
+
+        {/* 7. 홈 텍스트 + 아이콘 버튼 */}
+        <section>
+          <h2 className="text-kor-heading-3-bold mb-3">HomeTextIconButton</h2>
+          <HomeTextIconButton onClick={() => console.log('text-icon')}>레이블</HomeTextIconButton>
+          <p className="text-conx-gray-450 mt-2 text-sm">
+            기본/active는 투명, hover만 연회색 박스. 누르면 텍스트+아이콘 둘 다 검정.
+          </p>
         </section>
       </div>
     </div>
