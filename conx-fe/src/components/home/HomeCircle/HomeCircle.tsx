@@ -36,7 +36,7 @@ export default function HomeCircle({
   return (
     <button
       type="button"
-      className={`bg-conx-gray-50 hover:bg-conx-primary-100 flex shrink-0 cursor-pointer flex-col items-center justify-center rounded-full ${s.box} ${s.gap} ${className ?? ''}`}
+      className={`bg-conx-gray-50 hover:bg-conx-primary-100 flex shrink-0 cursor-pointer flex-col items-center justify-center rounded-full ${s.box} ${className ?? ''}`}
       {...props}
     >
       {/* 키워드 pill */}
