@@ -11,6 +11,8 @@ import { DropdownForm } from '@/components/common/DropdownForm';
 import { HomeTextButton } from '@/components/home/HomeTextButton';
 import { HomeBookmarkButton } from '@/components/home/HomeBookmarkButton';
 import { HomeTextIconButton } from '@/components/home/HomeTextIconButton';
+import { HomeStrokeText } from '@/components/home/HomeStrokeText';
+import { HomeCircle } from '@/components/home/HomeCircle';
 
 const Timer = <span className="text-kor-body-1-medium text-conx-gray-600">0:00</span>;
 
@@ -236,18 +238,45 @@ export default function Home() {
         <section>
           <h2 className="text-kor-heading-3-bold mb-3">HomeBookmarkButton</h2>
           <HomeBookmarkButton onClick={() => console.log('bookmark')}>레이블</HomeBookmarkButton>
-          <p className="text-conx-gray-450 mt-2 text-sm">
-            마우스 올리면 hover(초록 텍스트), 누르고 있으면 active(어두운 배경)
-          </p>
         </section>
 
         {/* 7. 홈 텍스트 + 아이콘 버튼 */}
         <section>
           <h2 className="text-kor-heading-3-bold mb-3">HomeTextIconButton</h2>
           <HomeTextIconButton onClick={() => console.log('text-icon')}>레이블</HomeTextIconButton>
-          <p className="text-conx-gray-450 mt-2 text-sm">
-            기본/active는 투명, hover만 연회색 박스. 누르면 텍스트+아이콘 둘 다 검정.
-          </p>
+        </section>
+
+        {/* 8. 홈 스트로크 텍스트 (필터/태그용 pill) */}
+        <section>
+          <h2 className="text-kor-heading-3-bold mb-3">HomeStrokeText</h2>
+          <div className="flex flex-wrap gap-3">
+            <HomeStrokeText>리서치·인사이트</HomeStrokeText>
+            <HomeStrokeText>샘플링·오프라인</HomeStrokeText>
+            <HomeStrokeText>마케팅 전략·기획</HomeStrokeText>
+            <HomeStrokeText>앱·서비스 테스트</HomeStrokeText>
+            <HomeStrokeText>숏폼·UGC</HomeStrokeText>
+          </div>
+        </section>
+
+        {/* 9. 홈 서클 — lg/sm, 키워드 pill + 2줄 타이틀 + 3줄 설명 */}
+        <section>
+          <h2 className="text-kor-heading-3-bold mb-3">HomeCircle</h2>
+          <div className="flex flex-wrap items-center gap-8">
+            <HomeCircle
+              size="lg"
+              keyword="키워드"
+              title={['텍스트 첫째줄', '텍스트 둘째줄']}
+              description={['텍스트 첫째줄', '텍스트 둘째줄', '텍스트 셋째줄']}
+              onClick={() => console.log('circle-lg')}
+            />
+            <HomeCircle
+              size="sm"
+              keyword="키워드"
+              title={['텍스트 첫째줄', '텍스트 둘째줄']}
+              description={['텍스트 첫째줄', '텍스트 둘째줄', '텍스트 셋째줄']}
+              onClick={() => console.log('circle-sm')}
+            />
+          </div>
         </section>
       </div>
     </div>

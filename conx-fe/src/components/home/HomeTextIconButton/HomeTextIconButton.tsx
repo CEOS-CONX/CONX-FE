@@ -15,8 +15,8 @@ export default function HomeTextIconButton({
       {...props}
     >
       <span>{children}</span>
-      <IconArrowRightStroke className="h-6 w-6 shrink-0 group-active:hidden" />
-      <IconArrowRightFill className="hidden h-6 w-6 shrink-0 group-active:block" />
+      <IconArrowRightStroke className="h-4.5 w-4.5 shrink-0 group-active:hidden" />
+      <IconArrowRightFill className="hidden h-4.5 w-4.5 shrink-0 group-active:block" />
     </button>
   );
 }
