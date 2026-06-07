@@ -65,6 +65,18 @@
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
   --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
 
+  /* Gradient — Figma의 Gradient_white/100_0, 0_100 */
+  --background-image-conx-gradient-white-top: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgb(255 255 255 / 0) 100%
+  );
+  --background-image-conx-gradient-white-bottom: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0) 0%,
+    #ffffff 100%
+  );
+
   /* ========== Z-Index ========== */
   --z-index-conx-base: 1;
   --z-index-conx-card-overlay: 10;
