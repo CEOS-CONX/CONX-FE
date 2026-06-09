@@ -3,7 +3,7 @@ import { HomeStrokeText } from '../HomeStrokeText';
 
 export default function IntroSection() {
   return (
-    <section id="intro" className="flex flex-col items-center gap-13.5 pt-39.5">
+    <section id="intro" className="flex flex-col items-center gap-13.5 pt-39.5 pb-60">
       <div className="flex flex-col items-center gap-18.25">
         <LogoConxTitle className="h-18.25 w-87.5" />
         <h2 className="text-kor-title-1-semibold flex text-center text-black">
