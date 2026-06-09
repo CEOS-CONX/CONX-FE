@@ -30,7 +30,7 @@ interface DropdownFormProps {
 const SIZE_WIDTH: Record<DropdownFormSize, string> = {
   sm: 'w-[349px]',
   md: 'w-[419px]',
-  lg: 'w-[457px]',
+  lg: 'w-[458px]',
 };
 
 export default function DropdownForm({
@@ -98,42 +98,43 @@ export default function DropdownForm({
 
   return (
     <div
-      className={`flex shrink-0 flex-col ${SIZE_WIDTH[size]} ${className ?? ''}`}
+      className={`flex shrink-0 flex-col gap-3 ${SIZE_WIDTH[size]} ${className ?? ''}`}
       ref={containerRef}
     >
-      {label && (
-        <span className="text-kor-body-1-semibold text-conx-common-black">
-          {label}
-          {required && (
-            <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+      {(label || helperText) && (
+        <div className="flex flex-col gap-0.5">
+          {label && (
+            <span className="text-kor-body-1-semibold text-conx-common-black">
+              {label}
+              {required && (
+                <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+              )}
+            </span>
           )}
-        </span>
+          {helperText && <p className="text-kor-label-1-medium text-conx-gray-450">{helperText}</p>}
+        </div>
       )}
 
-      {helperText && (
-        <p className="text-kor-label-1-medium text-conx-gray-450 mt-1">{helperText}</p>
-      )}
-
-      <div className="relative mt-2">
+      <div className="relative">
         <button
           type="button"
           onClick={() => setIsOpen((prev) => !prev)}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
-          className={`text-kor-body-1-medium bg-conx-common-white ${triggerBorderClass} ${textClass} flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border px-4 py-3`}
+          className={`text-kor-body-1-medium bg-conx-common-white ${triggerBorderClass} ${textClass} flex w-full cursor-pointer items-center justify-between gap-3 rounded-md border p-4`}
         >
           <span className="truncate">{selectedOption?.label ?? placeholder}</span>
           {isOpen ? (
-            <IconArrowUpFill className="h-4.5 w-4.5 shrink-0" />
+            <IconArrowUpFill className="h-5 w-5 shrink-0" />
           ) : (
-            <IconArrowDownStroke className="h-4.5 w-4.5 shrink-0" />
+            <IconArrowDownStroke className="h-5 w-5 shrink-0" />
           )}
         </button>
 
         {isOpen && (
           <ul
             role="listbox"
-            className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 max-h-90 w-full overflow-y-auto rounded-md p-2"
+            className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 flex w-full flex-col gap-1 rounded-lg p-2"
           >
             {options.map((opt) => (
               <li
@@ -141,9 +142,11 @@ export default function DropdownForm({
                 role="option"
                 aria-selected={opt.value === value}
                 onClick={() => handleSelect(opt.value)}
-                className="text-kor-label-1-semibold text-conx-gray-500 hover:bg-conx-opacity-gray-6 active:text-conx-common-black cursor-pointer truncate rounded-md px-2 py-2"
+                className="hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center gap-2 rounded-md px-2 py-3"
               >
-                {opt.label}
+                <span className="text-kor-label-1-semibold text-conx-gray-500 active:text-conx-common-black min-w-0 flex-1 truncate">
+                  {opt.label}
+                </span>
               </li>
             ))}
           </ul>
@@ -151,7 +154,7 @@ export default function DropdownForm({
       </div>
 
       {hasError && (
-        <p className="text-kor-label-1-medium text-conx-red-500 mt-1.5 flex items-center gap-1">
+        <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1">
           <IconError className="h-4 w-4 shrink-0" />
           {error}
         </p>

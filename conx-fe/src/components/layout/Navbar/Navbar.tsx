@@ -91,7 +91,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                   <Link href="#" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
                     로그인
                   </Link>
-                  <Link href="#" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
+                  <Link href="/signup" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
                     회원가입
                   </Link>
                 </>

@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import ogImage from '@/assets/images/OG_image.png';
-import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
 
@@ -91,12 +89,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${suit.variable} ${plusJakartaSans.variable} h-full antialiased`}>
-      <body className="font-suit flex min-h-full flex-col">
-        {/* 임시조치 - navbar 로그인 상태 여기서 관리하기 */}
-        <Navbar isLoggedIn={true} />
-        {children}
-        <Footer />
-      </body>
+      <body className="font-suit flex min-h-full flex-col">{children}</body>
     </html>
   );
 }
