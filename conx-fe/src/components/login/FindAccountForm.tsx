@@ -158,17 +158,25 @@ export default function FindAccountForm() {
           </div>
         </div>
 
-        {!codeSent ? (
-          <CTAButton disabled={!canSendCode} onClick={handleSendCode} className="w-114.5">
-            인증번호 전송
-          </CTAButton>
-        ) : (
-          <CTAButton disabled={!canVerify} onClick={handleVerify} className="w-114.5">
-            인증 완료
-          </CTAButton>
-        )}
+        <div className="relative w-114.5">
+          {toastMessage && (
+            <Toast
+              message={toastMessage}
+              onClose={handleToastClose}
+              className="z-conx-toast absolute bottom-full left-1/2 mb-3 -translate-x-1/2"
+            />
+          )}
+          {!codeSent ? (
+            <CTAButton disabled={!canSendCode} onClick={handleSendCode}>
+              인증번호 전송
+            </CTAButton>
+          ) : (
+            <CTAButton disabled={!canVerify} onClick={handleVerify}>
+              인증 완료
+            </CTAButton>
+          )}
+        </div>
       </div>
-      {toastMessage && <Toast message={toastMessage} onClose={handleToastClose} />}
     </div>
   );
 }
