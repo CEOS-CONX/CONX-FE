@@ -72,10 +72,13 @@ export default function StepEmailVerification({ onNext }: StepEmailVerificationP
         </div>
 
         <div className="flex w-114.25 flex-col gap-3">
-          <span className="text-kor-body-1-semibold text-conx-common-black">이메일</span>
+          <label htmlFor="signup-email" className="text-kor-body-1-semibold text-conx-common-black">
+            이메일
+          </label>
 
           <div className="flex flex-col gap-3">
             <TextFieldMembership
+              id="signup-email"
               placeholder="이메일을 입력해주세요"
               value={email}
               onChange={(e) => {

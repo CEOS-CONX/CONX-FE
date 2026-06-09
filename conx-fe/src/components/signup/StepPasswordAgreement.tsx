@@ -82,19 +82,30 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
         <div className="flex flex-col gap-9">
           {/* 이메일 (읽기 전용) */}
           <div className="flex w-114.5 flex-col gap-3">
-            <span className="text-kor-body-1-semibold text-conx-common-black">이메일</span>
-            <TextFieldMembership value={email} disabled />
+            <label
+              htmlFor="signup-email-readonly"
+              className="text-kor-body-1-semibold text-conx-common-black"
+            >
+              이메일
+            </label>
+            <TextFieldMembership id="signup-email-readonly" value={email} disabled />
           </div>
 
           {/* 비밀번호 */}
           <div className="flex w-114.5 flex-col gap-3">
             <div className="flex flex-col gap-0.5">
-              <span className="text-kor-body-1-semibold text-conx-common-black">비밀번호</span>
+              <label
+                htmlFor="signup-password"
+                className="text-kor-body-1-semibold text-conx-common-black"
+              >
+                비밀번호
+              </label>
               <p className="text-kor-label-1-medium text-conx-gray-450">
                 영문 소대문자, 숫자, 특수문자를 혼용하여 8자 이상, 16자이하로 입력해주세요
               </p>
             </div>
             <TextFieldMembership
+              id="signup-password"
               type="password"
               placeholder="비밀번호를 입력해주세요"
               value={password}
@@ -106,6 +117,7 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
               error={passwordError}
             />
             <TextFieldMembership
+              aria-label="비밀번호 확인"
               type="password"
               placeholder="비밀번호를 한 번 더 입력해주세요"
               value={passwordConfirm}

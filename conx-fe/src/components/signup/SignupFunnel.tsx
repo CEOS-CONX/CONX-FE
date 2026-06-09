@@ -6,6 +6,7 @@ import StepSelectType, { type UserType } from './StepSelectType';
 import StepEmailVerification from './StepEmailVerification';
 import StepPasswordAgreement from './StepPasswordAgreement';
 import StepCrewProfile, { type CrewProfileData } from './StepCrewProfile';
+import StepEnterpriseProfile, { type EnterpriseProfileData } from './StepEnterpriseProfile';
 import SignupCompleteModal from './SignupCompleteModal';
 
 type Step = 'select-type' | 'email' | 'password' | 'profile' | 'complete';
@@ -34,7 +35,7 @@ export default function SignupFunnel() {
     setStep('profile');
   }
 
-  function handleProfileDone(data: CrewProfileData) {
+  function handleProfileDone(data: CrewProfileData | EnterpriseProfileData) {
     // 목업: 실제로는 API 호출
     console.log('회원가입 완료', { userType, email, password, marketingAgreed, ...data });
     setStep('complete');
@@ -49,11 +50,15 @@ export default function SignupFunnel() {
       {step === 'select-type' && <StepSelectType onSelect={handleSelectType} />}
       {step === 'email' && <StepEmailVerification onNext={handleEmailVerified} />}
       {step === 'password' && <StepPasswordAgreement email={email} onNext={handlePasswordDone} />}
-      {step === 'profile' && <StepCrewProfile onNext={handleProfileDone} />}
-      {step === 'complete' && (
+      {step === 'profile' && userType === 'crew' && <StepCrewProfile onNext={handleProfileDone} />}
+      {step === 'profile' && userType === 'enterprise' && (
+        <StepEnterpriseProfile onNext={handleProfileDone} />
+      )}
+      {step === 'complete' && userType && (
         <SignupCompleteModal
-          onPortfolio={() => router.push('/')}
-          onCrewInfo={() => router.push('/')}
+          userType={userType}
+          onPrimaryAction={() => router.push('/')}
+          onSecondaryAction={() => router.push('/')}
           onClose={handleClose}
         />
       )}
