@@ -91,6 +91,7 @@ export default function StepEmailVerification({ onNext }: StepEmailVerificationP
 
             {codeSent && (
               <TextFieldMembership
+                aria-label="인증번호"
                 placeholder="인증번호 6자리를 입력해주세요"
                 value={code}
                 onChange={(e) => {

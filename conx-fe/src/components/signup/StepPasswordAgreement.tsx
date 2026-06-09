@@ -162,7 +162,11 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
               >
                 [필수] 서비스 이용약관에 동의합니다
               </RadioButton>
-              <button type="button" className="shrink-0 cursor-pointer p-1.5">
+              <button
+                type="button"
+                aria-label="서비스 이용약관 보기"
+                className="shrink-0 cursor-pointer p-1.5"
+              >
                 <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
               </button>
             </div>
@@ -175,7 +179,11 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
               >
                 [선택] 마케팅 수신 홍보목적의 개인정보 수집 및 이용에 동의합니다.
               </RadioButton>
-              <button type="button" className="shrink-0 cursor-pointer p-1.5">
+              <button
+                type="button"
+                aria-label="마케팅 수신 동의 내용 보기"
+                className="shrink-0 cursor-pointer p-1.5"
+              >
                 <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
               </button>
             </div>
