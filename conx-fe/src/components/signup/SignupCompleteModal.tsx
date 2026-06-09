@@ -37,13 +37,18 @@ export default function SignupCompleteModal({
   const content = MODAL_CONTENT[userType];
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  });
 
   useEffect(() => {
     closeButtonRef.current?.focus();
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -66,7 +71,7 @@ export default function SignupCompleteModal({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, []);
 
   return (
     <div className="bg-conx-opacity-gray-30 fixed inset-0 z-50 flex items-center justify-center">

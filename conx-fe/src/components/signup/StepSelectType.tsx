@@ -1,3 +1,5 @@
+'use client';
+
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { ChoiceCard } from '@/components/common/ChoiceCard';
 

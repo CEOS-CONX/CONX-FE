@@ -7,12 +7,12 @@ import { TextFieldMembership } from '@/components/common/TextFieldMembership';
 import { TextLineButton } from '@/components/common/TextLineButton';
 import { useTimer } from '@/hooks/useTimer';
 import { formatTime } from '@/utils/format';
+import { validateEmail } from '@/utils/validate';
 
 interface StepEmailVerificationProps {
   onNext: (email: string) => void;
 }
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const TIMER_SECONDS = 180;
 
 export default function StepEmailVerification({ onNext }: StepEmailVerificationProps) {
@@ -25,7 +25,7 @@ export default function StepEmailVerification({ onNext }: StepEmailVerificationP
   const timer = useTimer(TIMER_SECONDS);
 
   function handleSendCode() {
-    if (!EMAIL_REGEX.test(email)) {
+    if (!validateEmail(email)) {
       setEmailError('이메일을 다시 확인해 주세요');
       return;
     }
@@ -56,7 +56,7 @@ export default function StepEmailVerification({ onNext }: StepEmailVerificationP
     onNext(email);
   }
 
-  const canSendCode = EMAIL_REGEX.test(email) && !codeSent;
+  const canSendCode = validateEmail(email) && !codeSent;
   const canVerify = codeSent && code.length === 6 && timer.isRunning;
 
   return (
