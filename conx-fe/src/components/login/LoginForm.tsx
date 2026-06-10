@@ -69,11 +69,9 @@ export default function LoginForm() {
         <div className="flex flex-col items-center gap-6">
           <div className="flex w-114.5 flex-col gap-3">
             <CTAButton type="submit">로그인</CTAButton>
-            <Link href="/find-account">
-              <CTAButton variant="tertiary" type="button">
-                이메일·비밀번호 찾기
-              </CTAButton>
-            </Link>
+            <CTAButton variant="tertiary" href="/find-account">
+              이메일·비밀번호 찾기
+            </CTAButton>
           </div>
 
           <div className="flex items-center gap-5.5">
