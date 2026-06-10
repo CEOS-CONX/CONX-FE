@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 
 interface ToastProps {
   message: string;
@@ -19,10 +19,15 @@ export default function Toast({
   duration = 3000,
   className,
 }: ToastProps) {
+  const onCloseRef = useRef(onClose);
+  useLayoutEffect(() => {
+    onCloseRef.current = onClose;
+  });
+
   useEffect(() => {
-    const id = setTimeout(onClose, duration);
+    const id = setTimeout(() => onCloseRef.current(), duration);
     return () => clearTimeout(id);
-  }, [onClose, duration]);
+  }, [duration]);
 
   return (
     <div className={className ?? 'z-conx-toast fixed bottom-10 left-1/2 -translate-x-1/2'}>

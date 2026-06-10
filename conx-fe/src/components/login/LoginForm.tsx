@@ -2,19 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
 
 export default function LoginForm() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
-  function handleSubmit() {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     let hasError = false;
 
     if (!email.trim()) {
@@ -40,7 +39,7 @@ export default function LoginForm() {
         <h1 className="text-kor-title-1-bold text-conx-common-black">로그인</h1>
       </div>
 
-      <div className="flex flex-col items-center gap-15.5">
+      <form onSubmit={handleSubmit} className="flex flex-col items-center gap-15.5">
         <div className="flex flex-col gap-9">
           <TextFieldInput
             size="lg"
@@ -69,10 +68,12 @@ export default function LoginForm() {
 
         <div className="flex flex-col items-center gap-6">
           <div className="flex w-114.5 flex-col gap-3">
-            <CTAButton onClick={handleSubmit}>로그인</CTAButton>
-            <CTAButton variant="tertiary" onClick={() => router.push('/find-account')}>
-              이메일·비밀번호 찾기
-            </CTAButton>
+            <CTAButton type="submit">로그인</CTAButton>
+            <Link href="/find-account">
+              <CTAButton variant="tertiary" type="button">
+                이메일·비밀번호 찾기
+              </CTAButton>
+            </Link>
           </div>
 
           <div className="flex items-center gap-5.5">
@@ -87,7 +88,7 @@ export default function LoginForm() {
             </Link>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

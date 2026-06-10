@@ -66,13 +66,7 @@ export default function FindAccountForm() {
   function handleVerify() {
     if (!canVerify) return;
 
-    if (code.length !== 6) {
-      setCodeError('인증번호가 맞지 않습니다');
-      return;
-    }
-
-    // 목업: 아무 6자리나 통과
-    // TODO: 인증번호 검증 API 호출
+    // TODO: 인증번호 검증 API 호출 — 실패 시 setCodeError('인증번호가 맞지 않습니다')
     timer.clear();
     setToastMessage(TAB_CONFIG[activeTab].toastMessage);
   }
@@ -106,7 +100,7 @@ export default function FindAccountForm() {
               { value: 'password', label: '비밀번호 찾기' },
             ]}
             value={activeTab}
-            onChange={(v) => handleTabChange(v as Tab)}
+            onChange={handleTabChange}
           />
 
           {/* 입력 필드 */}
