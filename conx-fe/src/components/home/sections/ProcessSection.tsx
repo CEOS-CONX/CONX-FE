@@ -138,6 +138,7 @@ export default function ProcessSection() {
                 {STEPS.map((s) => (
                   <HomeBookmarkButton
                     key={s}
+                    id={`process-tab-${s}`}
                     selected={step === s}
                     onClick={() => handleStepClick(s)}
                     role="tab"
@@ -155,6 +156,7 @@ export default function ProcessSection() {
           <div
             role="tabpanel"
             id={`process-panel-${step}`}
+            aria-labelledby={`process-tab-${step}`}
             className="bg-conx-common-white w-full pt-12 pb-40"
           >
             <div className="mx-auto max-w-[1600px]">

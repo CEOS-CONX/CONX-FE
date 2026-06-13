@@ -12,6 +12,8 @@ import { HomeTextIconButton } from '@/components/home/HomeTextIconButton';
  * - [data-cursor-pause] 요소(예: 북마크 버튼) hover 시 일시정지
  * - 커서가 viewport 밖으로 나가면 정지
  * - 모바일/터치: mousemove가 안 와서 자동 비활성, 네이티브 horizontal scroll 사용
+ * - 성능: IntersectionObserver로 row가 뷰포트에 보일 때만 rAF 루프 실행
+ *   (랜딩처럼 긴 페이지에서 안 보일 때도 60fps 돌면 배터리/CPU 낭비)
  */
 function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
   useEffect(() => {
@@ -54,14 +56,34 @@ function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
       rafId = requestAnimationFrame(tick);
     }
 
+    function startLoop() {
+      if (rafId) return; // 이미 도는 중이면 중복 시작 방지
+      rafId = requestAnimationFrame(tick);
+    }
+    function stopLoop() {
+      if (!rafId) return;
+      cancelAnimationFrame(rafId);
+      rafId = 0;
+    }
+
+    // row가 뷰포트에 보이는 동안만 rAF 루프 가동
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) startLoop();
+        else stopLoop();
+      },
+      { rootMargin: '200px 0px' }, // 화면 들어오기 직전부터 미리 켜서 자연스럽게
+    );
+    observer.observe(el);
+
     window.addEventListener('mousemove', onMouseMove);
     document.documentElement.addEventListener('mouseleave', onMouseLeave);
-    rafId = requestAnimationFrame(tick);
 
     return () => {
+      observer.disconnect();
       window.removeEventListener('mousemove', onMouseMove);
       document.documentElement.removeEventListener('mouseleave', onMouseLeave);
-      cancelAnimationFrame(rafId);
+      stopLoop();
     };
   }, [ref]);
 }
