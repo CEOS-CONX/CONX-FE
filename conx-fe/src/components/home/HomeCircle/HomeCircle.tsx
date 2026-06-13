@@ -6,8 +6,8 @@ interface HomeCircleProps extends Omit<
 > {
   size?: HomeCircleSize;
   keyword: string;
-  title: [string, string]; // 2줄 고정
-  description: [string, string, string]; // 3줄 고정
+  title: string;
+  description: string;
 }
 
 const SIZE_STYLES: Record<HomeCircleSize, { box: string; title: string; description: string }> = {
@@ -44,18 +44,14 @@ export default function HomeCircle({
         {keyword}
       </span>
 
-      {/* 타이틀 (2줄) */}
-      <div className={`text-conx-common-black mb-3 text-center ${s.title}`}>
-        {title.map((line, i) => (
-          <p key={i}>{line}</p>
-        ))}
-      </div>
+      {/* 타이틀 — 문자열 내 \n으로 줄바꿈 */}
+      <span className={`text-conx-common-black mb-3 text-center whitespace-pre-line ${s.title}`}>
+        {title}
+      </span>
 
-      {/* 설명 (3줄) */}
-      <div className={`text-conx-gray-550 text-center ${s.description}`}>
-        {description.map((line, i) => (
-          <p key={i}>{line}</p>
-        ))}
+      {/* 설명 — 문자열 내 \n으로 줄바꿈 */}
+      <div className={`text-conx-gray-550 text-center whitespace-pre-line ${s.description}`}>
+        {description}
       </div>
     </button>
   );
