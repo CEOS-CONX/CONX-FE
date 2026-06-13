@@ -1,10 +1,12 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { HomeBookmarkButton } from '@/components/home/HomeBookmarkButton';
 
 type Step = 1 | 2 | 3 | 4;
 
 const STEPS: Step[] = [1, 2, 3, 4];
+const STEP_HEIGHT = 800; // 각 step당 스크롤 길이 (px) — 디자이너 스펙
+const TOTAL_SCROLL = STEP_HEIGHT * STEPS.length; // 3200
 
 // 각 STEP별 기업/크루 컨텐츠
 const STEP_CONTENT: Record<
@@ -64,67 +66,141 @@ const STEP_CONTENT: Record<
   },
 };
 
+function clamp01(x: number) {
+  return Math.max(0, Math.min(1, x));
+}
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
+/** progress가 [start, end] 구간에 들어왔을 때 0→1로 보간 (easeOut 적용) */
+function reveal(progress: number, start: number, end: number): number {
+  return easeOutCubic(clamp01((progress - start) / (end - start)));
+}
+
 export default function ProcessSection() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<Step>(1);
+  const [progress, setProgress] = useState(0); // 현재 step 내 진행도 0~1
+
+  // 스크롤 추적
+  useEffect(() => {
+    function onScroll() {
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+      const rect = wrapper.getBoundingClientRect();
+      const scrollAmount = -rect.top; // wrapper top이 viewport top 위로 올라간 양
+      const clamped = Math.max(0, Math.min(TOTAL_SCROLL, scrollAmount));
+      const idx = Math.min(STEPS.length - 1, Math.floor(clamped / STEP_HEIGHT));
+      const prog = (clamped - idx * STEP_HEIGHT) / STEP_HEIGHT;
+      setStep((idx + 1) as Step);
+      setProgress(prog);
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // 탭 버튼 클릭 — 해당 step의 끝 위치로 즉시 점프 (애니메이션 없이 fully revealed 상태로)
+  function handleStepClick(s: Step) {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return;
+    const targetY = wrapper.offsetTop + (s - 1) * STEP_HEIGHT + STEP_HEIGHT - 1;
+    window.scrollTo({ top: targetY, behavior: 'instant' });
+  }
+
   const content = STEP_CONTENT[step];
+  const titleReveal = reveal(progress, 0, 0.33);
+  const descReveal = reveal(progress, 0.33, 0.66);
+  const imageReveal = reveal(progress, 0.66, 1);
+
+  /** 노출도(0~1)에 따라 아래에서 위로 슬라이드 + 페이드인 스타일 */
+  const animStyle = (r: number) => ({
+    transform: `translateY(${(1 - r) * 40}px)`,
+    opacity: r,
+  });
 
   return (
-    <section id="process" className="bg-conx-gray-50 pt-20">
-      <div className="mx-auto max-w-[1600px]">
-        {/* 헤더 */}
-        <div className="mb-12 text-center">
-          <h3 className="text-kor-title-3-bold text-conx-primary-400">프로세스</h3>
-          <h4 className="text-kor-display-3-bold text-conx-common-black mt-3">
-            쉽고 빠르게 커넥스를 경험해보세요
-          </h4>
-        </div>
-
-        <div className="pt-3 pl-[90px]">
-          <div role="tablist" className="flex gap-5">
-            {STEPS.map((s) => (
-              <HomeBookmarkButton
-                key={s}
-                selected={step === s}
-                onClick={() => setStep(s)}
-                role="tab"
-                aria-selected={step === s}
-                aria-controls={`process-panel-${s}`}
-              >
-                STEP {s}
-              </HomeBookmarkButton>
-            ))}
-          </div>
-        </div>
-
-        {/* 컨텐츠 패널 — 기업 / 크루 2-column */}
-        <div
-          role="tabpanel"
-          id={`process-panel-${step}`}
-          className="bg-conx-common-white w-full pt-12 pb-40"
-        >
-          <div className="grid grid-cols-2 gap-[145px] pr-[210px] pl-[90px]">
-            {/* 기업 */}
-            <div>
-              <h5 className="text-kor-heading-1-bold text-conx-gray-550">기업</h5>
-              <h6 className="text-kor-title-2-bold mt-3 whitespace-pre-line text-black">
-                {content.company.title}
-              </h6>
-              <p className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 whitespace-pre-line">
-                {content.company.description}
-              </p>
-              {/* 이미지 placeholder — 디자인팀 이미지 받으면 교체 */}
-              <div className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md" />
+    <section id="process" className="bg-conx-gray-50">
+      <div ref={wrapperRef} style={{ height: `calc(${TOTAL_SCROLL}px + 100vh)` }}>
+        <div className="bg-conx-gray-50 sticky top-0 h-screen overflow-hidden pt-20">
+          <div className="mx-auto max-w-[1600px]">
+            {/* 헤더 — 고정 */}
+            <div className="mb-12 text-center">
+              <h3 className="text-kor-title-3-bold text-conx-primary-400">프로세스</h3>
+              <h4 className="text-kor-display-3-bold text-conx-common-black mt-3">
+                쉽고 빠르게 커넥스를 경험해보세요
+              </h4>
             </div>
-            {/* 크루 */}
-            <div>
-              <h5 className="text-kor-heading-1-bold text-conx-gray-550">크루</h5>
-              <h6 className="text-kor-title-2-bold mt-3 whitespace-pre-line text-black">
-                {content.crew.title}
-              </h6>
-              <p className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 whitespace-pre-line">
-                {content.crew.description}
-              </p>
-              <div className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md" />
+
+            {/* STEP 탭 — selected는 scroll-driven step에 연동 */}
+            <div className="pt-3 pl-[90px]">
+              <div role="tablist" className="flex gap-5">
+                {STEPS.map((s) => (
+                  <HomeBookmarkButton
+                    key={s}
+                    selected={step === s}
+                    onClick={() => handleStepClick(s)}
+                    role="tab"
+                    aria-selected={step === s}
+                    aria-controls={`process-panel-${s}`}
+                  >
+                    STEP {s}
+                  </HomeBookmarkButton>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 컨텐츠 패널 */}
+          <div
+            role="tabpanel"
+            id={`process-panel-${step}`}
+            className="bg-conx-common-white w-full pt-12 pb-40"
+          >
+            <div className="mx-auto max-w-[1600px]">
+              <div className="grid grid-cols-2 gap-[145px] pr-[210px] pl-[90px]">
+                {/* 기업 */}
+                <div>
+                  {/* 기업/크루 레이블은 고정 — 애니메이션 X */}
+                  <h5 className="text-kor-heading-1-bold text-conx-gray-550">기업</h5>
+                  <h6
+                    className="text-kor-title-2-bold mt-3 whitespace-pre-line text-black"
+                    style={animStyle(titleReveal)}
+                  >
+                    {content.company.title}
+                  </h6>
+                  <p
+                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 whitespace-pre-line"
+                    style={animStyle(descReveal)}
+                  >
+                    {content.company.description}
+                  </p>
+                  <div
+                    className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md"
+                    style={animStyle(imageReveal)}
+                  />
+                </div>
+                {/* 크루 */}
+                <div>
+                  <h5 className="text-kor-heading-1-bold text-conx-gray-550">크루</h5>
+                  <h6
+                    className="text-kor-title-2-bold mt-3 whitespace-pre-line text-black"
+                    style={animStyle(titleReveal)}
+                  >
+                    {content.crew.title}
+                  </h6>
+                  <p
+                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 whitespace-pre-line"
+                    style={animStyle(descReveal)}
+                  >
+                    {content.crew.description}
+                  </p>
+                  <div
+                    className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md"
+                    style={animStyle(imageReveal)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
