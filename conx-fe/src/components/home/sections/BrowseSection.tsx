@@ -1,6 +1,70 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { HomeTextIconButton } from '@/components/home/HomeTextIconButton';
+
+/**
+ * 커서 기반 자동 가로 스크롤 훅 (desktop only)
+ * - 수직: ref가 가리키는 row의 bounding rect 안에 커서가 있을 때만 활성
+ * - 수평: viewport 중심을 기준으로 좌/우 거리에 따라 속도 결정 (가장자리로 갈수록 가파름)
+ * - [data-cursor-pause] 요소(예: 북마크 버튼) hover 시 일시정지
+ * - 커서가 viewport 밖으로 나가면 정지
+ * - 모바일/터치: mousemove가 안 와서 자동 비활성, 네이티브 horizontal scroll 사용
+ */
+function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let hasMouse = false;
+    let rafId = 0;
+
+    function onMouseMove(e: MouseEvent) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      hasMouse = true;
+    }
+    function onMouseLeave() {
+      hasMouse = false;
+    }
+
+    function tick() {
+      if (el && hasMouse) {
+        const target = document.elementFromPoint(mouseX, mouseY);
+        const isPaused = !!target?.closest('[data-cursor-pause]');
+
+        if (!isPaused) {
+          const rect = el.getBoundingClientRect();
+          const inVerticalRange = mouseY >= rect.top && mouseY <= rect.bottom;
+
+          if (inVerticalRange) {
+            const center = window.innerWidth / 2;
+            const ratio = (mouseX - center) / center; // -1 ~ 1
+            const sign = Math.sign(ratio);
+            // 가장자리로 갈수록 가파른 가속 (지수 2.5, 최대 20px/frame ≈ 1200px/s)
+            const speed = sign * Math.pow(Math.abs(ratio), 2.5) * 20;
+            el.scrollLeft += speed;
+          }
+        }
+      }
+      rafId = requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('mousemove', onMouseMove);
+    document.documentElement.addEventListener('mouseleave', onMouseLeave);
+    rafId = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      document.documentElement.removeEventListener('mouseleave', onMouseLeave);
+      cancelAnimationFrame(rafId);
+    };
+  }, [ref]);
+}
 
 // 일단 5개씩 placeholder. 나중에 API/필터링 결과로 교체.
 const MOCK_PROJECTS = Array.from({ length: 5 }, (_, i) => ({
@@ -28,6 +92,12 @@ const MOCK_CREWS = Array.from({ length: 5 }, (_, i) => ({
 }));
 
 export default function BrowseSection() {
+  const projectsRef = useRef<HTMLDivElement>(null);
+  const crewsRef = useRef<HTMLDivElement>(null);
+
+  useCursorAutoScroll(projectsRef);
+  useCursorAutoScroll(crewsRef);
+
   return (
     <section id="browse" className="bg-conx-gray-50 pt-25">
       <div className="mx-auto max-w-[1600px]">
@@ -46,7 +116,7 @@ export default function BrowseSection() {
           <h5 className="text-kor-heading-2-semibold text-conx-common-black mb-3 pl-[90px]">
             프로젝트
           </h5>
-          <div className="flex gap-6 overflow-x-auto pl-[90px]">
+          <div ref={projectsRef} className="scrollbar-hide flex gap-6 overflow-x-auto pl-[90px]">
             {MOCK_PROJECTS.map((card) => (
               <Link
                 key={card.id}
@@ -78,7 +148,7 @@ export default function BrowseSection() {
           <h5 className="text-kor-heading-2-semibold text-conx-common-black mb-3 pl-[90px]">
             크루
           </h5>
-          <div className="flex gap-6 overflow-x-auto pl-[90px]">
+          <div ref={crewsRef} className="scrollbar-hide flex gap-6 overflow-x-auto pl-[90px]">
             {MOCK_CREWS.map((card) => (
               <Link
                 key={card.id}
