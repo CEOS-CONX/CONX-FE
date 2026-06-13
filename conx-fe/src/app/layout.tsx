@@ -1,8 +1,5 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import ogImage from '@/assets/images/OG_image.png';
-import { Footer } from '@/components/layout/Footer';
-import { Navbar } from '@/components/layout/Navbar';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
 

@@ -5,7 +5,7 @@ import { HomeBookmarkButton } from '@/components/home/HomeBookmarkButton';
 type Step = 1 | 2 | 3 | 4;
 
 const STEPS: Step[] = [1, 2, 3, 4];
-const STEP_HEIGHT = 800; // 각 step당 스크롤 길이 (px) — 디자이너 스펙
+const STEP_HEIGHT = 800; // 각 step당 스크롤 길이 (px)
 const TOTAL_SCROLL = STEP_HEIGHT * STEPS.length; // 3200
 
 // 각 STEP별 기업/크루 컨텐츠
