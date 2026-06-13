@@ -108,6 +108,20 @@ export default function ProcessSection() {
     window.scrollTo({ top: targetY, behavior: 'instant' });
   }
 
+  // 키보드 탐색 — WAI-ARIA Authoring Practices 탭 패턴 (ArrowLeft/Right/Home/End)
+  function handleTablistKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    const idx = STEPS.indexOf(step);
+    let nextStep: Step | null = null;
+    if (e.key === 'ArrowLeft') nextStep = STEPS[(idx - 1 + STEPS.length) % STEPS.length];
+    else if (e.key === 'ArrowRight') nextStep = STEPS[(idx + 1) % STEPS.length];
+    else if (e.key === 'Home') nextStep = STEPS[0];
+    else if (e.key === 'End') nextStep = STEPS[STEPS.length - 1];
+    if (nextStep === null) return;
+    e.preventDefault();
+    handleStepClick(nextStep);
+    document.getElementById(`process-tab-${nextStep}`)?.focus();
+  }
+
   const content = STEP_CONTENT[step];
   const titleReveal = reveal(progress, 0, 0.33);
   const descReveal = reveal(progress, 0.33, 0.66);
@@ -134,7 +148,7 @@ export default function ProcessSection() {
 
             {/* STEP 탭 — selected는 scroll-driven step에 연동 */}
             <div className="pt-3 pl-[90px]">
-              <div role="tablist" className="flex gap-5">
+              <div role="tablist" className="flex gap-5" onKeyDown={handleTablistKeyDown}>
                 {STEPS.map((s) => (
                   <HomeBookmarkButton
                     key={s}
@@ -143,7 +157,8 @@ export default function ProcessSection() {
                     onClick={() => handleStepClick(s)}
                     role="tab"
                     aria-selected={step === s}
-                    aria-controls={`process-panel-${s}`}
+                    aria-controls="process-panel"
+                    tabIndex={step === s ? 0 : -1}
                   >
                     STEP {s}
                   </HomeBookmarkButton>
@@ -155,7 +170,7 @@ export default function ProcessSection() {
           {/* 컨텐츠 패널 */}
           <div
             role="tabpanel"
-            id={`process-panel-${step}`}
+            id="process-panel"
             aria-labelledby={`process-tab-${step}`}
             className="bg-conx-common-white w-full pt-12 pb-40"
           >

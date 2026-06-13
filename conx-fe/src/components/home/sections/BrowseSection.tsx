@@ -23,19 +23,11 @@ function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
     let mouseX = 0;
     let mouseY = 0;
     let hasMouse = false;
+    let isVisible = false;
     let rafId = 0;
 
-    function onMouseMove(e: MouseEvent) {
-      mouseX = e.clientX;
-      mouseY = e.clientY;
-      hasMouse = true;
-    }
-    function onMouseLeave() {
-      hasMouse = false;
-    }
-
     function tick() {
-      if (el && hasMouse) {
+      if (el && hasMouse && isVisible) {
         const target = document.elementFromPoint(mouseX, mouseY);
         const isPaused = !!target?.closest('[data-cursor-pause]');
 
@@ -53,24 +45,38 @@ function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
           }
         }
       }
-      rafId = requestAnimationFrame(tick);
+      // 두 조건이 모두 참일 때만 다음 프레임 예약 — 둘 중 하나라도 false면 자연 정지
+      if (hasMouse && isVisible) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        rafId = 0;
+      }
     }
 
-    function startLoop() {
-      if (rafId) return; // 이미 도는 중이면 중복 시작 방지
-      rafId = requestAnimationFrame(tick);
-    }
-    function stopLoop() {
-      if (!rafId) return;
-      cancelAnimationFrame(rafId);
-      rafId = 0;
+    // 두 조건 변경 시점에 루프 재시작 보장
+    function ensureRunning() {
+      if (rafId === 0 && hasMouse && isVisible) {
+        rafId = requestAnimationFrame(tick);
+      }
     }
 
-    // row가 뷰포트에 보이는 동안만 rAF 루프 가동
+    function onMouseMove(e: MouseEvent) {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      hasMouse = true;
+      ensureRunning();
+    }
+    function onMouseLeave() {
+      hasMouse = false;
+      // 명시적 cancel 안 함 — tick이 다음 호출에서 hasMouse=false 보고 자연 정지
+    }
+
+    // row가 뷰포트에 보이는 동안만 활성 (커서가 화면 위에 있어도)
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) startLoop();
-        else stopLoop();
+        isVisible = entry.isIntersecting;
+        if (isVisible) ensureRunning();
+        // 안 보이면 tick이 자연 정지하도록 둠 (대기 중인 frame은 한 번만 더 돌고 멈춤)
       },
       { rootMargin: '200px 0px' }, // 화면 들어오기 직전부터 미리 켜서 자연스럽게
     );
@@ -83,7 +89,7 @@ function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
       observer.disconnect();
       window.removeEventListener('mousemove', onMouseMove);
       document.documentElement.removeEventListener('mouseleave', onMouseLeave);
-      stopLoop();
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [ref]);
 }
