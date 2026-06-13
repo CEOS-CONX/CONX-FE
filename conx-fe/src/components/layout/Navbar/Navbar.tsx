@@ -43,7 +43,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
 
   return (
-    <header className="border-conx-gray-100 w-full border-b">
+    <header className="w-full">
       <div className="mx-auto max-w-400 min-w-248 px-9 min-[1200px]:px-14 min-[1600px]:px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo */}
@@ -91,7 +91,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                   <Link href="#" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
                     로그인
                   </Link>
-                  <Link href="#" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
+                  <Link href="/signup" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
                     회원가입
                   </Link>
                 </>

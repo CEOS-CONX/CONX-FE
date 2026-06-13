@@ -65,6 +65,30 @@
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
   --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
 
+  /* Gradient — Figma의 Gradient_white/100_0, 0_100 (섹션 경계용, 세로 100% white) */
+  --background-image-conx-gradient-white-top: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    rgb(255 255 255 / 0) 100%
+  );
+  --background-image-conx-gradient-white-bottom: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0) 0%,
+    #ffffff 100%
+  );
+
+  /* Edge fade — 가장자리 요소 페이드용 (가로, 80% white) */
+  --background-image-conx-gradient-white-fade-left: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.8) 0%,
+    rgb(255 255 255 / 0) 100%
+  );
+  --background-image-conx-gradient-white-fade-right: linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0) 0%,
+    rgb(255 255 255 / 0.8) 100%
+  );
+
   /* ========== Z-Index ========== */
   --z-index-conx-base: 1;
   --z-index-conx-card-overlay: 10;
@@ -379,6 +403,17 @@
   --text-eng-caption-1-medium--line-height: 150%;
   --text-eng-caption-1-medium--letter-spacing: 0;
   --text-eng-caption-1-medium--font-weight: 500;
+}
+
+/* scroll bar hidden */
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 body {

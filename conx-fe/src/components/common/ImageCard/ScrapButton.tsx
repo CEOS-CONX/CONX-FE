@@ -10,7 +10,13 @@ export default function ScrapButton({ defaultScraped = false }: { defaultScraped
   return (
     <button
       aria-label={isScraped ? '스크랩 취소' : '스크랩'}
-      onClick={() => setIsScraped((prev) => !prev)}
+      data-cursor-pause // 커서 자동 스크롤(BrowseSection) hover 시 일시정지용
+      onClick={(e) => {
+        // 카드가 <Link>로 감싸진 경우, 네비게이션이 같이 트리거되지 않게 막음
+        e.preventDefault();
+        e.stopPropagation();
+        setIsScraped((prev) => !prev);
+      }}
       className="flex cursor-pointer items-center justify-center p-1.5"
     >
       {isScraped ? (
