@@ -39,28 +39,29 @@ export default function TextFieldInput({
       ].join(' ');
 
   return (
-    <div className={`flex shrink-0 flex-col ${SIZE_WIDTH[size]} ${className ?? ''}`}>
-      {label && (
-        <label htmlFor={id} className="text-kor-body-1-semibold text-conx-common-black">
-          {label}
-          {required && (
-            <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+    <div className={`flex shrink-0 flex-col gap-3 ${SIZE_WIDTH[size]} ${className ?? ''}`}>
+      {(label || helperText) && (
+        <div className="flex flex-col gap-0.5">
+          {label && (
+            <label htmlFor={id} className="text-kor-body-1-semibold text-conx-common-black">
+              {label}
+              {required && (
+                <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+              )}
+            </label>
           )}
-        </label>
-      )}
-
-      {helperText && (
-        <p className="text-kor-label-1-medium text-conx-gray-450 mt-1">{helperText}</p>
+          {helperText && <p className="text-kor-label-1-medium text-conx-gray-450">{helperText}</p>}
+        </div>
       )}
 
       <input
         id={id}
-        className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 mt-2 w-full rounded-md border px-4 py-3 outline-none ${inputStateClass}`}
+        className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full rounded-md border p-4 outline-none ${inputStateClass}`}
         {...props}
       />
 
       {hasError && (
-        <p className="text-kor-label-1-medium text-conx-red-500 mt-1.5 flex items-center gap-1">
+        <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1">
           <IconError className="h-4 w-4 shrink-0" />
           {error}
         </p>

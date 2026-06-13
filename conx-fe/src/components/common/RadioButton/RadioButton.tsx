@@ -27,12 +27,16 @@ export default function RadioButton({
       aria-checked={checked}
       onClick={() => onChange(!checked)}
       disabled={disabled}
-      className={`mx-0.5 my-0.75 inline-flex cursor-pointer items-center gap-1 disabled:cursor-not-allowed disabled:opacity-50 ${className ?? ''}`}
+      className={`inline-flex cursor-pointer items-start gap-1 text-left disabled:cursor-not-allowed disabled:opacity-50 ${className ?? ''}`}
       {...props}
     >
-      <Icon className="h-4.5 w-4.5 shrink-0" />
+      <span className="shrink-0 px-0.5 py-0.75">
+        <Icon className="h-4.5 w-4.5" />
+      </span>
       {children && (
-        <span className="text-kor-body-1-medium text-conx-common-black">{children}</span>
+        <span className="text-kor-body-1-medium text-conx-common-black min-w-0 flex-1">
+          {children}
+        </span>
       )}
     </button>
   );
