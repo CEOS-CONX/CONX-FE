@@ -11,10 +11,15 @@ import SignupCompleteModal from './SignupCompleteModal';
 
 type Step = 'select-type' | 'email' | 'password' | 'profile' | 'complete';
 
-export default function SignupFunnel() {
+interface SignupFunnelProps {
+  // 외부에서 type 지정 시 select-type 단계 건너뛰고 바로 email부터 시작
+  initialType?: UserType;
+}
+
+export default function SignupFunnel({ initialType }: SignupFunnelProps) {
   const router = useRouter();
-  const [step, setStep] = useState<Step>('select-type');
-  const [userType, setUserType] = useState<UserType>();
+  const [step, setStep] = useState<Step>(initialType ? 'email' : 'select-type');
+  const [userType, setUserType] = useState<UserType | undefined>(initialType);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [marketingAgreed, setMarketingAgreed] = useState(false);

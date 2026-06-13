@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { HomeTextButton } from '@/components/home/HomeTextButton';
 import LogoConxTitleWhite from '@/assets/icons/logo_conx_title_white.svg';
 
@@ -22,9 +23,12 @@ export default function CtaSection() {
           지금, 커넥스와 함께하세요
         </h2>
         <div className="flex gap-5 pt-15">
-          {/* TODO : 로그인창으로 연결 */}
-          <HomeTextButton variant="black">기업으로 시작하기</HomeTextButton>
-          <HomeTextButton>크루로 시작하기</HomeTextButton>
+          <Link href="/signup?type=enterprise">
+            <HomeTextButton variant="black">기업으로 시작하기</HomeTextButton>
+          </Link>
+          <Link href="/signup?type=crew">
+            <HomeTextButton>크루로 시작하기</HomeTextButton>
+          </Link>
         </div>
       </div>
     </section>
