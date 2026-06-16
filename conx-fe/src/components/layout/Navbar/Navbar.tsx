@@ -9,6 +9,7 @@ import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
 import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
+import { useAuth } from '@/context/AuthContext';
 
 const NAV_LINKS = [
   { label: '홈', href: '/' },
@@ -38,7 +39,8 @@ const ICON_BUTTONS: {
   { name: 'profile', label: '프로필', Stroke: IconProfileStroke, Fill: IconProfileFill },
 ];
 
-export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
+export default function Navbar() {
+  const { isLoggedIn } = useAuth();
   // TODO: 라우트 확정 후 usePathname()으로 전환하여 URL과 동기화
   const [activeLink, setActiveLink] = useState<string | null>(null);
   const [activeIcon, setActiveIcon] = useState<IconName | null>(null);

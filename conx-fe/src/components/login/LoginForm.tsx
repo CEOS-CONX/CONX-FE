@@ -6,9 +6,11 @@ import { useRouter } from 'next/navigation';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginForm() {
   const router = useRouter();
+  const { setIsLoggedIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -31,6 +33,7 @@ export default function LoginForm() {
     // TODO: 로그인 API 호출 — 응답에 따라 에러 분기
     // setEmailError('이메일을 다시 확인해 주세요');
     // setPasswordError('비밀번호가 일치하지 않습니다.');
+    setIsLoggedIn(true);
     router.push('/');
   }
 
