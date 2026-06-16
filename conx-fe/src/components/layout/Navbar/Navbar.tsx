@@ -24,6 +24,7 @@ type IconName = 'notification' | 'scrap' | 'profile';
 const ICON_BUTTONS: {
   name: IconName;
   label: string;
+  href?: string;
   Stroke: typeof IconNotificationStroke;
   Fill: typeof IconNotificationFill;
 }[] = [
@@ -33,7 +34,7 @@ const ICON_BUTTONS: {
     Stroke: IconNotificationStroke,
     Fill: IconNotificationFill,
   },
-  { name: 'scrap', label: '스크랩', Stroke: IconScrapStroke, Fill: IconScrapFill },
+  { name: 'scrap', label: '스크랩', href: '/scrap', Stroke: IconScrapStroke, Fill: IconScrapFill },
   { name: 'profile', label: '프로필', Stroke: IconProfileStroke, Fill: IconProfileFill },
 ];
 
@@ -71,20 +72,42 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div className="flex items-center gap-5">
               {isLoggedIn ? (
                 <>
-                  {ICON_BUTTONS.map(({ name, label, Stroke, Fill }) => (
-                    <button
-                      key={name}
-                      aria-label={label}
-                      onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
-                      className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
-                    >
-                      {activeIcon === name ? (
-                        <Fill className="h-6.5 w-6.5" />
-                      ) : (
-                        <Stroke className="h-6.5 w-6.5" />
-                      )}
-                    </button>
-                  ))}
+                  {ICON_BUTTONS.map(({ name, label, href, Stroke, Fill }) => {
+                    const content = (
+                      <>
+                        {activeIcon === name ? (
+                          <Fill className="h-6.5 w-6.5" />
+                        ) : (
+                          <Stroke className="h-6.5 w-6.5" />
+                        )}
+                      </>
+                    );
+
+                    if (href) {
+                      return (
+                        <Link
+                          key={name}
+                          href={href}
+                          aria-label={label}
+                          onClick={() => setActiveIcon(name)}
+                          className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                        >
+                          {content}
+                        </Link>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={name}
+                        aria-label={label}
+                        onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
+                        className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                      >
+                        {content}
+                      </button>
+                    );
+                  })}
                 </>
               ) : (
                 <>
