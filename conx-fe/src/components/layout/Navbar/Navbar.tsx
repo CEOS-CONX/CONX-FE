@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import NotificationModal from './NotificationModal';
 import IconNotificationStroke from '@/assets/icons/icon_notification_stroke.svg';
 import IconNotificationFill from '@/assets/icons/icon_notification_fill.svg';
 import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
@@ -41,6 +42,28 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
   // TODO: 라우트 확정 후 usePathname()으로 전환하여 URL과 동기화
   const [activeLink, setActiveLink] = useState<string | null>(null);
   const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  // 알림 모달: 바깥 클릭 / Esc 로 닫기 (벨 버튼은 wrapper 안이라 토글 동작 유지)
+  useEffect(() => {
+    if (activeIcon !== 'notification') return;
+
+    function handleClickOutside(e: MouseEvent) {
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        setActiveIcon(null);
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') setActiveIcon(null);
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [activeIcon]);
 
   return (
     <header className="w-full">
@@ -71,20 +94,31 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div className="flex items-center gap-5">
               {isLoggedIn ? (
                 <>
-                  {ICON_BUTTONS.map(({ name, label, Stroke, Fill }) => (
-                    <button
-                      key={name}
-                      aria-label={label}
-                      onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
-                      className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
-                    >
-                      {activeIcon === name ? (
-                        <Fill className="h-6.5 w-6.5" />
-                      ) : (
-                        <Stroke className="h-6.5 w-6.5" />
-                      )}
-                    </button>
-                  ))}
+                  {ICON_BUTTONS.map(({ name, label, Stroke, Fill }) => {
+                    const isActive = activeIcon === name;
+                    const isNotification = name === 'notification';
+                    const Icon = isActive ? Fill : Stroke;
+                    return (
+                      <div
+                        key={name}
+                        ref={isNotification ? notificationRef : undefined}
+                        className="relative"
+                      >
+                        <button
+                          aria-label={label}
+                          onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
+                          aria-haspopup={isNotification ? 'dialog' : undefined}
+                          aria-expanded={isNotification ? isActive : undefined}
+                          className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                        >
+                          <Icon className="h-6.5 w-6.5" />
+                        </button>
+                        {isNotification && (
+                          <NotificationModal open={isActive} onClose={() => setActiveIcon(null)} />
+                        )}
+                      </div>
+                    );
+                  })}
                 </>
               ) : (
                 <>
