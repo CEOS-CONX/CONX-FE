@@ -46,11 +46,6 @@ export default function FindAccountForm() {
   function handleSendCode() {
     if (!canSendCode) return;
 
-    if (!validateEmail(emailValue)) {
-      setEmailError('이메일을 다시 확인해 주세요');
-      return;
-    }
-
     setCodeSent(true);
     setCode('');
     setCodeError('');
@@ -104,7 +99,14 @@ export default function FindAccountForm() {
           />
 
           {/* 입력 필드 */}
-          <div className="flex flex-col gap-9">
+          <form
+            className="flex flex-col gap-9"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (!codeSent) handleSendCode();
+              else handleVerify();
+            }}
+          >
             <TextFieldInput
               size="lg"
               label="이름"
@@ -149,26 +151,33 @@ export default function FindAccountForm() {
                 />
               )}
             </div>
-          </div>
-        </div>
 
-        <div className="relative w-114.5">
-          {toastMessage && (
-            <Toast
-              message={toastMessage}
-              onClose={handleToastClose}
-              className="z-conx-toast absolute bottom-full left-1/2 mb-3 -translate-x-1/2"
-            />
-          )}
-          {!codeSent ? (
-            <CTAButton disabled={!canSendCode} onClick={handleSendCode}>
-              인증번호 전송
-            </CTAButton>
-          ) : (
-            <CTAButton disabled={!canVerify} onClick={handleVerify}>
-              인증 완료
-            </CTAButton>
-          )}
+            <div className="relative">
+              <div
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                className="absolute bottom-full left-1/2 mb-3 -translate-x-1/2"
+              >
+                {toastMessage && (
+                  <Toast
+                    message={toastMessage}
+                    onClose={handleToastClose}
+                    className="z-conx-toast"
+                  />
+                )}
+              </div>
+              {!codeSent ? (
+                <CTAButton type="submit" disabled={!canSendCode}>
+                  인증번호 전송
+                </CTAButton>
+              ) : (
+                <CTAButton type="submit" disabled={!canVerify}>
+                  인증 완료
+                </CTAButton>
+              )}
+            </div>
+          </form>
         </div>
       </div>
     </div>
