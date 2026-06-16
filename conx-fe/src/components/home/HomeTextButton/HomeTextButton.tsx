@@ -31,7 +31,7 @@ export default function HomeTextButton({
   return (
     <button
       type="button"
-      className={`text-kor-heading-3-semibold inline-flex cursor-pointer items-center justify-center rounded-md px-2 py-4 disabled:pointer-events-none disabled:opacity-50 ${VARIANT_STYLES[variant]} ${className ?? ''}`}
+      className={`text-kor-heading-3-semibold inline-flex cursor-pointer items-center justify-center rounded-md px-4 py-2 disabled:pointer-events-none disabled:opacity-50 ${VARIANT_STYLES[variant]} ${className ?? ''}`}
       {...props}
     >
       {children}

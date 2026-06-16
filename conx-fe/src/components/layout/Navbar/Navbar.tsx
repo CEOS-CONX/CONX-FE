@@ -43,8 +43,8 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
 
   return (
-    <header className="border-conx-gray-100 w-full border-b">
-      <div className="mx-auto max-w-400 min-w-248 px-9 min-[1200px]:px-14 min-[1600px]:px-16.5">
+    <header className="w-full">
+      <div className="xlarge:px-14 large:px-9 mx-auto max-w-400 min-w-248 px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo */}
           <Link href="/" className="shrink-0">

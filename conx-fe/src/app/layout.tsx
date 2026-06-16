@@ -1,8 +1,12 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
-import ogImage from '@/assets/images/OG_image.png';
 import { SITE_URL } from '@/lib/site';
 import './globals.css';
+
+// OG 이미지 경로 (public/images/OG_image.png — 1200×630 PNG)
+const OG_IMAGE_URL = '/images/OG_image.png';
+const OG_IMAGE_WIDTH = 1200;
+const OG_IMAGE_HEIGHT = 630;
 
 const suit = localFont({
   src: '../assets/fonts/SUIT-Variable.woff2',
@@ -59,9 +63,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: [
       {
-        url: ogImage.src,
-        width: ogImage.width,
-        height: ogImage.height,
+        url: OG_IMAGE_URL,
+        width: OG_IMAGE_WIDTH,
+        height: OG_IMAGE_HEIGHT,
         alt: 'CONX | 기업과 대학생 크루를 연결하는 플랫폼',
       },
     ],
@@ -70,7 +74,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: OG_TITLE,
     description: SITE_DESCRIPTION,
-    images: [ogImage.src],
+    images: [OG_IMAGE_URL],
   },
   robots: {
     index: true,

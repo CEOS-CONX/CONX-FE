@@ -31,7 +31,7 @@ export default function BrowseCrewsPage() {
   const [sort, setSort] = useState('latest');
 
   return (
-    <main className="mx-auto w-full max-w-230 px-6 pt-25 pb-82.5 min-[1200px]:max-w-272 min-[1600px]:max-w-367">
+    <main className="xlarge:max-w-272 large:max-w-230 mx-auto w-full max-w-367 px-6 pt-25 pb-82.5">
       <h1 className="text-kor-title-1-bold text-conx-common-black">크루 둘러보기</h1>
       <p className="text-kor-heading-3-semibold text-conx-common-black mt-3">
         프로젝트 성격과 잘 맞는 크루를 탐색하고 협업을 시작해 보세요.
@@ -43,7 +43,7 @@ export default function BrowseCrewsPage() {
             value={searchQuery}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             placeholder="검색창"
-            className="w-50 min-[1200px]:w-68.75 min-[1600px]:w-114.25"
+            className="xlarge:w-68.75 large:w-50 w-114.25"
           />
           <DropdownCompact
             placeholder="활동 분야"
