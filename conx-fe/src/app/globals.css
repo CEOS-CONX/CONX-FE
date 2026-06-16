@@ -103,6 +103,7 @@
   --z-index-conx-base: 1;
   --z-index-conx-card-overlay: 10;
   --z-index-conx-dropdown: 20;
+  --z-index-conx-toast: 50;
 
   /* Background / Foreground */
   --color-background: var(--background);
