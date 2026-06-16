@@ -147,11 +147,12 @@ export default function ScrapPage() {
 
       {undoTarget !== null && (
         <Toast
+          key={undoTarget}
           message="스크랩을 취소했습니다"
           actionLabel="되돌리기"
           onAction={handleUndo}
           onClose={handleToastClose}
-          className="z-conx-toast absolute top-226.5 left-1/2 -translate-x-1/2"
+          className="z-conx-toast fixed top-226.5 left-1/2 -translate-x-1/2"
         />
       )}
     </>

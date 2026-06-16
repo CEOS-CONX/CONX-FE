@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import IconNotificationStroke from '@/assets/icons/icon_notification_stroke.svg';
 import IconNotificationFill from '@/assets/icons/icon_notification_fill.svg';
 import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
@@ -41,9 +41,13 @@ const ICON_BUTTONS: {
 
 export default function Navbar() {
   const { isLoggedIn } = useAuth();
-  // TODO: 라우트 확정 후 usePathname()으로 전환하여 URL과 동기화
-  const [activeLink, setActiveLink] = useState<string | null>(null);
-  const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
+  const pathname = usePathname();
+
+  const activeLink =
+    NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
+    (pathname === '/' ? '홈' : null);
+  const activeIcon: IconName | null =
+    ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null;
 
   return (
     <header className="w-full">
@@ -62,7 +66,6 @@ export default function Navbar() {
                 <Link
                   key={label}
                   href={href}
-                  onClick={() => setActiveLink(label)}
                   className={`${NAV_LINK_BASE} ${activeLink === label ? 'text-kor-body-1-bold' : 'text-kor-body-1-semibold'}`}
                 >
                   {label}
@@ -91,7 +94,6 @@ export default function Navbar() {
                           key={name}
                           href={href}
                           aria-label={label}
-                          onClick={() => setActiveIcon(name)}
                           className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                         >
                           {content}
@@ -103,7 +105,7 @@ export default function Navbar() {
                       <button
                         key={name}
                         aria-label={label}
-                        onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
+                        onClick={() => {}}
                         className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                       >
                         {content}

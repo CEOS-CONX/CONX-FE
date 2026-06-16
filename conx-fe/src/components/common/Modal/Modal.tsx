@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import IconClose from '@/assets/icons/icon_delete.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 
@@ -23,6 +23,7 @@ export default function Modal({
   onSecondaryClick,
   onClose,
 }: ModalProps) {
+  const titleId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const onCloseRef = useRef(onClose);
@@ -67,6 +68,7 @@ export default function Modal({
         ref={modalRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         className="z-conx-modal flex w-123.25 flex-col gap-3 rounded-xl bg-white px-5 pt-3.25 pb-5"
       >
         <div className="flex justify-end">
@@ -83,7 +85,9 @@ export default function Modal({
 
         <div className="flex flex-col items-center gap-11.75">
           <div className="flex w-full flex-col items-center gap-3 text-center">
-            <h2 className="text-kor-title-2-bold text-[#1d2229]">{title}</h2>
+            <h2 id={titleId} className="text-kor-title-2-bold text-[#1d2229]">
+              {title}
+            </h2>
             {subtitle && (
               <p className="text-kor-heading-3-semibold text-conx-gray-450">{subtitle}</p>
             )}
