@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 interface ToastProps {
   message: string;
@@ -20,7 +20,7 @@ export default function Toast({
   className,
 }: ToastProps) {
   const onCloseRef = useRef(onClose);
-  useLayoutEffect(() => {
+  useEffect(() => {
     onCloseRef.current = onClose;
   });
 
@@ -30,11 +30,7 @@ export default function Toast({
   }, [duration]);
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={className ?? 'z-conx-toast fixed bottom-10 left-1/2 -translate-x-1/2'}
-    >
+    <div className={className ?? 'z-conx-toast fixed bottom-10 left-1/2 -translate-x-1/2'}>
       <div className="bg-conx-gray-550 flex items-center justify-center gap-9 rounded-md px-6 py-3">
         <p className="text-kor-body-1-medium whitespace-nowrap text-white">{message}</p>
         {actionLabel && onAction && (

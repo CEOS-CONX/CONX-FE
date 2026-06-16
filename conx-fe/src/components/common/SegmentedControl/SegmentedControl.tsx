@@ -41,7 +41,7 @@ export default function SegmentedControl<T extends string>({
 
   return (
     <div
-      role="tablist"
+      role="radiogroup"
       className={`bg-conx-gray-100 flex items-center gap-2 rounded-lg p-1 ${className ?? ''}`}
     >
       {items.map((item, index) => {
@@ -53,8 +53,8 @@ export default function SegmentedControl<T extends string>({
               tabsRef.current[index] = el;
             }}
             type="button"
-            role="tab"
-            aria-selected={isSelected}
+            role="radio"
+            aria-checked={isSelected}
             tabIndex={isSelected ? 0 : -1}
             onKeyDown={handleKeyDown}
             onClick={() => onChange(item.value)}
