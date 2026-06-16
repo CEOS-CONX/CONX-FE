@@ -36,7 +36,7 @@ export default function BrowseProjectsPage() {
   const [sort, setSort] = useState('latest');
 
   return (
-    <main className="mx-auto w-full max-w-230 px-6 pt-25 pb-82.5 min-[1200px]:max-w-272 min-[1600px]:max-w-367">
+    <main className="xlarge:max-w-272 large:max-w-230 mx-auto w-full max-w-367 px-6 pt-25 pb-82.5">
       <h1 className="text-kor-title-1-bold text-conx-common-black">프로젝트 둘러보기</h1>
       <p className="text-kor-heading-3-semibold text-conx-common-black mt-3">
         프로젝트를 비교하고, 우리 팀과 잘 맞는 협업 기회를 찾아보세요.
@@ -48,7 +48,7 @@ export default function BrowseProjectsPage() {
             value={searchQuery}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             placeholder="검색창"
-            className="w-50 min-[1200px]:w-68.75 min-[1600px]:w-114.25"
+            className="xlarge:w-68.75 large:w-50 w-114.25"
           />
           <DropdownCompact
             placeholder="산업 분야"
@@ -66,7 +66,7 @@ export default function BrowseProjectsPage() {
             placeholder="실행 기간"
             value={duration}
             onChange={setDuration}
-            className="w-50 min-[1200px]:w-64.5"
+            className="large:w-50 w-64.5"
           />
         </div>
         <DropdownCompact

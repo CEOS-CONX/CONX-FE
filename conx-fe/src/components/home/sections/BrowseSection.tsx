@@ -149,7 +149,7 @@ export default function BrowseSection() {
               <Link
                 key={card.id}
                 href={`/projects/${card.id}`}
-                className="w-[200px] shrink-0 min-[1200px]:w-[242px] min-[1600px]:w-[337px]"
+                className="xlarge:w-[242px] large:w-[200px] w-[337px] shrink-0"
               >
                 <Card
                   imageSrc={card.imageSrc}
@@ -181,7 +181,7 @@ export default function BrowseSection() {
               <Link
                 key={card.id}
                 href={`/crews/${card.id}`}
-                className="w-[200px] shrink-0 min-[1200px]:w-[242px] min-[1600px]:w-[337px]"
+                className="xlarge:w-[242px] large:w-[200px] w-[337px] shrink-0"
               >
                 <Card
                   imageSrc={card.imageSrc}
