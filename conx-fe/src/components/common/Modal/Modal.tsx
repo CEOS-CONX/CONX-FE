@@ -33,6 +33,7 @@ export default function Modal({
   });
 
   useEffect(() => {
+    const previousFocus = document.activeElement as HTMLElement | null;
     closeButtonRef.current?.focus();
 
     function handleKeyDown(e: KeyboardEvent) {
@@ -59,7 +60,10 @@ export default function Modal({
     }
 
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocus?.focus();
+    };
   }, []);
 
   return (
