@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { SITE_URL } from '@/lib/site';
+import { AuthProvider } from '@/context/AuthContext';
 import './globals.css';
 
 // OG 이미지 경로 (public/images/OG_image.png — 1200×630 PNG)
@@ -93,7 +94,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className={`${suit.variable} ${plusJakartaSans.variable} h-full antialiased`}>
-      <body className="font-suit flex min-h-full flex-col">{children}</body>
+      <body className="font-suit flex min-h-full flex-col">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }

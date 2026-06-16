@@ -5,6 +5,16 @@
   --foreground: #121212;
 }
 
+/* ========== Breakpoints (Desktop-first) ========== */
+/* 기본값(prefix 없음) → xxlarge (1600px 이상) — 기본 디자인 값
+  large:              → 1200px 미만 (실질 최소 992px)
+  xlarge:             → 1200~1599px
+  xxlarge:            → 1600px 이상 (기본값과 동일 — 명시하고 싶을 때만)
+   예) px-16.5 xlarge:px-14 large:px-9  (기본=xxlarge, 화면 줄면 xlarge→large 순으로 덮어씀) */
+@custom-variant large (@media (width < 1200px));
+@custom-variant xlarge (@media (width >= 1200px) and (width < 1600px));
+@custom-variant xxlarge (@media (width >= 1600px));
+
 @theme {
   /* ========== Colors ========== */
 
@@ -93,6 +103,9 @@
   --z-index-conx-base: 1;
   --z-index-conx-card-overlay: 10;
   --z-index-conx-dropdown: 20;
+  --z-index-conx-toast: 50;
+  --z-index-conx-modal-backdrop: 90;
+  --z-index-conx-modal: 100;
 
   /* Background / Foreground */
   --color-background: var(--background);

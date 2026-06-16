@@ -8,11 +8,18 @@ interface ImageCardProps {
   alt: string;
   tag?: { type: TagType; label: string };
   defaultScraped?: boolean;
+  onScrapChange?: (scraped: boolean) => void;
 }
 
-export default function ImageCard({ src, alt, tag, defaultScraped = false }: ImageCardProps) {
+export default function ImageCard({
+  src,
+  alt,
+  tag,
+  defaultScraped = false,
+  onScrapChange,
+}: ImageCardProps) {
   return (
-    <div className="group relative h-30 w-full overflow-hidden rounded-md min-[1200px]:h-36.5 min-[1600px]:h-50.75">
+    <div className="group xlarge:h-36.5 large:h-30 relative h-50.75 w-full overflow-hidden rounded-md">
       {/* Image */}
       <Image
         src={src}
@@ -30,7 +37,7 @@ export default function ImageCard({ src, alt, tag, defaultScraped = false }: Ima
         }}
       >
         {tag ? <Tag type={tag.type} label={tag.label} /> : <span />}
-        <ScrapButton defaultScraped={defaultScraped} />
+        <ScrapButton defaultScraped={defaultScraped} onScrapChange={onScrapChange} />
       </div>
     </div>
   );
