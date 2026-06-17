@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import IconCheckboxChecked from '@/assets/icons/icon_checkbox_checked.svg';
-import IconCheckboxDefault from '@/assets/icons/icon_checkbox_default.svg';
 import IconDelete from '@/assets/icons/icon_delete.svg';
-import { DropdownCompact } from '@/components/common/DropdownCompact';
-import type { DropdownCompactOption } from '@/components/common/DropdownCompact';
+import { Chip } from '@/components/common/Chip';
+import MessageCard from './MessageCard';
 
-const FILTER_OPTIONS: DropdownCompactOption[] = [
+const FILTER_OPTIONS = [
   { value: 'all', label: '전체' },
   { value: 'qna', label: '담당자 Q&A' },
   { value: 'project', label: '프로젝트' },
@@ -21,6 +19,9 @@ interface NotificationItem {
   sender: string;
   time: string;
   message: string;
+  // TODO(나중에): API 연동 시 각 알림의 실제 읽음 여부 채우기 → MessageCard read로 전달
+  //              + 안읽은 개수(read=false 개수)로 벨 아이콘 뱃지 표시
+  read?: boolean;
 }
 
 // 임시 mock — 나중에 API 연동으로 교체
@@ -62,22 +63,12 @@ interface NotificationModalProps {
 }
 
 export default function NotificationModal({ open, onClose }: NotificationModalProps) {
-  const [filter, setFilter] = useState<string>('all');
-  const [checkedIds, setCheckedIds] = useState<Set<number>>(new Set());
+  const [filter, setFilter] = useState('all');
 
   if (!open) return null;
 
   const items =
     filter === 'all' ? MOCK_NOTIFICATIONS : MOCK_NOTIFICATIONS.filter((n) => n.category === filter);
-
-  function toggleChecked(id: number) {
-    setCheckedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
 
   return (
     // 벨 wrapper 기준 앵커: 우측 끝을 스크랩 아이콘 왼쪽 끝에 맞춤
@@ -85,11 +76,11 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
     <div
       role="dialog"
       aria-label="알림"
-      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex h-[602px] w-[425px] flex-col overflow-hidden rounded-[12px]"
+      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px]"
     >
       {/* Header (white) */}
       <div className="bg-conx-common-white shrink-0">
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between px-5 pt-6 pb-4">
           <h2 className="text-kor-heading-2-bold text-conx-common-black">알림</h2>
           <button
             type="button"
@@ -100,50 +91,36 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
             <IconDelete className="h-5.5 w-5.5" />
           </button>
         </div>
-        <div className="px-6 pb-4">
-          <DropdownCompact
-            type="line"
-            options={FILTER_OPTIONS}
-            value={filter}
-            onChange={setFilter}
-          />
+        {/* 카테고리 필터 (단일 선택 칩) */}
+        <div className="flex gap-2 px-5 pb-4">
+          {FILTER_OPTIONS.map((opt) => (
+            <Chip
+              key={opt.value}
+              selected={filter === opt.value}
+              onClick={() => setFilter(opt.value)}
+            >
+              {opt.label}
+            </Chip>
+          ))}
         </div>
       </div>
 
-      {/* Content: 리스트 or 빈 상태 */}
+      {/* Content: 영역 높이를 카드 4개(=444px)에 맞춤. 초과 시 스크롤 / 미만 시 아래 빈칸 */}
       {items.length > 0 ? (
-        <ul className="flex-1 overflow-y-auto">
-          {items.map((n) => {
-            const checked = checkedIds.has(n.id);
-            const Checkbox = checked ? IconCheckboxChecked : IconCheckboxDefault;
-            return (
-              <li key={n.id} className="border-conx-gray-100 flex gap-3 border-b px-6 py-4">
-                <button
-                  type="button"
-                  aria-label={checked ? '선택 해제' : '선택'}
-                  aria-pressed={checked}
-                  onClick={() => toggleChecked(n.id)}
-                  className="mt-0.5 shrink-0 cursor-pointer"
-                >
-                  <Checkbox className="h-5 w-5" />
-                </button>
-                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-kor-caption-1-medium text-conx-gray-450 truncate">
-                      {n.sender}
-                    </span>
-                    <span className="text-kor-caption-1-medium text-conx-gray-450 shrink-0">
-                      {n.time}
-                    </span>
-                  </div>
-                  <p className="text-kor-label-1-medium text-conx-common-black">{n.message}</p>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="scrollbar-hide h-[444px] overflow-y-auto">
+          {items.map((n) => (
+            <MessageCard
+              key={n.id}
+              sender={n.sender}
+              time={n.time}
+              message={n.message}
+              read={n.read}
+              // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동
+            />
+          ))}
+        </div>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+        <div className="flex h-[444px] flex-col items-center justify-center gap-4">
           {/* TODO: 디자인팀 빈 상태 일러스트로 교체 */}
           <div className="bg-conx-gray-150 h-20 w-20 rounded-md" aria-hidden />
           <p className="text-kor-body-1-medium text-conx-gray-400">알림이 아직 없어요</p>
