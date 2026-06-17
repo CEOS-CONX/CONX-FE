@@ -7,6 +7,7 @@ interface CardProps {
   imageAlt: string;
   tag?: { type: TagType; label: string };
   defaultScraped?: boolean;
+  onScrapChange?: (scraped: boolean) => void;
   title: string;
   subtitle?: string;
   category1?: string;
@@ -30,6 +31,7 @@ export default function Card({
   imageAlt,
   tag,
   defaultScraped,
+  onScrapChange,
   title,
   subtitle,
   category1,
@@ -41,7 +43,13 @@ export default function Card({
 }: CardProps) {
   return (
     <div className="flex w-full flex-col gap-2">
-      <ImageCard src={imageSrc} alt={imageAlt} tag={tag} defaultScraped={defaultScraped} />
+      <ImageCard
+        src={imageSrc}
+        alt={imageAlt}
+        tag={tag}
+        defaultScraped={defaultScraped}
+        onScrapChange={onScrapChange}
+      />
 
       <div className="flex flex-col gap-0.5">
         <h3 className="text-kor-body-1-bold text-conx-common-black">{title}</h3>

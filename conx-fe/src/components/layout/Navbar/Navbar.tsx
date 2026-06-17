@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import NotificationModal from './NotificationModal';
 import IconNotificationStroke from '@/assets/icons/icon_notification_stroke.svg';
 import IconNotificationFill from '@/assets/icons/icon_notification_fill.svg';
@@ -10,6 +11,7 @@ import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
 import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
+import { useAuth } from '@/context/AuthContext';
 
 const NAV_LINKS = [
   { label: '홈', href: '/' },
@@ -25,6 +27,7 @@ type IconName = 'notification' | 'scrap' | 'profile';
 const ICON_BUTTONS: {
   name: IconName;
   label: string;
+  href?: string;
   Stroke: typeof IconNotificationStroke;
   Fill: typeof IconNotificationFill;
 }[] = [
@@ -34,27 +37,33 @@ const ICON_BUTTONS: {
     Stroke: IconNotificationStroke,
     Fill: IconNotificationFill,
   },
-  { name: 'scrap', label: '스크랩', Stroke: IconScrapStroke, Fill: IconScrapFill },
+  { name: 'scrap', label: '스크랩', href: '/scrap', Stroke: IconScrapStroke, Fill: IconScrapFill },
   { name: 'profile', label: '프로필', Stroke: IconProfileStroke, Fill: IconProfileFill },
 ];
 
-export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
-  // TODO: 라우트 확정 후 usePathname()으로 전환하여 URL과 동기화
-  const [activeLink, setActiveLink] = useState<string | null>(null);
-  const [activeIcon, setActiveIcon] = useState<IconName | null>(null);
+export default function Navbar() {
+  const { isLoggedIn } = useAuth();
+  const pathname = usePathname();
+  const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+
+  const activeLink =
+    NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
+    (pathname === '/' ? '홈' : null);
+  const activeIcon: IconName | null =
+    ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null;
 
   // 알림 모달: 바깥 클릭 / Esc 로 닫기 (벨 버튼은 wrapper 안이라 토글 동작 유지)
   useEffect(() => {
-    if (activeIcon !== 'notification') return;
+    if (!notificationOpen) return;
 
     function handleClickOutside(e: MouseEvent) {
       if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
-        setActiveIcon(null);
+        setNotificationOpen(false);
       }
     }
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') setActiveIcon(null);
+      if (e.key === 'Escape') setNotificationOpen(false);
     }
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -63,7 +72,7 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [activeIcon]);
+  }, [notificationOpen]);
 
   return (
     <header className="w-full">
@@ -82,7 +91,6 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
                 <Link
                   key={label}
                   href={href}
-                  onClick={() => setActiveLink(label)}
                   className={`${NAV_LINK_BASE} ${activeLink === label ? 'text-kor-body-1-bold' : 'text-kor-body-1-semibold'}`}
                 >
                   {label}
@@ -94,35 +102,64 @@ export default function Navbar({ isLoggedIn }: { isLoggedIn: boolean }) {
             <div className="flex items-center gap-5">
               {isLoggedIn ? (
                 <>
-                  {ICON_BUTTONS.map(({ name, label, Stroke, Fill }) => {
-                    const isActive = activeIcon === name;
+                  {ICON_BUTTONS.map(({ name, label, href, Stroke, Fill }) => {
                     const isNotification = name === 'notification';
-                    const Icon = isActive ? Fill : Stroke;
-                    return (
-                      <div
-                        key={name}
-                        ref={isNotification ? notificationRef : undefined}
-                        className="relative"
-                      >
-                        <button
+                    // 알림은 모달 open 상태로, 나머지는 현재 경로로 active 판정
+                    const isActive = isNotification ? notificationOpen : activeIcon === name;
+                    const content = isActive ? (
+                      <Fill className="h-6.5 w-6.5" />
+                    ) : (
+                      <Stroke className="h-6.5 w-6.5" />
+                    );
+
+                    if (href) {
+                      return (
+                        <Link
+                          key={name}
+                          href={href}
                           aria-label={label}
-                          onClick={() => setActiveIcon((prev) => (prev === name ? null : name))}
-                          aria-haspopup={isNotification ? 'dialog' : undefined}
-                          aria-expanded={isNotification ? isActive : undefined}
                           className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                         >
-                          <Icon className="h-6.5 w-6.5" />
-                        </button>
-                        {isNotification && (
-                          <NotificationModal open={isActive} onClose={() => setActiveIcon(null)} />
-                        )}
-                      </div>
+                          {content}
+                        </Link>
+                      );
+                    }
+
+                    if (isNotification) {
+                      return (
+                        <div key={name} ref={notificationRef} className="relative">
+                          <button
+                            aria-label={label}
+                            onClick={() => setNotificationOpen((prev) => !prev)}
+                            aria-haspopup="dialog"
+                            aria-expanded={notificationOpen}
+                            className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                          >
+                            {content}
+                          </button>
+                          <NotificationModal
+                            open={notificationOpen}
+                            onClose={() => setNotificationOpen(false)}
+                          />
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <button
+                        key={name}
+                        aria-label={label}
+                        onClick={() => {}}
+                        className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                      >
+                        {content}
+                      </button>
                     );
                   })}
                 </>
               ) : (
                 <>
-                  <Link href="#" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
+                  <Link href="/login" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
                     로그인
                   </Link>
                   <Link href="/signup" className={`${NAV_LINK_BASE} text-kor-body-1-semibold`}>
