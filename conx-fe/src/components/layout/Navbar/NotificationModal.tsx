@@ -80,11 +80,12 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
   }
 
   return (
-    // 벨 아이콘 기준 앵커: 우측 끝을 아이콘 우측 끝에 맞춤(right-0), 폭 425px 고정
+    // 벨 wrapper 기준 앵커: 우측 끝을 스크랩 아이콘 왼쪽 끝에 맞춤
+    // (-right-5 = 벨↔스크랩 간격 gap-5(20px)만큼 오른쪽으로), 폭 425px 고정
     <div
       role="dialog"
       aria-label="알림"
-      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full right-0 mt-3 flex h-[602px] w-[425px] flex-col overflow-hidden rounded-[12px]"
+      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex h-[602px] w-[425px] flex-col overflow-hidden rounded-[12px]"
     >
       {/* Header (white) */}
       <div className="bg-conx-common-white shrink-0">
