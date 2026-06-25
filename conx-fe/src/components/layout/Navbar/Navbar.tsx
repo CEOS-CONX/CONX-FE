@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NotificationModal from './NotificationModal';
@@ -46,6 +46,13 @@ export default function Navbar() {
   const pathname = usePathname();
   const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const bellButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 닫을 때 트리거(벨 버튼)로 포커스 복원 (ARIA APG Modal Dialog 필수 요건)
+  const closeNotification = useCallback(() => {
+    setNotificationOpen(false);
+    bellButtonRef.current?.focus();
+  }, []);
 
   const activeLink =
     NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
@@ -53,17 +60,18 @@ export default function Navbar() {
   const activeIcon: IconName | null =
     ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null;
 
-  // 알림 모달: 바깥 클릭 / Esc 로 닫기 (벨 버튼은 wrapper 안이라 토글 동작 유지)
+  // 알림 모달: 바깥 클릭 / Esc 로 닫기
   useEffect(() => {
     if (!notificationOpen) return;
 
     function handleClickOutside(e: MouseEvent) {
       if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        // 마우스 외부 클릭: 포커스가 클릭 지점으로 자연 이동하므로 벨로 강제 복원하지 않음
         setNotificationOpen(false);
       }
     }
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') setNotificationOpen(false);
+      if (e.key === 'Escape') closeNotification(); // 키보드 닫기: 벨로 포커스 복원
     }
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -72,7 +80,7 @@ export default function Navbar() {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [notificationOpen]);
+  }, [notificationOpen, closeNotification]);
 
   return (
     <header className="w-full">
@@ -129,6 +137,7 @@ export default function Navbar() {
                       return (
                         <div key={name} ref={notificationRef} className="relative">
                           <button
+                            ref={bellButtonRef}
                             aria-label={label}
                             onClick={() => setNotificationOpen((prev) => !prev)}
                             aria-haspopup="dialog"
@@ -137,10 +146,7 @@ export default function Navbar() {
                           >
                             {content}
                           </button>
-                          <NotificationModal
-                            open={notificationOpen}
-                            onClose={() => setNotificationOpen(false)}
-                          />
+                          <NotificationModal open={notificationOpen} onClose={closeNotification} />
                         </div>
                       );
                     }
