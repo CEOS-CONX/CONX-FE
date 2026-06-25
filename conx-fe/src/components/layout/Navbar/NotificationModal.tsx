@@ -104,7 +104,6 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
     <div
       ref={dialogRef}
       role="dialog"
-      aria-modal="true"
       tabIndex={-1}
       aria-label="알림"
       className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px] focus:outline-none"
