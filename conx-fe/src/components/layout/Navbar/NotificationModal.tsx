@@ -137,18 +137,19 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
 
       {/* Content: 영역 높이를 카드 4개(=444px)에 맞춤. 초과 시 스크롤 / 미만 시 아래 빈칸 */}
       {items.length > 0 ? (
-        <div className="scrollbar-hide h-[444px] overflow-y-auto">
+        <ul className="scrollbar-hide m-0 h-[444px] list-none overflow-y-auto p-0">
           {items.map((n) => (
-            <MessageCard
-              key={n.id}
-              sender={n.sender}
-              time={n.time}
-              message={n.message}
-              read={n.read}
-              // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동
-            />
+            <li key={n.id}>
+              <MessageCard
+                sender={n.sender}
+                time={n.time}
+                message={n.message}
+                read={n.read}
+                // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       ) : (
         <div className="flex h-[444px] flex-col items-center justify-center gap-4">
           {/* TODO: 디자인팀 빈 상태 일러스트로 교체 */}
