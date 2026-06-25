@@ -140,7 +140,7 @@ export default function Navbar() {
                             ref={bellButtonRef}
                             aria-label={label}
                             onClick={() => setNotificationOpen((prev) => !prev)}
-                            aria-haspopup="dialog"
+                            aria-haspopup="true"
                             aria-expanded={notificationOpen}
                             className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                           >
