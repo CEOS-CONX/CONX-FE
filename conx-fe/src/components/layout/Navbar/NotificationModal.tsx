@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconDelete from '@/assets/icons/icon_delete.svg';
 import { Chip } from '@/components/common/Chip';
 import MessageCard from './MessageCard';
@@ -64,6 +64,33 @@ interface NotificationModalProps {
 
 export default function NotificationModal({ open, onClose }: NotificationModalProps) {
   const [filter, setFilter] = useState('all');
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // 접근성: 모달이 열리면 포커스를 대화상자로 이동 + 열린 동안 포커스 트랩 (ARIA APG Modal Dialog)
+  useEffect(() => {
+    if (!open) return;
+    dialogRef.current?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key !== 'Tab' || !dialogRef.current) return;
+      const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   if (!open) return null;
 
@@ -74,9 +101,11 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
     // 벨 wrapper 기준 앵커: 우측 끝을 스크랩 아이콘 왼쪽 끝에 맞춤
     // (-right-5 = 벨↔스크랩 간격 gap-5(20px)만큼 오른쪽으로), 폭 425px 고정
     <div
+      ref={dialogRef}
       role="dialog"
+      tabIndex={-1}
       aria-label="알림"
-      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px]"
+      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px] focus:outline-none"
     >
       {/* Header (white) */}
       <div className="bg-conx-common-white shrink-0">
