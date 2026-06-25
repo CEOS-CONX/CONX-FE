@@ -5,13 +5,14 @@ import IconDelete from '@/assets/icons/icon_delete.svg';
 import { Chip } from '@/components/common/Chip';
 import MessageCard from './MessageCard';
 
-const FILTER_OPTIONS = [
+type NotificationCategory = 'qna' | 'project';
+type FilterValue = 'all' | NotificationCategory;
+
+const FILTER_OPTIONS: { value: FilterValue; label: string }[] = [
   { value: 'all', label: '전체' },
   { value: 'qna', label: '담당자 Q&A' },
   { value: 'project', label: '프로젝트' },
 ];
-
-type NotificationCategory = 'qna' | 'project';
 
 interface NotificationItem {
   id: number;
@@ -63,7 +64,7 @@ interface NotificationModalProps {
 }
 
 export default function NotificationModal({ open, onClose }: NotificationModalProps) {
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState<FilterValue>('all');
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // 접근성: 모달이 열리면 포커스를 대화상자로 이동 + 열린 동안 포커스 트랩 (ARIA APG Modal Dialog)
