@@ -126,11 +126,13 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
             <IconDelete className="h-5.5 w-5.5" />
           </button>
         </div>
-        {/* 카테고리 필터 (단일 선택 칩) */}
-        <div className="flex gap-2 px-5 pb-4">
+        {/* 카테고리 필터 (단일 선택 → radiogroup/radio) */}
+        <div role="radiogroup" aria-label="알림 카테고리 필터" className="flex gap-2 px-5 pb-4">
           {FILTER_OPTIONS.map((opt) => (
             <Chip
               key={opt.value}
+              role="radio"
+              aria-checked={filter === opt.value}
               selected={filter === opt.value}
               onClick={() => setFilter(opt.value)}
             >
