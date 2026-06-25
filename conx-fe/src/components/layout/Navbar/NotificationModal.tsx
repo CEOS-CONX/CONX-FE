@@ -142,7 +142,8 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
 
       {/* Content: 영역 높이를 카드 4개(=444px)에 맞춤. 초과 시 스크롤 / 미만 시 아래 빈칸 */}
       {items.length > 0 ? (
-        <ul className="scrollbar-hide m-0 h-[444px] list-none overflow-y-auto p-0">
+        // role="list": Safari/VoiceOver는 list-style:none ul의 list role을 제거하므로 명시 복원
+        <ul role="list" className="scrollbar-hide m-0 h-[444px] list-none overflow-y-auto p-0">
           {items.map((n) => (
             <li key={n.id}>
               <MessageCard
