@@ -80,7 +80,12 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
+      // 초기 오픈 시 포커스는 dialog 컨테이너(tabIndex=-1)에 있어 first/last에서 제외되므로,
+      // 컨테이너에서 Shift+Tab 하면 트랩을 벗어난다 → 컨테이너도 첫 요소로 간주해 last로 래핑
+      if (
+        e.shiftKey &&
+        (document.activeElement === first || document.activeElement === dialogRef.current)
+      ) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && document.activeElement === last) {
