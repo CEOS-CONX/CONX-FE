@@ -7,6 +7,7 @@ import { Button } from '@/components/common/Button';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
 import ProjectTabs, { tabId, tabPanelId, type ProjectTab } from './ProjectTabs';
+import ProjectThumbnails from './ProjectThumbnails';
 
 // 좌우 여백 90px + navbar와 동일한 max-w-400(1600px) 컨테이너
 const CONTAINER = 'mx-auto max-w-400 px-[90px]';
@@ -20,19 +21,16 @@ const TABS: ProjectTab[] = [
   { value: 'qna', label: '담당자Q&A' },
 ];
 
+// 썸네일 placeholder — 개수 바꿔서 케이스 확인: 0=간격만 / 1 / 2 / 3+=캐러셀
+const THUMBNAILS = ['썸네일 이미지 1', '썸네일 이미지 2', '썸네일 이미지 3', '썸네일 이미지 4'];
+
 export default function ProjectDetailBody({ projectId }: { projectId: string }) {
   const [tab, setTab] = useState<string>('description');
 
   return (
     <main data-project-id={projectId}>
-      {/* 썸네일 밴드 — 양옆 conx-gray-50, 가운데 480x290 이미지 자리 (스크롤됨) */}
-      <section className={`${CONTAINER} pt-6`}>
-        <div className="bg-conx-gray-50 flex h-[290px] justify-center">
-          <div className="text-kor-body-1-medium text-conx-gray-300 border-conx-gray-150 flex h-full w-[480px] items-center justify-center border-x">
-            썸네일 이미지 1
-          </div>
-        </div>
-      </section>
+      {/* 썸네일 — 개수별 분기(없음/1/2/3+ 캐러셀) */}
+      <ProjectThumbnails thumbnails={THUMBNAILS} />
 
       {/* 본문 2단 — 왼쪽(헤더→탭→패널) / 오른쪽(CTA). 탭과 CTA만 sticky */}
       <div className={`${CONTAINER} pb-40`}>
