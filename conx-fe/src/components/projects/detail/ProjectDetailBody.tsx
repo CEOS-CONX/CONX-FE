@@ -6,6 +6,7 @@ import IconShare from '@/assets/icons/icon_share.svg';
 import { Button } from '@/components/common/Button';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
+import { Toast } from '@/components/common/Toast';
 import {
   ConditionSection,
   DescriptionSection,
@@ -33,6 +34,7 @@ const THUMBNAILS = ['썸네일 이미지 1', '썸네일 이미지 2', '썸네일
 
 export default function ProjectDetailBody({ projectId }: { projectId: string }) {
   const [active, setActive] = useState('description');
+  const [copied, setCopied] = useState(false);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   // 스크롤스파이 — 상단(스티키 탭 아래)에 들어온 섹션을 active로
@@ -53,6 +55,16 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
   function handleSelect(value: string) {
     setActive(value);
     sectionRefs.current[value]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // 공유: 현재 페이지 URL을 클립보드에 복사 → 토스트 (백엔드 불필요)
+  async function handleShare() {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      // 클립보드 접근 실패(비보안 컨텍스트 등) — 추후 fallback
+    }
   }
 
   return (
@@ -77,7 +89,13 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
                 프로젝트 제목이 들어갈 자리입니다.
               </h1>
               <div className="flex shrink-0 items-center gap-3">
-                <button type="button" aria-label="공유하기" className={ICON_BTN}>
+                {/* 공유: hover 시 회색 네모(opacity-gray-6), active는 default와 동일(투명) */}
+                <button
+                  type="button"
+                  aria-label="공유하기"
+                  onClick={handleShare}
+                  className={`${ICON_BTN} active:bg-transparent`}
+                >
                   <IconShare className="h-6 w-6" />
                 </button>
                 <button type="button" aria-label="북마크" className={ICON_BTN}>
@@ -123,6 +141,16 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
           </aside>
         </div>
       </div>
+
+      {/* 링크 복사 토스트 (하단 중앙 60px, 5초) — 기본(40px) 대신 이 인스턴스만 override */}
+      {copied && (
+        <Toast
+          message="링크를 복사했습니다"
+          duration={5000}
+          onClose={() => setCopied(false)}
+          className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
+        />
+      )}
     </main>
   );
 }
