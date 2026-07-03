@@ -117,13 +117,13 @@ export function DescriptionSection() {
           {SCHEDULE.map((s, i) => (
             <Fragment key={s.label}>
               {i > 0 && (
-                <span aria-hidden className="text-conx-gray-300 px-1">
+                <span aria-hidden className="text-conx-gray-450 px-2 text-2xl">
                   »
                 </span>
               )}
-              <div className="bg-conx-gray-50 rounded-md px-5 py-3.5">
-                <p className="text-kor-label-1-medium text-conx-gray-450">{s.label}</p>
-                <p className="text-kor-body-1-semibold text-conx-common-black mt-1">{s.date}</p>
+              <div className="bg-conx-gray-50 gap-1 rounded-md px-3 py-4 text-center">
+                <p className="text-kor-body-1-semibold text-conx-gray-550">{s.label}</p>
+                <p className="text-eng-body-1-medium text-conx-gray-550">{s.date}</p>
               </div>
             </Fragment>
           ))}
@@ -135,10 +135,11 @@ export function DescriptionSection() {
       <Field label="프로젝트 유형">숏폼·UGC</Field>
 
       <Field label="결과물">
+        {/* 박스: gray-50 배경 + radius 6px + p-4(16px). 아랫줄(desc)은 프로젝트에 따라 없을 수 있음 */}
         <div className="flex flex-col gap-2">
           {OUTCOMES.map((o, i) => (
-            <div key={i} className={GRAY_CARD}>
-              <div className="text-kor-body-1-semibold text-conx-common-black flex flex-wrap items-center gap-2.5">
+            <div key={i} className="bg-conx-gray-50 rounded-md p-4">
+              <p className="text-kor-body-1-semibold text-conx-gray-550 flex flex-wrap items-center gap-2.5">
                 <span>플랫폼명</span>
                 <Divider />
                 <span>콘텐츠 유형</span>
@@ -146,8 +147,8 @@ export function DescriptionSection() {
                 <span>0개</span>
                 <Divider />
                 <span>최종 제출 결과물</span>
-              </div>
-              {o.desc && <p className="text-kor-body-1-medium text-conx-gray-450 mt-2">{o.desc}</p>}
+              </p>
+              {o.desc && <p className="text-kor-body-1-medium text-conx-gray-550 mt-3">{o.desc}</p>}
             </div>
           ))}
         </div>
