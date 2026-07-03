@@ -1,6 +1,8 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
+import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
 import { Button } from '@/components/common/Button';
@@ -33,8 +35,14 @@ const SECTIONS: { value: string; label: string; Comp: React.ComponentType }[] = 
 const THUMBNAILS = ['썸네일 이미지 1', '썸네일 이미지 2', '썸네일 이미지 3', '썸네일 이미지 4'];
 
 export default function ProjectDetailBody({ projectId }: { projectId: string }) {
+  const router = useRouter();
   const [active, setActive] = useState('description');
-  const [copied, setCopied] = useState(false);
+  const [scrapped, setScrapped] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    actionLabel?: string;
+    onAction?: () => void;
+  } | null>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
 
   // 스크롤스파이 — 상단(스티키 탭 아래)에 들어온 섹션을 active로
@@ -61,9 +69,23 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setCopied(true);
+      setToast({ message: '링크를 복사했습니다' });
     } catch {
       // 클립보드 접근 실패(비보안 컨텍스트 등) — 추후 fallback
+    }
+  }
+
+  // 스크랩: 아이콘 채움 토글 + 완료 시 토스트("스크랩 보기" → 스크랩 페이지 이동)
+  // TODO: 실제 스크랩 저장(API)은 나중에 — 지금은 시각 상태 + 이동만
+  function handleScrap() {
+    const next = !scrapped;
+    setScrapped(next);
+    if (next) {
+      setToast({
+        message: '프로젝트를 스크랩했습니다',
+        actionLabel: '스크랩 보기',
+        onAction: () => router.push('/scrap'),
+      });
     }
   }
 
@@ -98,9 +120,19 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
                 >
                   <IconShare className="h-6 w-6" />
                 </button>
-                <button type="button" aria-label="북마크" className={ICON_BTN}>
-                  {/* SVG에 stroke="#121212"가 박혀 있어 text-*는 무효 → path stroke를 CSS로 덮어씀 */}
-                  <IconBookmark className="[&_path]:stroke-conx-gray-450 h-6 w-6" />
+                {/* 스크랩: 완료되면 채운 아이콘 + primary-300 (fill·stroke 둘 다 박혀 있어 함께 덮음) */}
+                <button
+                  type="button"
+                  aria-label="스크랩"
+                  aria-pressed={scrapped}
+                  onClick={handleScrap}
+                  className={`${ICON_BTN} active:bg-transparent`}
+                >
+                  {scrapped ? (
+                    <IconBookmarkFill className="[&_path]:fill-conx-primary-300 [&_path]:stroke-conx-primary-300 h-6 w-6" />
+                  ) : (
+                    <IconBookmark className="[&_path]:stroke-conx-gray-450 h-6 w-6" />
+                  )}
                 </button>
               </div>
             </div>
@@ -142,12 +174,14 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
         </div>
       </div>
 
-      {/* 링크 복사 토스트 (하단 중앙 60px, 5초) — 기본(40px) 대신 이 인스턴스만 override */}
-      {copied && (
+      {/* 공유·스크랩 공용 토스트 (하단 중앙 60px, 5초). 기본(40px) 대신 이 인스턴스만 override */}
+      {toast && (
         <Toast
-          message="링크를 복사했습니다"
+          message={toast.message}
+          actionLabel={toast.actionLabel}
+          onAction={toast.onAction}
           duration={5000}
-          onClose={() => setCopied(false)}
+          onClose={() => setToast(null)}
           className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
         />
       )}
