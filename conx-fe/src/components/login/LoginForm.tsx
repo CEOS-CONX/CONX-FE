@@ -2,21 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
-import { useAuth } from '@/context/AuthContext';
+import { useAuthStore } from '@/stores/auth';
 
 export default function LoginForm() {
   const router = useRouter();
-  const { setIsLoggedIn } = useAuth();
+  const searchParams = useSearchParams();
+  const login = useAuthStore((s) => s.login);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     let hasError = false;
 
@@ -30,11 +32,17 @@ export default function LoginForm() {
     }
     if (hasError) return;
 
-    // TODO: 로그인 API 호출 — 응답에 따라 에러 분기
-    // setEmailError('이메일을 다시 확인해 주세요');
-    // setPasswordError('비밀번호가 일치하지 않습니다.');
-    setIsLoggedIn(true);
-    router.push('/');
+    setIsSubmitting(true);
+    const result = await login(email, password);
+    setIsSubmitting(false);
+
+    if (!result.success) {
+      setEmailError('이메일 또는 비밀번호를 다시 확인해 주세요');
+      return;
+    }
+
+    const redirect = searchParams.get('redirect') ?? '/';
+    router.push(redirect);
   }
 
   return (
@@ -73,7 +81,9 @@ export default function LoginForm() {
 
         <div className="flex flex-col items-center gap-6">
           <div className="flex w-114.5 flex-col gap-3">
-            <CTAButton type="submit">로그인</CTAButton>
+            <CTAButton type="submit" disabled={isSubmitting}>
+              {isSubmitting ? '로그인 중...' : '로그인'}
+            </CTAButton>
             <CTAButton variant="tertiary" href="/find-account">
               이메일·비밀번호 찾기
             </CTAButton>
