@@ -1,0 +1,25 @@
+export const API_ROUTES = {
+  AUTH: {
+    LOGIN: '/api/auth/login',
+    SIGNUP_USERINFO: '/api/auth/signup/userinfo',
+    SIGNUP_CREW: '/api/auth/signup/crew',
+    SIGNUP_COMPANY: '/api/auth/signup/company',
+    LOGOUT: '/api/auth/logout',
+    ME: '/api/auth/me',
+    REFRESH: '/api/auth/refresh',
+    EMAIL_SEND: '/api/auth/email/send',
+    EMAIL_VERIFY: '/api/auth/email/verify',
+  },
+} as const;
+
+export const BACKEND_ENDPOINTS = {
+  AUTH: {
+    LOGIN: '/api/v1/login',
+    SIGNUP_USERINFO_CREW: '/api/v1/auth/userinfo/crew',
+    SIGNUP_USERINFO_COMPANY: '/api/v1/auth/userinfo/company',
+    SIGNUP_SETTING_CREW: '/api/v1/auth/usersetting/crew',
+    SIGNUP_SETTING_COMPANY: '/api/v1/auth/usersetting/company',
+    EMAIL_SEND: '/api/v1/auth/email/send',
+    EMAIL_VERIFY: '/api/v1/auth/email/verify',
+  },
+} as const;
