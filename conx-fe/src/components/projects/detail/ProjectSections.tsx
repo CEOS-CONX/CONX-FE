@@ -135,7 +135,7 @@ export function DescriptionSection() {
       <Field label="프로젝트 유형">숏폼·UGC</Field>
 
       <Field label="결과물">
-        {/* 박스: gray-50 배경 + radius 6px + p-4(16px). 아랫줄(desc)은 프로젝트에 따라 없을 수 있음 */}
+        {/* 아랫줄(desc)은 프로젝트에 따라 없을 수 있음 */}
         <div className="flex flex-col gap-2">
           {OUTCOMES.map((o, i) => (
             <div key={i} className="bg-conx-gray-50 rounded-md p-4">

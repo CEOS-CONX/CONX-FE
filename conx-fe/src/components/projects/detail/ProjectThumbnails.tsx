@@ -54,13 +54,15 @@ export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps
 
 function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  // 오른쪽 화살표는 항상 노출. 왼쪽은 오른쪽으로 1회 이상 스크롤한 뒤에만 노출.
+  // 왼쪽 화살표: 오른쪽으로 1회+ 스크롤 후 노출 / 오른쪽 화살표: 끝까지 스크롤하면 숨김
   const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(true);
 
   function update() {
     const el = scrollRef.current;
     if (!el) return;
     setCanLeft(el.scrollLeft > 0);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 1);
   }
 
   useEffect(() => {
@@ -69,15 +71,17 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // 3개 보이므로 1칸 = 보이는 폭의 1/3
+  // 1칸 = 이미지 폭(480) + 갭(1px)
   function scrollByCard(dir: 1 | -1) {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * (el.clientWidth / 3), behavior: 'smooth' });
+    const step = (el.firstElementChild?.getBoundingClientRect().width ?? 480) + 1;
+    el.scrollBy({ left: dir * step, behavior: 'smooth' });
   }
 
+  // 캐러셀 폭 1420(= max-w-400 − px-90). 이미지 고정 480 → 3번째가 잘려 보임
   return (
-    <section className={`${MAXW} px-[28px] pt-6`}>
+    <section className={`${MAXW} px-[90px] pt-6`}>
       <div className="relative">
         <div
           ref={scrollRef}
@@ -85,7 +89,7 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
           className={`scrollbar-hide flex ${THUMB_H} snap-x snap-mandatory gap-px overflow-x-auto`}
         >
           {thumbnails.map((t, i) => (
-            <div key={i} className={`${CARD} h-full w-[calc((100%_-_2px)/3)] shrink-0 snap-start`}>
+            <div key={i} className={`${CARD} h-full w-[480px] shrink-0 snap-start`}>
               {t}
             </div>
           ))}
@@ -98,11 +102,13 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
             className="absolute top-1/2 left-4 -translate-y-1/2"
           />
         )}
-        <ArrowButton
-          dir="right"
-          onClick={() => scrollByCard(1)}
-          className="absolute top-1/2 right-4 -translate-y-1/2"
-        />
+        {canRight && (
+          <ArrowButton
+            dir="right"
+            onClick={() => scrollByCard(1)}
+            className="absolute top-1/2 right-4 -translate-y-1/2"
+          />
+        )}
       </div>
     </section>
   );
