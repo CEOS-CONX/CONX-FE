@@ -1,22 +1,21 @@
 'use client';
 
-import { createContext, useContext, useState, type ReactNode } from 'react';
-
-interface AuthContextValue {
-  isLoggedIn: boolean;
-  setIsLoggedIn: (v: boolean) => void;
-}
-
-const AuthContext = createContext<AuthContextValue | null>(null);
+import { useEffect, type ReactNode } from 'react';
+import { useAuthStore } from '@/stores/auth';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const hydrate = useAuthStore((s) => s.hydrate);
 
-  return <AuthContext value={{ isLoggedIn, setIsLoggedIn }}>{children}</AuthContext>;
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
+
+  return <>{children}</>;
 }
 
 export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider');
-  return ctx;
+  const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
+  const user = useAuthStore((s) => s.user);
+  const isLoading = useAuthStore((s) => s.isLoading);
+  return { isLoggedIn, user, isLoading };
 }
