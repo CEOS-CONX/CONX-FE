@@ -132,60 +132,60 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
               }
             />
           </div>
-        </div>
-      </div>
 
-      {/* 약관 동의 */}
-      <div className="bg-conx-gray-50 flex w-114.5 flex-col rounded-md">
-        <div className="p-5">
-          <RadioButton checked={allChecked} onChange={handleToggleAll}>
-            <span className="text-kor-body-1-semibold">모두 동의합니다.</span>
-          </RadioButton>
-        </div>
-
-        <div className="border-conx-gray-150 flex flex-col gap-5 border-t p-5">
-          <p className="text-kor-label-1-semibold text-conx-gray-400">
-            회원 가입 및 회원 관리 등의 목적으로 이메일, 비밀번호, 휴대폰 번호 등의 정보를 수집 및
-            이용하고 있습니다.
-          </p>
-
-          <div className="flex flex-col gap-2">
-            <RadioButton checked={agreements.age} onChange={handleToggle('age')}>
-              [필수] 만 14세 이상입니다.
-            </RadioButton>
-
-            <div className="flex items-center justify-between">
-              <RadioButton
-                className="w-90 shrink-0"
-                checked={agreements.terms}
-                onChange={handleToggle('terms')}
-              >
-                [필수] 서비스 이용약관에 동의합니다
+          {/* 약관 동의 */}
+          <div className="bg-conx-gray-50 flex w-114.5 flex-col rounded-md">
+            <div className="p-5">
+              <RadioButton checked={allChecked} onChange={handleToggleAll}>
+                <span className="text-kor-body-1-semibold">모두 동의합니다.</span>
               </RadioButton>
-              <button
-                type="button"
-                aria-label="서비스 이용약관 보기"
-                className="shrink-0 cursor-pointer p-1.5"
-              >
-                <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
-              </button>
             </div>
 
-            <div className="flex items-center justify-between">
-              <RadioButton
-                className="w-90 shrink-0"
-                checked={agreements.marketing}
-                onChange={handleToggle('marketing')}
-              >
-                [선택] 마케팅 수신 홍보목적의 개인정보 수집 및 이용에 동의합니다.
-              </RadioButton>
-              <button
-                type="button"
-                aria-label="마케팅 수신 동의 내용 보기"
-                className="shrink-0 cursor-pointer p-1.5"
-              >
-                <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
-              </button>
+            <div className="border-conx-gray-150 flex flex-col gap-5 border-t p-5">
+              <p className="text-kor-label-1-semibold text-conx-gray-400">
+                회원 가입 및 회원 관리 등의 목적으로 이메일, 비밀번호, 휴대폰 번호 등의 정보를 수집
+                및 이용하고 있습니다.
+              </p>
+
+              <div className="flex flex-col gap-2">
+                <RadioButton checked={agreements.age} onChange={handleToggle('age')}>
+                  [필수] 만 14세 이상입니다.
+                </RadioButton>
+
+                <div className="flex items-center justify-between">
+                  <RadioButton
+                    className="w-90 shrink-0"
+                    checked={agreements.terms}
+                    onChange={handleToggle('terms')}
+                  >
+                    [필수] 서비스 이용약관에 동의합니다
+                  </RadioButton>
+                  <button
+                    type="button"
+                    aria-label="서비스 이용약관 보기"
+                    className="shrink-0 cursor-pointer p-1.5"
+                  >
+                    <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
+                  </button>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <RadioButton
+                    className="w-90 shrink-0"
+                    checked={agreements.marketing}
+                    onChange={handleToggle('marketing')}
+                  >
+                    [선택] 마케팅 수신 홍보목적의 개인정보 수집 및 이용에 동의합니다.
+                  </RadioButton>
+                  <button
+                    type="button"
+                    aria-label="마케팅 수신 동의 내용 보기"
+                    className="shrink-0 cursor-pointer p-1.5"
+                  >
+                    <IconArrowRightStroke className="text-conx-gray-450 h-4.5 w-4.5" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
