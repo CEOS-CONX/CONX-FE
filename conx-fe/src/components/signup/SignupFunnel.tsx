@@ -2,17 +2,18 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import StepSelectType, { type UserType } from './StepSelectType';
+import { API_ROUTES } from '@/constants/api';
+import { USER_TYPE, type UserType } from '@/types/auth';
+import StepSelectType from './StepSelectType';
 import StepEmailVerification from './StepEmailVerification';
 import StepPasswordAgreement from './StepPasswordAgreement';
 import StepCrewProfile, { type CrewProfileData } from './StepCrewProfile';
-import StepEnterpriseProfile, { type EnterpriseProfileData } from './StepEnterpriseProfile';
+import StepCompanyProfile, { type CompanyProfileData } from './StepCompanyProfile';
 import SignupCompleteModal from './SignupCompleteModal';
 
 type Step = 'select-type' | 'email' | 'password' | 'profile' | 'complete';
 
 interface SignupFunnelProps {
-  // 외부에서 type 지정 시 select-type 단계 건너뛰고 바로 email부터 시작
   initialType?: UserType;
 }
 
@@ -21,8 +22,7 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
   const [step, setStep] = useState<Step>(initialType ? 'email' : 'select-type');
   const [userType, setUserType] = useState<UserType | undefined>(initialType);
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [marketingAgreed, setMarketingAgreed] = useState(false);
+  const [error, setError] = useState('');
 
   function handleSelectType(type: UserType) {
     setUserType(type);
@@ -34,16 +34,56 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
     setStep('password');
   }
 
-  function handlePasswordDone(pw: string, marketing: boolean) {
-    setPassword(pw);
-    setMarketingAgreed(marketing);
-    setStep('profile');
+  async function handlePasswordDone(pw: string, marketing: boolean) {
+    setError('');
+
+    try {
+      const res = await fetch(API_ROUTES.AUTH.SIGNUP_USERINFO, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userType,
+          email,
+          password: pw,
+          passwordCheck: pw,
+          options: {
+            personalInformation: true,
+            sendingPromoteMessage: marketing,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.message ?? '회원가입에 실패했습니다.');
+        return;
+      }
+      setStep('profile');
+    } catch {
+      setError('네트워크 오류가 발생했습니다.');
+    }
   }
 
-  function handleProfileDone(data: CrewProfileData | EnterpriseProfileData) {
-    // 목업: 실제로는 API 호출
-    console.log('회원가입 완료', { userType, email, password, marketingAgreed, ...data });
-    setStep('complete');
+  async function handleProfileDone(data: CrewProfileData | CompanyProfileData) {
+    setError('');
+
+    const endpoint =
+      userType === USER_TYPE.COMPANY ? API_ROUTES.AUTH.SIGNUP_COMPANY : API_ROUTES.AUTH.SIGNUP_CREW;
+
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, ...data }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        setError(result.message ?? '프로필 등록에 실패했습니다.');
+        return;
+      }
+      setStep('complete');
+    } catch {
+      setError('네트워크 오류가 발생했습니다.');
+    }
   }
 
   function handleClose() {
@@ -52,12 +92,15 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
 
   return (
     <>
+      {error && <p className="text-kor-body-2-medium mb-4 text-center text-red-500">{error}</p>}
       {step === 'select-type' && <StepSelectType onSelect={handleSelectType} />}
       {step === 'email' && <StepEmailVerification onNext={handleEmailVerified} />}
       {step === 'password' && <StepPasswordAgreement email={email} onNext={handlePasswordDone} />}
-      {step === 'profile' && userType === 'crew' && <StepCrewProfile onNext={handleProfileDone} />}
-      {step === 'profile' && userType === 'enterprise' && (
-        <StepEnterpriseProfile onNext={handleProfileDone} />
+      {step === 'profile' && userType === USER_TYPE.CREW && (
+        <StepCrewProfile onNext={handleProfileDone} />
+      )}
+      {step === 'profile' && userType === USER_TYPE.COMPANY && (
+        <StepCompanyProfile onNext={handleProfileDone} />
       )}
       {step === 'complete' && userType && (
         <SignupCompleteModal
