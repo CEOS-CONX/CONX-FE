@@ -5,30 +5,44 @@ import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { DropdownForm } from '@/components/common/DropdownForm';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
-import { INDUSTRY_OPTIONS } from '@/constants/browse';
+import { INDUSTRY, INDUSTRY_OPTIONS } from '@/constants/browse';
 
-export interface EnterpriseProfileData {
+export interface CompanyProfileData {
   brandName: string;
   industry: string;
+  customIndustry?: string;
   managerName: string;
-  position: string;
+  job: string;
 }
 
-interface StepEnterpriseProfileProps {
-  onNext: (data: EnterpriseProfileData) => void;
+interface StepCompanyProfileProps {
+  onNext: (data: CompanyProfileData) => void;
 }
 
-export default function StepEnterpriseProfile({ onNext }: StepEnterpriseProfileProps) {
+export default function StepCompanyProfile({ onNext }: StepCompanyProfileProps) {
   const [brandName, setBrandName] = useState('');
   const [industry, setIndustry] = useState<string>();
+  const [customIndustry, setCustomIndustry] = useState('');
   const [managerName, setManagerName] = useState('');
-  const [position, setPosition] = useState('');
+  const [job, setJob] = useState('');
 
-  const canSubmit = brandName.trim() && industry && managerName.trim() && position.trim();
+  const isEtc = industry === INDUSTRY.ETC;
+  const canSubmit =
+    brandName.trim() &&
+    industry &&
+    (!isEtc || customIndustry.trim()) &&
+    managerName.trim() &&
+    job.trim();
 
   function handleSubmit() {
     if (!canSubmit || !industry) return;
-    onNext({ brandName, industry, managerName, position });
+    onNext({
+      brandName,
+      industry,
+      ...(isEtc ? { customIndustry } : {}),
+      managerName,
+      job,
+    });
   }
 
   return (
@@ -59,6 +73,15 @@ export default function StepEnterpriseProfile({ onNext }: StepEnterpriseProfileP
             value={industry}
             onChange={setIndustry}
           />
+          {isEtc && (
+            <TextFieldInput
+              size="lg"
+              label="직접 입력"
+              placeholder="산업 분야를 입력하세요"
+              value={customIndustry}
+              onChange={(e) => setCustomIndustry(e.target.value)}
+            />
+          )}
           <TextFieldInput
             size="lg"
             label="담당자명"
@@ -70,8 +93,8 @@ export default function StepEnterpriseProfile({ onNext }: StepEnterpriseProfileP
             size="lg"
             label="직무"
             placeholder="내용을 입력하세요"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
+            value={job}
+            onChange={(e) => setJob(e.target.value)}
           />
         </div>
       </div>

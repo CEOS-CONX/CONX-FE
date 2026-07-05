@@ -1,7 +1,9 @@
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import NotificationModal from './NotificationModal';
 import IconNotificationStroke from '@/assets/icons/icon_notification_stroke.svg';
 import IconNotificationFill from '@/assets/icons/icon_notification_fill.svg';
 import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
@@ -42,12 +44,43 @@ const ICON_BUTTONS: {
 export default function Navbar() {
   const { isLoggedIn } = useAuth();
   const pathname = usePathname();
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+  const bellButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 닫을 때 트리거(벨 버튼)로 포커스 복원 (ARIA APG Modal Dialog 필수 요건)
+  const closeNotification = useCallback(() => {
+    setNotificationOpen(false);
+    bellButtonRef.current?.focus();
+  }, []);
 
   const activeLink =
     NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
     (pathname === '/' ? '홈' : null);
   const activeIcon: IconName | null =
     ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null;
+
+  // 알림 모달: 바깥 클릭 / Esc 로 닫기
+  useEffect(() => {
+    if (!notificationOpen) return;
+
+    function handleClickOutside(e: MouseEvent) {
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        // 마우스 외부 클릭: 포커스가 클릭 지점으로 자연 이동하므로 벨로 강제 복원하지 않음
+        setNotificationOpen(false);
+      }
+    }
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeNotification(); // 키보드 닫기: 벨로 포커스 복원
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [notificationOpen, closeNotification]);
 
   return (
     <header className="w-full">
@@ -78,14 +111,13 @@ export default function Navbar() {
               {isLoggedIn ? (
                 <>
                   {ICON_BUTTONS.map(({ name, label, href, Stroke, Fill }) => {
-                    const content = (
-                      <>
-                        {activeIcon === name ? (
-                          <Fill className="h-6.5 w-6.5" />
-                        ) : (
-                          <Stroke className="h-6.5 w-6.5" />
-                        )}
-                      </>
+                    const isNotification = name === 'notification';
+                    // 알림은 모달 open 상태로, 나머지는 현재 경로로 active 판정
+                    const isActive = isNotification ? notificationOpen : activeIcon === name;
+                    const content = isActive ? (
+                      <Fill className="h-6.5 w-6.5" />
+                    ) : (
+                      <Stroke className="h-6.5 w-6.5" />
                     );
 
                     if (href) {
@@ -98,6 +130,24 @@ export default function Navbar() {
                         >
                           {content}
                         </Link>
+                      );
+                    }
+
+                    if (isNotification) {
+                      return (
+                        <div key={name} ref={notificationRef} className="relative">
+                          <button
+                            ref={bellButtonRef}
+                            aria-label={label}
+                            onClick={() => setNotificationOpen((prev) => !prev)}
+                            aria-haspopup="true"
+                            aria-expanded={notificationOpen}
+                            className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
+                          >
+                            {content}
+                          </button>
+                          <NotificationModal open={notificationOpen} onClose={closeNotification} />
+                        </div>
                       );
                     }
 
