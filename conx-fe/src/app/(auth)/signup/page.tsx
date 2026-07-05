@@ -12,7 +12,8 @@ interface SignupPageProps {
 
 export default async function SignupPage({ searchParams }: SignupPageProps) {
   const { type } = await searchParams;
-  const upperType = type?.toUpperCase();
+  const raw = Array.isArray(type) ? type[0] : type;
+  const upperType = raw?.toUpperCase();
   const initialType =
     upperType === USER_TYPE.COMPANY || upperType === USER_TYPE.CREW ? upperType : undefined;
 

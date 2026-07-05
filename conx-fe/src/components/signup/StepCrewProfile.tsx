@@ -28,7 +28,11 @@ export default function StepCrewProfile({ onNext }: StepCrewProfileProps) {
 
   const isEtc = crewType === 'ETC';
   const canSubmit =
-    crewName.trim() && crewType && (!isEtc || customCrewType.trim()) && managerName.trim();
+    crewName.trim() &&
+    crewType &&
+    (!isEtc || customCrewType.trim()) &&
+    managerName.trim() &&
+    job.trim();
 
   function handleSubmit() {
     if (!canSubmit || !crewType) return;

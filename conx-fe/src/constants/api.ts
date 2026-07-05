@@ -12,6 +12,12 @@ export const API_ROUTES = {
   },
 } as const;
 
+export const COOKIE_CONFIG = {
+  ACCESS_TOKEN: { name: 'accessToken', path: '/' },
+  REFRESH_TOKEN: { name: 'refreshToken', path: '/api/auth' },
+  USER: { name: 'user', path: '/' },
+} as const;
+
 export const BACKEND_ENDPOINTS = {
   AUTH: {
     LOGIN: '/api/v1/login',

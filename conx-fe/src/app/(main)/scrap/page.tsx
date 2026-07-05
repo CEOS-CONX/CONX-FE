@@ -32,13 +32,13 @@ const MOCK_PROJECT_SCRAPS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const EMPTY_STATE = {
-  company: {
+  [USER_TYPE.COMPANY]: {
     message1: '아직 스크랩한 크루가 없어요',
     message2: '크루 둘러보기에서 관심 있는 크루를 저장해보세요',
     buttonLabel: '크루 둘러보러 가기',
     buttonHref: '/crews',
   },
-  crew: {
+  [USER_TYPE.CREW]: {
     message1: '아직 스크랩한 프로젝트가 없어요',
     message2: '프로젝트 둘러보기에서 관심 있는 프로젝트를 저장해보세요',
     buttonLabel: '프로젝트 둘러보러 가기',

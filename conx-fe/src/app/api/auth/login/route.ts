@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { BACKEND_ENDPOINTS } from '@/constants/api';
+import { BACKEND_ENDPOINTS, COOKIE_CONFIG } from '@/constants/api';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -21,33 +21,33 @@ export async function POST(request: NextRequest) {
   }
 
   const accessToken = backendRes.headers.get('Authorization')?.replace('Bearer ', '');
-  const backendSetCookie = backendRes.headers.get('Set-Cookie');
+  const backendSetCookies = backendRes.headers.getSetCookie();
 
   const data = await backendRes.json().catch(() => ({}));
   const user = data.data;
 
   const res = NextResponse.json({ user });
 
-  res.cookies.set('user', JSON.stringify(user), {
+  res.cookies.set(COOKIE_CONFIG.USER.name, JSON.stringify(user), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: '/',
+    path: COOKIE_CONFIG.USER.path,
     maxAge: 60 * 60 * 24 * 3,
   });
 
   if (accessToken) {
-    res.cookies.set('accessToken', accessToken, {
+    res.cookies.set(COOKIE_CONFIG.ACCESS_TOKEN.name, accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      path: '/',
+      path: COOKIE_CONFIG.ACCESS_TOKEN.path,
       maxAge: 60 * 60,
     });
   }
 
-  if (backendSetCookie) {
-    res.headers.append('Set-Cookie', backendSetCookie);
+  for (const cookie of backendSetCookies) {
+    res.headers.append('Set-Cookie', cookie);
   }
 
   return res;

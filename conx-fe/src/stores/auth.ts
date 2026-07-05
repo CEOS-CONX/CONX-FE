@@ -11,12 +11,15 @@ interface AuthState {
   hydrate: () => Promise<void>;
 }
 
+let hydrateController: AbortController | null = null;
+
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoggedIn: false,
   isLoading: true,
 
   login: async (email, password) => {
+    hydrateController?.abort();
     try {
       const res = await fetch(API_ROUTES.AUTH.LOGIN, {
         method: 'POST',
@@ -25,7 +28,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       });
       const data = await res.json();
       if (res.ok) {
-        set({ isLoggedIn: true, user: data.user });
+        set({ isLoggedIn: true, user: data.user, isLoading: false });
         return { success: true };
       }
       return { success: false, error: data.message };
@@ -35,13 +38,19 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: async () => {
+    hydrateController?.abort();
     await fetch(API_ROUTES.AUTH.LOGOUT, { method: 'POST' });
     set({ isLoggedIn: false, user: null });
   },
 
   hydrate: async () => {
+    hydrateController?.abort();
+    const controller = new AbortController();
+    hydrateController = controller;
+
     try {
-      const res = await fetch(API_ROUTES.AUTH.ME);
+      const res = await fetch(API_ROUTES.AUTH.ME, { signal: controller.signal });
+      if (controller.signal.aborted) return;
       if (res.ok) {
         const data = await res.json();
         set({
@@ -52,7 +61,8 @@ export const useAuthStore = create<AuthState>((set) => ({
       } else {
         set({ isLoggedIn: false, user: null, isLoading: false });
       }
-    } catch {
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'AbortError') return;
       set({ isLoggedIn: false, user: null, isLoading: false });
     }
   },

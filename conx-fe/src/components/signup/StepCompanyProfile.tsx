@@ -28,7 +28,11 @@ export default function StepCompanyProfile({ onNext }: StepCompanyProfileProps) 
 
   const isEtc = industry === INDUSTRY.ETC;
   const canSubmit =
-    brandName.trim() && industry && (!isEtc || customIndustry.trim()) && managerName.trim();
+    brandName.trim() &&
+    industry &&
+    (!isEtc || customIndustry.trim()) &&
+    managerName.trim() &&
+    job.trim();
 
   function handleSubmit() {
     if (!canSubmit || !industry) return;

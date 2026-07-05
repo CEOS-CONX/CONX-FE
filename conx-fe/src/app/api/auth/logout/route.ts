@@ -1,28 +1,27 @@
 import { NextResponse } from 'next/server';
+import { COOKIE_CONFIG } from '@/constants/api';
 
 export async function POST() {
   const res = NextResponse.json({ success: true });
 
-  res.cookies.set('accessToken', '', {
+  const cookieDefaults = {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
+    sameSite: 'lax' as const,
     maxAge: 0,
+  };
+
+  res.cookies.set(COOKIE_CONFIG.ACCESS_TOKEN.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.ACCESS_TOKEN.path,
   });
-  res.cookies.set('user', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/',
-    maxAge: 0,
+  res.cookies.set(COOKIE_CONFIG.USER.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.USER.path,
   });
-  res.cookies.set('refreshToken', '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/api/auth',
-    maxAge: 0,
+  res.cookies.set(COOKIE_CONFIG.REFRESH_TOKEN.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.REFRESH_TOKEN.path,
   });
 
   return res;
