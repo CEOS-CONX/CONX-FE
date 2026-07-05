@@ -25,7 +25,7 @@ export default function CtaSection() {
           지금, 커넥스와 함께하세요
         </h2>
         <div className="flex gap-5 pt-15">
-          <Link href="/signup?type=enterprise">
+          <Link href="/signup?type=company">
             <HomeTextButton variant="black">기업으로 시작하기</HomeTextButton>
           </Link>
           <Link href="/signup?type=crew">

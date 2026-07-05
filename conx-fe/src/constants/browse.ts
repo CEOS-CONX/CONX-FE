@@ -1,13 +1,25 @@
+export const INDUSTRY = {
+  BEAUTY: 'BEAUTY',
+  FASHION: 'FASHION',
+  IT: 'IT',
+  CAREER: 'CAREER',
+  FANDB: 'FANDB',
+  LIFESTYLE: 'LIFESTYLE',
+  ENTERTAIN: 'ENTERTAIN',
+  ETC: 'ETC',
+} as const;
+
+export type Industry = (typeof INDUSTRY)[keyof typeof INDUSTRY];
+
 export const INDUSTRY_OPTIONS = [
-  { value: 'marketing', label: '마케팅' },
-  { value: 'design', label: '디자인' },
-  { value: 'business', label: '경영/컨설팅' },
-  { value: 'finance', label: '금융' },
-  { value: 'startup', label: '창업' },
-  { value: 'dev-it', label: '개발/IT' },
-  { value: 'art', label: '공연/예술' },
-  { value: 'sports', label: '스포츠' },
-  { value: 'volunteer', label: '봉사' },
+  { value: INDUSTRY.BEAUTY, label: '뷰티' },
+  { value: INDUSTRY.FASHION, label: '패션' },
+  { value: INDUSTRY.IT, label: 'IT/서비스' },
+  { value: INDUSTRY.CAREER, label: '진로' },
+  { value: INDUSTRY.FANDB, label: 'F&B' },
+  { value: INDUSTRY.LIFESTYLE, label: '라이프스타일' },
+  { value: INDUSTRY.ENTERTAIN, label: '엔터테인먼트' },
+  { value: INDUSTRY.ETC, label: '기타' },
 ];
 
 export const PROJECT_TYPE_OPTIONS = [
@@ -18,10 +30,11 @@ export const PROJECT_TYPE_OPTIONS = [
 ];
 
 export const CREW_TYPE_OPTIONS = [
-  { value: 'academic', label: '학회' },
-  { value: 'club', label: '동아리' },
-  { value: 'gathering', label: '소모임' },
-  { value: 'council', label: '학생회' },
+  { value: 'ACADEMY', label: '학회' },
+  { value: 'CLUB', label: '동아리' },
+  { value: 'SMALLMEETING', label: '소모임' },
+  { value: 'COUNCIL', label: '학생회' },
+  { value: 'ETC', label: '기타' },
 ];
 
 export const RATING_OPTIONS = [

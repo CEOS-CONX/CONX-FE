@@ -5,8 +5,7 @@ import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { Toast } from '@/components/common/Toast';
 
-// TODO: 실제 유저 타입은 인증 컨텍스트에서 가져오기
-type UserType = 'crew' | 'enterprise';
+import { USER_TYPE, type UserType } from '@/types/auth';
 
 const MOCK_CREW_SCRAPS = Array.from({ length: 12 }, (_, i) => ({
   id: i,
@@ -33,13 +32,13 @@ const MOCK_PROJECT_SCRAPS = Array.from({ length: 12 }, (_, i) => ({
 }));
 
 const EMPTY_STATE = {
-  enterprise: {
+  [USER_TYPE.COMPANY]: {
     message1: '아직 스크랩한 크루가 없어요',
     message2: '크루 둘러보기에서 관심 있는 크루를 저장해보세요',
     buttonLabel: '크루 둘러보러 가기',
     buttonHref: '/crews',
   },
-  crew: {
+  [USER_TYPE.CREW]: {
     message1: '아직 스크랩한 프로젝트가 없어요',
     message2: '프로젝트 둘러보기에서 관심 있는 프로젝트를 저장해보세요',
     buttonLabel: '프로젝트 둘러보러 가기',
@@ -49,10 +48,10 @@ const EMPTY_STATE = {
 
 export default function ScrapPage() {
   // TODO: 인증 컨텍스트에서 유저 타입 가져오기
-  const userType: UserType = 'enterprise';
+  const userType: UserType = USER_TYPE.COMPANY;
 
-  const isEnterprise = userType === 'enterprise';
-  const allScraps = isEnterprise ? MOCK_CREW_SCRAPS : MOCK_PROJECT_SCRAPS;
+  const isCompany = userType === USER_TYPE.COMPANY;
+  const allScraps = isCompany ? MOCK_CREW_SCRAPS : MOCK_PROJECT_SCRAPS;
 
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
   const [undoTarget, setUndoTarget] = useState<number | null>(null);
@@ -106,7 +105,7 @@ export default function ScrapPage() {
           </div>
         ) : (
           <div className="mt-27.25 grid grid-cols-4 gap-x-6 gap-y-18.5">
-            {isEnterprise
+            {isCompany
               ? visibleScraps.map((card) => (
                   <Card
                     key={card.id}

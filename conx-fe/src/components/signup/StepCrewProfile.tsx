@@ -5,14 +5,14 @@ import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { DropdownForm } from '@/components/common/DropdownForm';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
-import { CREW_TYPE_OPTIONS, INDUSTRY_OPTIONS } from '@/constants/browse';
+import { CREW_TYPE_OPTIONS } from '@/constants/browse';
 
 export interface CrewProfileData {
   crewName: string;
   crewType: string;
-  field: string;
+  customCrewType?: string;
   managerName: string;
-  position: string;
+  job: string;
 }
 
 interface StepCrewProfileProps {
@@ -22,15 +22,27 @@ interface StepCrewProfileProps {
 export default function StepCrewProfile({ onNext }: StepCrewProfileProps) {
   const [crewName, setCrewName] = useState('');
   const [crewType, setCrewType] = useState<string>();
-  const [field, setField] = useState<string>();
+  const [customCrewType, setCustomCrewType] = useState('');
   const [managerName, setManagerName] = useState('');
-  const [position, setPosition] = useState('');
+  const [job, setJob] = useState('');
 
-  const canSubmit = crewName.trim() && crewType && field && managerName.trim() && position.trim();
+  const isEtc = crewType === 'ETC';
+  const canSubmit =
+    crewName.trim() &&
+    crewType &&
+    (!isEtc || customCrewType.trim()) &&
+    managerName.trim() &&
+    job.trim();
 
   function handleSubmit() {
-    if (!canSubmit || !crewType || !field) return;
-    onNext({ crewName, crewType, field, managerName, position });
+    if (!canSubmit || !crewType) return;
+    onNext({
+      crewName,
+      crewType,
+      ...(isEtc ? { customCrewType } : {}),
+      managerName,
+      job,
+    });
   }
 
   return (
@@ -61,14 +73,15 @@ export default function StepCrewProfile({ onNext }: StepCrewProfileProps) {
             value={crewType}
             onChange={setCrewType}
           />
-          <DropdownForm
-            size="lg"
-            label="활동 분야"
-            placeholder="내용을 입력하세요"
-            options={INDUSTRY_OPTIONS}
-            value={field}
-            onChange={setField}
-          />
+          {isEtc && (
+            <TextFieldInput
+              size="lg"
+              label="직접 입력"
+              placeholder="크루 유형을 입력하세요"
+              value={customCrewType}
+              onChange={(e) => setCustomCrewType(e.target.value)}
+            />
+          )}
           <TextFieldInput
             size="lg"
             label="담당자명"
@@ -80,8 +93,8 @@ export default function StepCrewProfile({ onNext }: StepCrewProfileProps) {
             size="lg"
             label="직무"
             placeholder="내용을 입력하세요"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
+            value={job}
+            onChange={(e) => setJob(e.target.value)}
           />
         </div>
       </div>
