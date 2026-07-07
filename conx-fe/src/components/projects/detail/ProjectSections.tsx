@@ -11,6 +11,7 @@ import { RadioButton } from '@/components/common/RadioButton';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { Toast } from '@/components/common/Toast';
 import { Toggle } from '@/components/common/Toggle';
+import QnaCard, { type QnaItem } from './QnaCard';
 
 /* ───────── 공통 ───────── */
 
@@ -71,21 +72,6 @@ function LinkIcon({ className }: { className?: string }) {
       <path d="M9.5 14.5l5-5" />
       <path d="M11.5 6.5l1-1a3.5 3.5 0 0 1 5 5l-1 1" />
       <path d="M12.5 17.5l-1 1a3.5 3.5 0 0 1-5-5l1-1" />
-    </svg>
-  );
-}
-function LockIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      className={className}
-      aria-hidden
-    >
-      <rect x="5" y="11" width="14" height="9" rx="2" />
-      <path d="M8 11V8a4 4 0 0 1 8 0v3" strokeLinecap="round" />
     </svg>
   );
 }
@@ -256,11 +242,14 @@ export function ReferenceSection() {
 
 /* ───────── 4. 담당자 Q&A ───────── */
 
-const QNA: { secret: boolean; title: string | null; status: '답변 전' | '답변완료' }[] = [
-  { secret: true, title: null, status: '답변 전' },
-  { secret: false, title: '제목이 들어가는 자리입니다.', status: '답변완료' },
-  { secret: true, title: null, status: '답변완료' },
-  { secret: true, title: null, status: '답변완료' },
+type QnaListItem = QnaItem & { id: number; defaultOpen?: boolean };
+
+const ANSWER = { brand: '[브랜드 이름] 담당자', text: '브랜드 측 답변', date: '2000.00.00' };
+const INITIAL_QNA: QnaListItem[] = [
+  { id: 1, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
+  { id: 2, secret: false, title: '제목이 들어가는 자리입니다.', body: '문의글 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
+  { id: 3, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
+  { id: 4, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
 ];
 
 // TODO: 실제 에러 문구 전달받으면 교체
@@ -270,6 +259,7 @@ export function QnaSection() {
   const [excludeSecret, setExcludeSecret] = useState(false);
   const [myOnly, setMyOnly] = useState(false);
   const [page, setPage] = useState(1);
+  const [qnaList, setQnaList] = useState<QnaListItem[]>(INITIAL_QNA);
 
   // 문의 등록 폼
   const [writing, setWriting] = useState(false);
@@ -308,7 +298,20 @@ export function QnaSection() {
     setTitleError(tErr);
     setContentError(cErr);
     if (tErr || cErr) return; // 하나라도 비면 등록 안 함
-    // TODO: 목록 상단에 QnaCard(open)로 추가 + 최신순 정렬 (QnaCard 컴포넌트 나오면 연결)
+    // 등록: 최신순이라 맨 앞에 추가, 등록 직후엔 펼친(open) 상태로 노출
+    const newItem: QnaListItem = {
+      id: Date.now(),
+      secret,
+      title: title.trim(),
+      body: content.trim(),
+      status: '답변 전',
+      author: 'yuik***', // TODO: 실제 로그인 유저
+      date: '2000.00.00 00:00', // TODO: 실제 등록 시각
+      answer: null,
+      defaultOpen: true,
+    };
+    setQnaList((prev) => [newItem, ...prev]);
+    setPage(1); // 최신 글이 있는 첫 페이지로
     setRegistered(true); // 5초 토스트
     closeForm();
   }
@@ -378,7 +381,7 @@ export function QnaSection() {
     <>
       <SectionTitle>담당자 Q&amp;A</SectionTitle>
 
-      {QNA.length === 0 ? (
+      {qnaList.length === 0 ? (
         // 질문 0개 → 안내 문구만 (필터·목록 숨김)
         <div className="flex justify-center py-20">
           <span className="text-kor-heading-3-semibold text-conx-gray-550">
@@ -410,21 +413,11 @@ export function QnaSection() {
             </label>
           </div>
 
-          {/* 목록 — TODO: 등록 최신순 정렬 */}
+          {/* 목록 (최신순, 각 카드 클릭 시 펼침) */}
           <ul className="mt-2">
-            {QNA.map((q, i) => (
-              <li key={i} className="border-conx-gray-100 border-b py-4">
-                <p className="text-kor-body-1-medium text-conx-common-black flex items-center gap-1.5">
-                  {q.secret && <LockIcon className="text-conx-gray-450 h-4 w-4" />}
-                  {q.secret ? '비밀글입니다' : q.title}
-                </p>
-                <p className="text-kor-label-1-medium text-conx-gray-400 mt-2 flex items-center gap-2">
-                  <span className="text-conx-gray-600 font-semibold">{q.status}</span>
-                  <Divider />
-                  <span>yuik***</span>
-                  <Divider />
-                  <span>2000.00.00 00:00</span>
-                </p>
+            {qnaList.map(({ id, ...q }) => (
+              <li key={id}>
+                <QnaCard {...q} />
               </li>
             ))}
           </ul>
