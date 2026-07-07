@@ -9,6 +9,7 @@ import { Button } from '@/components/common/Button';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
+import ApplyPanel from './ApplyPanel';
 import {
   ConditionSection,
   DescriptionSection,
@@ -37,6 +38,7 @@ const THUMBNAILS = ['썸네일 이미지 1', '썸네일 이미지 2', '썸네일
 export default function ProjectDetailBody({ projectId }: { projectId: string }) {
   const router = useRouter();
   const [active, setActive] = useState('description');
+  const [applying, setApplying] = useState(false); // 지원하기 패널 노출
   const [scrapped, setScrapped] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
@@ -168,8 +170,16 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
 
           {/* 오른쪽 CTA — sticky (탭과 함께 top-0에 고정) */}
           <aside className="sticky top-0 z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
-            <CTAButton variant="secondary">지원하기</CTAButton>
-            <Button variant="tertiary">Admin</Button>
+            {applying ? (
+              <ApplyPanel onBack={() => setApplying(false)} />
+            ) : (
+              <>
+                <CTAButton variant="secondary" onClick={() => setApplying(true)}>
+                  지원하기
+                </CTAButton>
+                <Button variant="tertiary">Admin</Button>
+              </>
+            )}
           </aside>
         </div>
       </div>
