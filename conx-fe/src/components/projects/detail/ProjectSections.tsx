@@ -11,6 +11,8 @@ import { RadioButton } from '@/components/common/RadioButton';
 import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { Toast } from '@/components/common/Toast';
 import { Toggle } from '@/components/common/Toggle';
+import EventCard from './EventCard';
+import OutcomeCard from './OutcomeCard';
 import QnaCard, { type QnaItem } from './QnaCard';
 
 /* ───────── 공통 ───────── */
@@ -26,14 +28,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <h3 className="text-kor-heading-3-semibold text-conx-common-black mb-2">{label}</h3>
       <div className="text-kor-body-1-medium text-conx-gray-550">{children}</div>
     </div>
-  );
-}
-
-function Divider() {
-  return (
-    <span aria-hidden className="text-conx-gray-200">
-      |
-    </span>
   );
 }
 
@@ -111,10 +105,7 @@ export function DescriptionSection() {
                   »
                 </span>
               )}
-              <div className="bg-conx-gray-50 gap-1 rounded-md px-3 py-4 text-center">
-                <p className="text-kor-body-1-semibold text-conx-gray-550">{s.label}</p>
-                <p className="text-eng-body-1-medium text-conx-gray-550">{s.date}</p>
-              </div>
+              <EventCard label={s.label} date={s.date} />
             </Fragment>
           ))}
         </div>
@@ -128,18 +119,14 @@ export function DescriptionSection() {
         {/* 아랫줄(desc)은 프로젝트에 따라 없을 수 있음 */}
         <div className="flex flex-col gap-2">
           {OUTCOMES.map((o, i) => (
-            <div key={i} className="bg-conx-gray-50 rounded-md p-4">
-              <p className="text-kor-body-1-semibold text-conx-gray-550 flex flex-wrap items-center gap-2.5">
-                <span>플랫폼명</span>
-                <Divider />
-                <span>콘텐츠 유형</span>
-                <Divider />
-                <span>0개</span>
-                <Divider />
-                <span>최종 제출 결과물</span>
-              </p>
-              {o.desc && <p className="text-kor-body-1-medium text-conx-gray-550 mt-3">{o.desc}</p>}
-            </div>
+            <OutcomeCard
+              key={i}
+              platform="플랫폼명"
+              contentType="콘텐츠 유형"
+              count="0개"
+              submission="최종 제출 결과물"
+              info={o.desc ?? undefined}
+            />
           ))}
         </div>
       </Field>
