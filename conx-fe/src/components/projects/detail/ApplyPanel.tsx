@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+import { useState } from 'react';
 import IconArrowLeft from '@/assets/icons/icon_arrowLeft_stroke.svg';
 import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 import { CTAButton } from '@/components/common/CTAButton';
@@ -11,6 +13,10 @@ interface ApplyPanelProps {
 
 // 지원하기 패널 — CTA(지원하기) 자리에 교체되어 뜸.
 export default function ApplyPanel({ onBack }: ApplyPanelProps) {
+  const [motive, setMotive] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+  const hasContent = motive.trim().length > 0; // type·filled → 제출 버튼 활성
+
   return (
     <div className="border-conx-gray-150 bg-conx-common-white w-full overflow-hidden rounded-md border">
       {/* 헤더: < 지원하기 */}
@@ -36,10 +42,11 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
           </p>
         </div>
 
-        {/* gap 12 → 프로필 카드 (클릭 시 프로필 상세 — TODO) */}
-        <button
-          type="button"
-          className="border-conx-gray-100 mt-3 flex items-center gap-4 rounded-md border py-4 pr-2 pl-4 text-left"
+        {/* gap 12 → 프로필 카드. 클릭 시 해당 크루 상세로 이동 */}
+        {/* TODO: 실제 크루 id로 경로 연결 (예: /crews/[crewId]) */}
+        <Link
+          href="/crews/1"
+          className="border-conx-gray-100 hover:bg-conx-gray-50 active:bg-conx-gray-150 mt-3 flex items-center gap-4 rounded-md border py-4 pr-2 pl-4 text-left transition-colors"
         >
           <div className="min-w-0 flex-1">
             <p className="text-kor-body-1-semibold text-conx-common-black">프로필명</p>
@@ -58,7 +65,7 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
             </p>
           </div>
           <IconArrowRight className="h-[18px] w-[18px] shrink-0" />
-        </button>
+        </Link>
 
         {/* gap 32 → 지원 동기 */}
         <div className="mt-8">
@@ -70,16 +77,40 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
 
         {/* gap 12 → 작성박스 */}
         <textarea
+          value={motive}
+          onChange={(e) => setMotive(e.target.value)}
           placeholder="내용을 입력해주세요"
-          className="bg-conx-gray-50 text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 [&::-webkit-scrollbar-thumb]:bg-conx-gray-100 [&::-webkit-scrollbar-thumb:hover]:bg-conx-gray-150 [&::-webkit-scrollbar-thumb:active]:bg-conx-gray-200 mt-3 h-[320px] w-full resize-none [scrollbar-width:thin] [scrollbar-color:#EBEFF5_transparent] rounded-md py-4 pr-2 pl-4 outline-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
+          className="bg-conx-gray-50 text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 hover:bg-conx-gray-100 focus:bg-conx-gray-50 focus:border-conx-primary-300 [&::-webkit-scrollbar-thumb]:bg-conx-gray-100 [&::-webkit-scrollbar-thumb:hover]:bg-conx-gray-150 [&::-webkit-scrollbar-thumb:active]:bg-conx-gray-200 mt-3 h-[320px] w-full resize-none [scrollbar-width:thin] [scrollbar-color:#EBEFF5_transparent] rounded-md border border-transparent py-4 pr-2 pl-4 transition-colors outline-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
         />
 
-        {/* gap 32 → 제출 (지금은 비활성 placeholder) */}
-        {/* TODO: 지원 동기 입력 시 활성화 + 실제 제출 */}
-        <CTAButton disabled className="mt-8">
+        {/* gap 32 → 제출. 내용 있으면 활성화, 클릭 시 약관 팝업 오픈 */}
+        <CTAButton disabled={!hasContent} onClick={() => setShowTerms(true)} className="mt-8">
           지원서 제출
         </CTAButton>
       </div>
+
+      {/* 약관 동의 팝업 — 추후 제작 예정. 지금은 흐름 확인용 임시 stub.
+          실제 팝업에서 동의 + 확인(내부 버튼) 후에만 최종 제출되도록 연결할 것 */}
+      {showTerms && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="약관 동의"
+          onClick={() => setShowTerms(false)}
+          className="bg-conx-opacity-gray-30 z-conx-modal fixed inset-0 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-conx-common-white flex w-[320px] flex-col gap-4 rounded-md p-6 text-center"
+          >
+            <p className="text-kor-heading-3-semibold text-conx-common-black">
+              약관 동의 팝업 (추후 제작)
+            </p>
+            {/* TODO: 실제 최종 제출 로직 연결 (동의 + 확인 후에만 제출) */}
+            <CTAButton onClick={() => setShowTerms(false)}>동의하고 제출하기</CTAButton>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
