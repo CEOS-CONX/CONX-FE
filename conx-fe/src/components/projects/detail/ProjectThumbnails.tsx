@@ -71,11 +71,11 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
     return () => window.removeEventListener('resize', update);
   }, []);
 
-  // 1칸 = 이미지 폭(480) + 갭(1px)
+  // 1칸 = 이미지 폭(480) + 갭(4px)
   function scrollByCard(dir: 1 | -1) {
     const el = scrollRef.current;
     if (!el) return;
-    const step = (el.firstElementChild?.getBoundingClientRect().width ?? 480) + 1;
+    const step = (el.firstElementChild?.getBoundingClientRect().width ?? 480) + 4;
     el.scrollBy({ left: dir * step, behavior: 'smooth' });
   }
 
@@ -86,7 +86,7 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
         <div
           ref={scrollRef}
           onScroll={update}
-          className={`scrollbar-hide flex ${THUMB_H} snap-x snap-mandatory gap-px overflow-x-auto`}
+          className={`scrollbar-hide flex ${THUMB_H} snap-x snap-mandatory gap-1 overflow-x-auto`}
         >
           {thumbnails.map((t, i) => (
             <div key={i} className={`${CARD} h-full w-[480px] shrink-0 snap-start`}>
