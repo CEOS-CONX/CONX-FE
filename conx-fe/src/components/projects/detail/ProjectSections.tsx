@@ -1,7 +1,6 @@
 'use client';
 
 import { Fragment, useState } from 'react';
-import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 import IconCheckboxChecked from '@/assets/icons/icon_checkbox_checked.svg';
 import IconCheckboxDefault from '@/assets/icons/icon_checkbox_default.svg';
 import { Button } from '@/components/common/Button';
@@ -14,6 +13,7 @@ import { Toggle } from '@/components/common/Toggle';
 import EventCard from './EventCard';
 import OutcomeCard from './OutcomeCard';
 import QnaCard, { type QnaItem } from './QnaCard';
+import UploadCard from './UploadCard';
 
 /* ───────── 공통 ───────── */
 
@@ -34,24 +34,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 const GRAY_CARD = 'bg-conx-gray-50 rounded-md px-5 py-4';
 
 // 전용 에셋이 없어 임시 인라인 (currentColor 상속) — 실제 아이콘 오면 교체
-function FileIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      className={className}
-      aria-hidden
-    >
-      <path
-        d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z"
-        strokeLinejoin="round"
-      />
-      <path d="M14 3v5h5" strokeLinejoin="round" />
-    </svg>
-  );
-}
 function LinkIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -170,16 +152,6 @@ const LINKS: { label: string; url: string; info: string | null }[] = [
   { label: '브랜드 인스타그램 계정', url: 'https://', info: null },
 ];
 
-// 미리보기 / 다운로드 (액션은 나중에 — 지금은 표시만)
-function ActionLink({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="flex items-center gap-0.5">
-      {children}
-      <IconArrowRight className="h-4 w-4" />
-    </span>
-  );
-}
-
 export function ReferenceSection() {
   return (
     <>
@@ -188,21 +160,7 @@ export function ReferenceSection() {
       <Field label="파일">
         <div className="flex flex-col gap-2">
           {FILES.map((f, i) => (
-            <div key={i} className={GRAY_CARD}>
-              <div className="flex items-center justify-between gap-4">
-                <span className="text-kor-body-1-medium text-conx-common-black flex items-center gap-2">
-                  <FileIcon className="text-conx-gray-450 h-5 w-5" />
-                  {f.name}
-                </span>
-                <span className="text-kor-label-1-medium text-conx-gray-450 flex shrink-0 items-center gap-4">
-                  <ActionLink>미리보기</ActionLink>
-                  <ActionLink>다운로드</ActionLink>
-                </span>
-              </div>
-              {f.info && (
-                <p className="text-kor-label-1-medium text-conx-gray-400 mt-2">{f.info}</p>
-              )}
-            </div>
+            <UploadCard key={i} name={f.name} info={f.info ?? undefined} />
           ))}
         </div>
       </Field>
