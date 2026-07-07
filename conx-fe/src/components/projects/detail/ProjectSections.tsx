@@ -11,6 +11,7 @@ import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { Toast } from '@/components/common/Toast';
 import { Toggle } from '@/components/common/Toggle';
 import EventCard from './EventCard';
+import LinkCard from './LinkCard';
 import OutcomeCard from './OutcomeCard';
 import QnaCard, { type QnaItem } from './QnaCard';
 import UploadCard from './UploadCard';
@@ -28,27 +29,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <h3 className="text-kor-heading-3-semibold text-conx-common-black mb-2">{label}</h3>
       <div className="text-kor-body-1-medium text-conx-gray-550">{children}</div>
     </div>
-  );
-}
-
-const GRAY_CARD = 'bg-conx-gray-50 rounded-md px-5 py-4';
-
-// 전용 에셋이 없어 임시 인라인 (currentColor 상속) — 실제 아이콘 오면 교체
-function LinkIcon({ className }: { className?: string }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      className={className}
-      aria-hidden
-    >
-      <path d="M9.5 14.5l5-5" />
-      <path d="M11.5 6.5l1-1a3.5 3.5 0 0 1 5 5l-1 1" />
-      <path d="M12.5 17.5l-1 1a3.5 3.5 0 0 1-5-5l1-1" />
-    </svg>
   );
 }
 
@@ -168,16 +148,7 @@ export function ReferenceSection() {
       <Field label="링크">
         <div className="flex flex-col gap-2">
           {LINKS.map((l, i) => (
-            <div key={i} className={GRAY_CARD}>
-              <span className="text-kor-body-1-medium text-conx-common-black flex items-center gap-2">
-                <LinkIcon className="text-conx-gray-450 h-5 w-5" />
-                {l.label}
-              </span>
-              <p className="text-kor-label-1-medium text-conx-gray-450 mt-1">{l.url}</p>
-              {l.info && (
-                <p className="text-kor-label-1-medium text-conx-gray-400 mt-2">{l.info}</p>
-              )}
-            </div>
+            <LinkCard key={i} name={l.label} url={l.url} info={l.info ?? undefined} />
           ))}
         </div>
       </Field>
