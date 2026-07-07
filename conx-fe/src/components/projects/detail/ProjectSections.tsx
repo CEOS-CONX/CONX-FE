@@ -11,6 +11,7 @@ import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { Toast } from '@/components/common/Toast';
 import { Toggle } from '@/components/common/Toggle';
 import EventCard from './EventCard';
+import FilePreviewModal from './FilePreviewModal';
 import LinkCard from './LinkCard';
 import OutcomeCard from './OutcomeCard';
 import QnaCard, { type QnaItem } from './QnaCard';
@@ -133,6 +134,8 @@ const LINKS: { label: string; url: string; info: string | null }[] = [
 ];
 
 export function ReferenceSection() {
+  const [previewFile, setPreviewFile] = useState<string | null>(null); // 미리보기 중인 파일명
+
   return (
     <>
       <SectionTitle>참고 자료</SectionTitle>
@@ -140,7 +143,12 @@ export function ReferenceSection() {
       <Field label="파일">
         <div className="flex flex-col gap-2">
           {FILES.map((f, i) => (
-            <UploadCard key={i} name={f.name} info={f.info ?? undefined} />
+            <UploadCard
+              key={i}
+              name={f.name}
+              info={f.info ?? undefined}
+              onPreview={() => setPreviewFile(f.name)}
+            />
           ))}
         </div>
       </Field>
@@ -152,6 +160,11 @@ export function ReferenceSection() {
           ))}
         </div>
       </Field>
+
+      {/* 파일 미리보기 오버레이 (미리보기 버튼 클릭 시) */}
+      {previewFile && (
+        <FilePreviewModal fileName={previewFile} onClose={() => setPreviewFile(null)} />
+      )}
     </>
   );
 }

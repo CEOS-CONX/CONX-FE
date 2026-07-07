@@ -11,12 +11,13 @@ interface UploadCardProps {
 }
 
 // 미리보기 / 다운로드 — text black semibold + chevron, padding 8/12, gap 4
+// default·active 동일, hover만 회색 배경(opacity-gray-6, 코드베이스 텍스트+아이콘 버튼 표준)
 function ActionButton({ label, onClick }: { label: string; onClick?: () => void }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className="text-kor-body-1-semibold text-conx-common-black flex cursor-pointer items-center gap-1 px-3 py-2 text-center"
+      className="text-kor-body-1-semibold text-conx-common-black hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center gap-1 rounded-md px-3 py-2 text-center transition-colors active:bg-transparent"
     >
       {label}
       <IconArrowRight className="h-[18px] w-[18px]" />

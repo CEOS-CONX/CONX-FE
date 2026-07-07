@@ -74,6 +74,7 @@
   /* Opacity */
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
   --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
+  --color-conx-opacity-gray-85: rgb(0 0 0 / 0.85);
 
   /* Gradient — Figma의 Gradient_white/100_0, 0_100 (섹션 경계용, 세로 100% white) */
   --background-image-conx-gradient-white-top: linear-gradient(
