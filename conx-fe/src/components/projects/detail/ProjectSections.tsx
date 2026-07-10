@@ -182,7 +182,8 @@ const INITIAL_QNA: QnaListItem[] = [
 ];
 
 // TODO: 실제 에러 문구 전달받으면 교체
-const QNA_ERROR = '에러메세지';
+const QNA_TITLE_ERROR = '문의 제목을 입력해주세요';
+const QNA_CONTENT_ERROR = '문의 내용을 입력해주세요';
 
 export function QnaSection() {
   const [excludeSecret, setExcludeSecret] = useState(false);
@@ -222,8 +223,8 @@ export function QnaSection() {
 
   // 등록하기: 제목·문의글 필수 검사 후 등록
   function handleSubmit() {
-    const tErr = title.trim() ? '' : QNA_ERROR;
-    const cErr = content.trim() ? '' : QNA_ERROR;
+    const tErr = title.trim() ? '' : QNA_TITLE_ERROR;
+    const cErr = content.trim() ? '' : QNA_CONTENT_ERROR;
     setTitleError(tErr);
     setContentError(cErr);
     if (tErr || cErr) return; // 하나라도 비면 등록 안 함

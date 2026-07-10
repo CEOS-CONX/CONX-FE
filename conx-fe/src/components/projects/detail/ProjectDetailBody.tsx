@@ -18,6 +18,7 @@ import {
 } from './ProjectSections';
 import ProjectTabs from './ProjectTabs';
 import ProjectThumbnails from './ProjectThumbnails';
+import SubmittedApplication from './SubmittedApplication';
 
 // 좌우 여백 90px + navbar와 동일한 max-w-400(1600px) 컨테이너
 const CONTAINER = 'mx-auto max-w-400 px-[90px]';
@@ -39,6 +40,9 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
   const router = useRouter();
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
+  const [applied, setApplied] = useState(false); // 지원 완료 상태
+  const [submittedMotive, setSubmittedMotive] = useState(''); // 제출한 지원 동기
+  const [viewingApplication, setViewingApplication] = useState(false); // 지원서 보기
   const [scrapped, setScrapped] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
@@ -170,8 +174,30 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
 
           {/* 오른쪽 CTA — sticky (탭과 함께 top-0에 고정) */}
           <aside className="sticky top-0 z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
-            {applying ? (
-              <ApplyPanel onBack={() => setApplying(false)} />
+            {applied ? (
+              // 지원 완료: 완료 버튼(비활성) + 지원서 보기 → 읽기전용 지원서
+              <>
+                <CTAButton variant="secondary" disabled>
+                  지원 완료
+                </CTAButton>
+                {viewingApplication ? (
+                  <SubmittedApplication motive={submittedMotive} />
+                ) : (
+                  <CTAButton variant="tertiary" onClick={() => setViewingApplication(true)}>
+                    지원서 보기
+                  </CTAButton>
+                )}
+              </>
+            ) : applying ? (
+              <ApplyPanel
+                onBack={() => setApplying(false)}
+                onSubmitted={(motive) => {
+                  setSubmittedMotive(motive);
+                  setApplied(true);
+                  setApplying(false);
+                  setToast({ message: '지원이 완료됐습니다.' });
+                }}
+              />
             ) : (
               <>
                 <CTAButton variant="secondary" onClick={() => setApplying(true)}>

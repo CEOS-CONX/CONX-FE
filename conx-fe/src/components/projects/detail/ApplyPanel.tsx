@@ -1,18 +1,18 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 import IconArrowLeft from '@/assets/icons/icon_arrowLeft_stroke.svg';
-import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 import { CTAButton } from '@/components/common/CTAButton';
+import ApplyTermsModal from './ApplyTermsModal';
+import CrewProfileCard from './CrewProfileCard';
 
 interface ApplyPanelProps {
-  /** 헤더 < 클릭 → 지원하기 버튼 상태로 복귀 */
   onBack: () => void;
+  onSubmitted: (motive: string) => void;
 }
 
-// 지원하기 패널 — CTA(지원하기) 자리에 교체되어 뜸.
-export default function ApplyPanel({ onBack }: ApplyPanelProps) {
+// 지원하기 패널
+export default function ApplyPanel({ onBack, onSubmitted }: ApplyPanelProps) {
   const [motive, setMotive] = useState('');
   const [showTerms, setShowTerms] = useState(false);
   const hasContent = motive.trim().length > 0; // type·filled → 제출 버튼 활성
@@ -42,32 +42,10 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
           </p>
         </div>
 
-        {/* gap 12 → 프로필 카드. 클릭 시 해당 크루 상세로 이동 */}
-        {/* TODO: 실제 크루 id로 경로 연결 (예: /crews/[crewId]) */}
-        <Link
-          href="/crews/1"
-          className="border-conx-gray-100 hover:bg-conx-gray-50 active:bg-conx-gray-150 mt-3 flex items-center gap-4 rounded-md border py-4 pr-2 pl-4 text-left transition-colors"
-        >
-          <div className="min-w-0 flex-1">
-            <p className="text-kor-body-1-semibold text-conx-common-black">프로필명</p>
-            <dl className="text-kor-label-1-medium mt-2 flex flex-col gap-1">
-              <div className="flex gap-3">
-                <dt className="text-conx-gray-350 w-14 shrink-0">크루명</dt>
-                <dd className="text-conx-common-black">CEOS 세오스</dd>
-              </div>
-              <div className="flex gap-3">
-                <dt className="text-conx-gray-350 w-14 shrink-0">대표자명</dt>
-                <dd className="text-conx-common-black">김대표</dd>
-              </div>
-            </dl>
-            <p className="border-conx-gray-100 text-kor-caption-1-medium text-conx-gray-350 mt-3 border-t pt-3">
-              2000.00.00 <span className="text-conx-gray-200 mx-1">|</span> 작성 완료
-            </p>
-          </div>
-          <IconArrowRight className="h-[18px] w-[18px] shrink-0" />
-        </Link>
+        {/*프로필 카드 */}
+        <CrewProfileCard className="mt-3" />
 
-        {/* gap 32 → 지원 동기 */}
+        {/* 지원 동기 */}
         <div className="mt-8">
           <h3 className="text-kor-heading-3-semibold text-conx-common-black">지원 동기</h3>
           <p className="text-kor-label-1-medium text-conx-gray-450 mt-1">
@@ -75,7 +53,7 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
           </p>
         </div>
 
-        {/* gap 12 → 작성박스 */}
+        {/* 작성박스 */}
         <textarea
           value={motive}
           onChange={(e) => setMotive(e.target.value)}
@@ -83,33 +61,22 @@ export default function ApplyPanel({ onBack }: ApplyPanelProps) {
           className="bg-conx-gray-50 text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 hover:bg-conx-gray-100 focus:bg-conx-gray-50 focus:border-conx-primary-300 [&::-webkit-scrollbar-thumb]:bg-conx-gray-100 [&::-webkit-scrollbar-thumb:hover]:bg-conx-gray-150 [&::-webkit-scrollbar-thumb:active]:bg-conx-gray-200 mt-3 h-[320px] w-full resize-none [scrollbar-width:thin] [scrollbar-color:#EBEFF5_transparent] rounded-md border border-transparent py-4 pr-2 pl-4 transition-colors outline-none [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
         />
 
-        {/* gap 32 → 제출. 내용 있으면 활성화, 클릭 시 약관 팝업 오픈 */}
+        {/* 제출. 내용 있으면 활성화, 클릭 시 약관 팝업 오픈 */}
         <CTAButton disabled={!hasContent} onClick={() => setShowTerms(true)} className="mt-8">
           지원서 제출
         </CTAButton>
       </div>
 
-      {/* 약관 동의 팝업 — 추후 제작 예정. 지금은 흐름 확인용 임시 stub.
-          실제 팝업에서 동의 + 확인(내부 버튼) 후에만 최종 제출되도록 연결할 것 */}
+      {/* 약관 동의 팝업 — 필수 항목 모두 동의 후 최종 제출 */}
       {showTerms && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="약관 동의"
-          onClick={() => setShowTerms(false)}
-          className="bg-conx-opacity-gray-30 z-conx-modal fixed inset-0 flex items-center justify-center"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-conx-common-white flex w-[320px] flex-col gap-4 rounded-md p-6 text-center"
-          >
-            <p className="text-kor-heading-3-semibold text-conx-common-black">
-              약관 동의 팝업 (추후 제작)
-            </p>
-            {/* TODO: 실제 최종 제출 로직 연결 (동의 + 확인 후에만 제출) */}
-            <CTAButton onClick={() => setShowTerms(false)}>동의하고 제출하기</CTAButton>
-          </div>
-        </div>
+        <ApplyTermsModal
+          onClose={() => setShowTerms(false)}
+          onSubmit={() => {
+            // TODO: 실제 지원서 제출 API 연결. 지금은 입력값을 부모로 올려 완료 상태 처리
+            setShowTerms(false);
+            onSubmitted(motive);
+          }}
+        />
       )}
     </div>
   );
