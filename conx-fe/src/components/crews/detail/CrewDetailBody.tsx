@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
@@ -15,8 +16,6 @@ const ICON_BTN =
 /* ───────── 데이터 (placeholder) ───────── */
 // TODO: 실제 크루 데이터 API 연결.
 //  - 필수(항상): name, type, field
-//  - 선택: logo, schools, memberCount, rating 등 (채워지면 헤더에 추가 노출)
-//  - 상세(소개/경험/포트폴리오 등)는 추후 추가 — 지금은 '필수만 채운' 최소 버전
 
 interface CrewData {
   name: string;
@@ -58,21 +57,37 @@ function StarRating({ rating }: { rating: number }) {
 /* ───────── 본문 ───────── */
 
 export default function CrewDetailBody({ crewId }: { crewId: string }) {
+  const router = useRouter();
   const [scrapped, setScrapped] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    actionLabel?: string;
+    onAction?: () => void;
+  } | null>(null);
 
   const crew = CREW; // TODO: crewId로 실제 데이터 조회
 
+  // 공유
   async function handleShare() {
     try {
       await navigator.clipboard.writeText(window.location.href);
-      setToast('링크를 복사했습니다');
+      setToast({ message: '링크를 복사했습니다' });
     } catch {
       // 비보안 컨텍스트 등 — 추후 fallback
     }
   }
+  // 스크랩
+  // TODO: 실제 스크랩 저장(API)은 나중에 — 지금은 시각 상태 + 이동만
   function handleScrap() {
-    setScrapped((v) => !v);
+    const next = !scrapped;
+    setScrapped(next);
+    if (next) {
+      setToast({
+        message: '크루를 스크랩했습니다',
+        actionLabel: '스크랩 보기',
+        onAction: () => router.push('/scrap'),
+      });
+    }
   }
 
   // 헤더 메타 — 값이 있는 항목만 노출 (최소 상태는 유형·분야만)
@@ -111,7 +126,12 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-3">
-            <button type="button" aria-label="공유하기" onClick={handleShare} className={ICON_BTN}>
+            <button
+              type="button"
+              aria-label="공유하기"
+              onClick={handleShare}
+              className={`${ICON_BTN} active:bg-transparent`}
+            >
               <IconShare className="h-6 w-6" />
             </button>
             <button
@@ -119,7 +139,7 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
               aria-label="스크랩"
               aria-pressed={scrapped}
               onClick={handleScrap}
-              className={ICON_BTN}
+              className={`${ICON_BTN} active:bg-transparent`}
             >
               {scrapped ? (
                 <IconBookmarkFill className="[&_path]:fill-conx-primary-300 [&_path]:stroke-conx-primary-300 h-6 w-6" />
@@ -138,10 +158,12 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
         </span>
       </div>
 
-      {/* 공유 토스트 */}
+      {/* 공유·스크랩 토스트 */}
       {toast && (
         <Toast
-          message={toast}
+          message={toast.message}
+          actionLabel={toast.actionLabel}
+          onAction={toast.onAction}
           duration={5000}
           onClose={() => setToast(null)}
           className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
