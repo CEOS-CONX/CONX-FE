@@ -27,11 +27,32 @@ interface CrewData {
   rating?: number;
 }
 
-// 필수만 채운 크루 (최소 상태)
-const CREW: CrewData = {
-  name: '크루 이름',
-  type: '활동가',
-  field: 'IT·창업',
+// 데이터 케이스: '1' = 선택 항목까지 채워진 크루 / '2' = 필수만 (기본·최소)
+// 선택 항목(logo·schools·memberCount·rating)은 값이 있을 때만 헤더에 노출됨
+const CREWS: Record<string, CrewData> = {
+  '1': {
+    name: '크루 이름',
+    logoText: 'CEOS',
+    type: '동아리',
+    field: 'IT·창업',
+    schools: [
+      '서강대학교',
+      '연세대학교',
+      '이화여자대학교',
+      '홍익대학교',
+      '서강대학교',
+      '연세대학교',
+      '이화여자대학교',
+      '홍익대학교',
+    ],
+    memberCount: 80,
+    rating: 5.0,
+  },
+  '2': {
+    name: '크루 이름',
+    type: '활동가',
+    field: 'IT·창업',
+  },
 };
 
 /* ───────── 서브 컴포넌트 ───────── */
@@ -54,6 +75,48 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
+const SCHOOLS_MAX_CHARS = 30; // 소속 학교는 최대 30자까지 표시
+
+// 소속 학교 메타 — 30자 초과 시 말줄임(...) + hover 시 전체 목록 tooltip
+// tooltip: 학교명 텍스트 시작점(x)·하단(y) 기준 고정, 마우스 따라가지 않음
+function SchoolMetaItem({ schools }: { schools: string[] }) {
+  const full = schools.join(', ');
+  const truncated = full.length > SCHOOLS_MAX_CHARS;
+  const shown = truncated ? `${full.slice(0, SCHOOLS_MAX_CHARS)}...` : full;
+
+  return (
+    // 라벨 + 학교명 전체가 hover trigger. 표시==전체면 truncated=false → tooltip 없음
+    <div className="group relative">
+      <div className="flex flex-col gap-1">
+        <span className="text-kor-label-1-medium text-conx-gray-450">소속 학교</span>
+        <span className="text-kor-body-1-medium text-conx-common-black whitespace-nowrap">
+          {shown}
+        </span>
+      </div>
+
+      {truncated && (
+        // top-full=학교명 하단, left-0=학교명 시작점. pt-2는 hover가 끊기지 않게 다리 역할
+        <div className="z-conx-dropdown absolute top-full left-0 hidden pt-2 group-hover:block">
+          <div className="border-conx-gray-100 bg-conx-common-white w-[180px] rounded-md border p-3 shadow-lg">
+            <p className="text-kor-label-1-medium text-conx-gray-400">전체 소속 학교</p>
+            <ul className="[&::-webkit-scrollbar-thumb]:bg-conx-gray-100 mt-2 flex max-h-[160px] [scrollbar-width:thin] [scrollbar-color:#EBEFF5_transparent] flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+              {schools.map((s, i) => (
+                <li
+                  key={i}
+                  className="text-kor-body-1-medium text-conx-common-black flex items-center gap-2"
+                >
+                  <span className="bg-conx-gray-300 h-1 w-1 shrink-0 rounded-full" />
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ───────── 본문 ───────── */
 
 export default function CrewDetailBody({ crewId }: { crewId: string }) {
@@ -65,7 +128,7 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
     onAction?: () => void;
   } | null>(null);
 
-  const crew = CREW; // TODO: crewId로 실제 데이터 조회
+  const crew = CREWS[crewId] ?? CREWS['2']; // 기본값은 필수만 채운 최소 버전. TODO: 실제 데이터 조회
 
   // 공유
   async function handleShare() {
@@ -83,26 +146,12 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
     setScrapped(next);
     if (next) {
       setToast({
-        message: '크루를 스크랩했습니다',
+        message: '크루 프로필을 스크랩했습니다',
         actionLabel: '스크랩 보기',
         onAction: () => router.push('/scrap'),
       });
     }
   }
-
-  // 헤더 메타 — 값이 있는 항목만 노출 (최소 상태는 유형·분야만)
-  type MetaEntry = { label: string; value: React.ReactNode };
-  const meta = (
-    [
-      crew.schools?.length ? { label: '소속 학교', value: crew.schools.join(', ') } : null,
-      { label: '크루 유형', value: crew.type },
-      { label: '활동 분야', value: crew.field },
-      crew.memberCount != null ? { label: '진출수', value: `${crew.memberCount}명` } : null,
-      crew.rating != null
-        ? { label: '기업 평가', value: <StarRating rating={crew.rating} /> }
-        : null,
-    ] as (MetaEntry | null)[]
-  ).filter((m): m is MetaEntry => m !== null);
 
   return (
     <main data-crew-id={crewId} className={`${CONTAINER} pb-40`}>
@@ -121,9 +170,15 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
         {/* 메타 + 아이콘 (space-between·center). 메타 텍스트에서 20px 아래에 border */}
         <div className="border-conx-gray-100 mt-4 flex items-center justify-between gap-4 border-b pb-5">
           <div className="flex flex-wrap items-start gap-x-10 gap-y-2">
-            {meta.map((m) => (
-              <MetaItem key={m.label} label={m.label} value={m.value} />
-            ))}
+            {crew.schools?.length ? <SchoolMetaItem schools={crew.schools} /> : null}
+            <MetaItem label="크루 유형" value={crew.type} />
+            <MetaItem label="활동 분야" value={crew.field} />
+            {crew.memberCount != null && (
+              <MetaItem label="인원수" value={`${crew.memberCount}명`} />
+            )}
+            {crew.rating != null && (
+              <MetaItem label="기업 평가" value={<StarRating rating={crew.rating} />} />
+            )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
             <button
