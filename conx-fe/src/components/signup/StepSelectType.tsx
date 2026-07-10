@@ -2,8 +2,7 @@
 
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { ChoiceCard } from '@/components/common/ChoiceCard';
-
-export type UserType = 'crew' | 'enterprise';
+import { USER_TYPE, type UserType } from '@/types/auth';
 
 interface StepSelectTypeProps {
   onSelect: (type: UserType) => void;
@@ -25,12 +24,12 @@ export default function StepSelectType({ onSelect }: StepSelectTypeProps) {
         <ChoiceCard
           title="기업"
           description="프로젝트를 등록하고 검증된 집단과 연결하세요"
-          onClick={() => onSelect('enterprise')}
+          onClick={() => onSelect(USER_TYPE.COMPANY)}
         />
         <ChoiceCard
           title="크루"
           description="프로젝트에 참여하고 활동의 가치를 증명하세요"
-          onClick={() => onSelect('crew')}
+          onClick={() => onSelect(USER_TYPE.CREW)}
         />
       </div>
     </div>
