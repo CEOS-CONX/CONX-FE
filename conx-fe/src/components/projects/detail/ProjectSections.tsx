@@ -185,6 +185,9 @@ const INITIAL_QNA: QnaListItem[] = [
 const QNA_TITLE_ERROR = '문의 제목을 입력해주세요';
 const QNA_CONTENT_ERROR = '문의 내용을 입력해주세요';
 
+const CURRENT_USER = 'yuik***'; // TODO: 실제 로그인 유저로 교체 ('내 Q&A 보기' 필터 기준)
+const QNA_PAGE_SIZE = 5; // 페이지당 문의 수 (디자인 확정 시 조정)
+
 export function QnaSection() {
   const [excludeSecret, setExcludeSecret] = useState(false);
   const [myOnly, setMyOnly] = useState(false);
@@ -200,6 +203,14 @@ export function QnaSection() {
   const [contentError, setContentError] = useState('');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [registered, setRegistered] = useState(false); // 등록 완료 토스트
+
+  // 필터(비밀글 제외 / 내 Q&A) 적용 → 페이지네이션
+  const filteredQna = qnaList.filter(
+    (q) => (!excludeSecret || !q.secret) && (!myOnly || q.author === CURRENT_USER),
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredQna.length / QNA_PAGE_SIZE));
+  const safePage = Math.min(page, totalPages); // 필터로 페이지 수가 줄어도 빈 페이지 방지
+  const visibleQna = filteredQna.slice((safePage - 1) * QNA_PAGE_SIZE, safePage * QNA_PAGE_SIZE);
 
   function openForm() {
     setSecret(false);
@@ -326,7 +337,10 @@ export function QnaSection() {
               type="button"
               role="checkbox"
               aria-checked={excludeSecret}
-              onClick={() => setExcludeSecret((v) => !v)}
+              onClick={() => {
+                setExcludeSecret((v) => !v);
+                setPage(1); // 필터 변경 시 첫 페이지로
+              }}
               className="text-kor-body-1-medium text-conx-gray-550 flex cursor-pointer items-center gap-1.5"
             >
               {excludeSecret ? (
@@ -339,13 +353,19 @@ export function QnaSection() {
 
             <label className="text-kor-body-1-medium text-conx-gray-550 flex cursor-pointer items-center gap-2">
               내 Q&amp;A 보기
-              <Toggle checked={myOnly} onChange={setMyOnly} />
+              <Toggle
+                checked={myOnly}
+                onChange={(v) => {
+                  setMyOnly(v);
+                  setPage(1); // 필터 변경 시 첫 페이지로
+                }}
+              />
             </label>
           </div>
 
-          {/* 목록 (최신순, 각 카드 클릭 시 펼침) */}
+          {/* 목록 (최신순, 각 카드 클릭 시 펼침) — 필터·페이지 적용 */}
           <ul className="mt-2">
-            {qnaList.map(({ id, ...q }) => (
+            {visibleQna.map(({ id, ...q }) => (
               <li key={id}>
                 <QnaCard {...q} />
               </li>
@@ -356,7 +376,7 @@ export function QnaSection() {
 
       {/* 페이지네이션(가운데) + 문의하기(오른쪽) */}
       <div className="relative mt-8 flex items-center justify-center">
-        <Pagination currentPage={page} totalPages={4} onPageChange={setPage} />
+        <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} />
         <Button variant="tertiary" onClick={openForm} className="absolute right-0">
           문의하기
         </Button>

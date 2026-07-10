@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 import IconClose from '@/assets/icons/icon_delete.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { RadioButton } from '@/components/common/RadioButton';
+import { useDialog } from '@/hooks/useDialog';
 import ApplyTermsDetailModal from './ApplyTermsDetailModal';
 
 interface ApplyTermsModalProps {
@@ -52,6 +53,7 @@ export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalPr
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [confirmed, setConfirmed] = useState(false); // 세부 확인 사항 '확인했습니다' 완료 여부
   const [showDetail, setShowDetail] = useState(false);
+  const dialogRef = useDialog(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
   const allChecked = TERMS.every((t) => checked[t.id]);
   const requiredChecked = TERMS.filter((t) => t.required).every((t) => checked[t.id]);
@@ -62,20 +64,6 @@ export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalPr
   function toggle(id: string) {
     return (next: boolean) => setChecked((prev) => ({ ...prev, [id]: next }));
   }
-
-  // Esc 닫기 + 뒤 스크롤 잠금
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
 
   // 화살표 → 세부 확인 사항 모달로 전환 (동의 체크 상태는 유지)
   if (showDetail) {
@@ -93,6 +81,7 @@ export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalPr
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="apply-terms-title"

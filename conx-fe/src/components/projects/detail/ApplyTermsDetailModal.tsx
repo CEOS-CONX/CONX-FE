@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
 import IconClose from '@/assets/icons/icon_delete.svg';
 import { CTAButton } from '@/components/common/CTAButton';
+import { useDialog } from '@/hooks/useDialog';
 
 interface ApplyTermsDetailModalProps {
   onClose: () => void;
@@ -72,22 +72,11 @@ export default function ApplyTermsDetailModal({
   onBack,
   onConfirm,
 }: ApplyTermsDetailModalProps) {
-  // Esc 닫기 + 뒤 스크롤 잠금
-  useEffect(() => {
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
-    }
-    document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
-    };
-  }, [onClose]);
+  const dialogRef = useDialog(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="apply-terms-detail-title"
