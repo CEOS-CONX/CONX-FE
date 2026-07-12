@@ -7,6 +7,8 @@ import { useDialog } from '@/hooks/useDialog';
 interface FilePreviewModalProps {
   fileName: string;
   onClose: () => void;
+  /** 다운로드 버튼 노출 여부 (포트폴리오 등 다운로드 불가 자료는 false) */
+  downloadable?: boolean;
 }
 
 // placeholder 페이지들 — 실제로는 이미지 URL 배열.
@@ -14,7 +16,11 @@ interface FilePreviewModalProps {
 // 각 페이지 width는 938px 고정, 높이는 파일마다 가변 → 지금은 placeholder 높이.
 const PLACEHOLDER_PAGES = [520, 320, 360, 480];
 
-export default function FilePreviewModal({ fileName, onClose }: FilePreviewModalProps) {
+export default function FilePreviewModal({
+  fileName,
+  onClose,
+  downloadable = true,
+}: FilePreviewModalProps) {
   const dialogRef = useDialog(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
   return (
@@ -53,7 +59,7 @@ export default function FilePreviewModal({ fileName, onClose }: FilePreviewModal
             <span className="text-conx-gray-300">|</span>
             <span className="text-kor-heading-2-semibold text-conx-common-white">0</span>
           </div>
-          <Button variant="secondary">다운로드</Button>
+          {downloadable && <Button variant="secondary">다운로드</Button>}
         </div>
       </div>
 

@@ -116,13 +116,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-3-semibold text-conx-common-black">{children}</h2>;
 }
 
-// 포트폴리오 카드 — 썸네일 + 캡션 (TODO: 실제 이미지 연결)
-function PortfolioCard({ caption }: { caption: string }) {
+// 포트폴리오 카드 — png 썸네일 + 캡션. 클릭 시 미리보기(다운로드 불가)
+// TODO: 실제 png 썸네일 연결, hover 효과는 추후 추가 가능
+function PortfolioCard({ caption, onPreview }: { caption: string; onPreview: () => void }) {
   return (
-    <div className="flex flex-col gap-2">
-      <div className="bg-conx-gray-100 aspect-[4/3] w-full rounded-md" />
-      <p className="text-kor-body-1-medium text-conx-common-black">{caption}</p>
-    </div>
+    <button
+      type="button"
+      onClick={onPreview}
+      className="flex cursor-pointer flex-col gap-2 text-left"
+    >
+      <div className="bg-conx-gray-100 aspect-5/3 w-full rounded-md" />
+      <p className="text-kor-body-1-bold text-conx-common-black">{caption}</p>
+    </button>
   );
 }
 
@@ -178,7 +183,8 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
     actionLabel?: string;
     onAction?: () => void;
   } | null>(null);
-  const [previewFile, setPreviewFile] = useState<string | null>(null); // 미리보기 중인 파일명
+  // 미리보기 — 크루 자료(다운로드 가능) / 포트폴리오(다운로드 불가)
+  const [preview, setPreview] = useState<{ fileName: string; downloadable: boolean } | null>(null);
 
   const crew = CREWS[crewId] ?? CREWS['2']; // 기본값은 필수만 채운 최소 버전. TODO: 실제 데이터 조회
   // 선택 입력 상세가 하나라도 있으면 본문 노출, 없으면 최소(안내 문구)
@@ -332,7 +338,7 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
                       key={`file-${i}`}
                       name={f.name}
                       info={f.info}
-                      onPreview={() => setPreviewFile(f.name)}
+                      onPreview={() => setPreview({ fileName: f.name, downloadable: true })}
                     />
                   ))}
                   {crew.links?.map((l, i) => (
@@ -346,9 +352,13 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
             {crew.portfolio?.length ? (
               <section>
                 <SectionTitle>포트폴리오</SectionTitle>
-                <div className="mt-4 grid grid-cols-4 gap-x-4 gap-y-8">
+                <div className="border-conx-gray-150 mt-3 grid grid-cols-4 gap-x-6 gap-y-10 rounded-md border px-8 py-[33]">
                   {crew.portfolio.map((p, i) => (
-                    <PortfolioCard key={i} caption={p} />
+                    <PortfolioCard
+                      key={i}
+                      caption={p}
+                      onPreview={() => setPreview({ fileName: p, downloadable: false })}
+                    />
                   ))}
                 </div>
               </section>
@@ -366,9 +376,13 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
         </div>
       )}
 
-      {/* 파일 미리보기 오버레이 */}
-      {previewFile && (
-        <FilePreviewModal fileName={previewFile} onClose={() => setPreviewFile(null)} />
+      {/* 파일/포트폴리오 미리보기 오버레이 (포트폴리오는 다운로드 불가) */}
+      {preview && (
+        <FilePreviewModal
+          fileName={preview.fileName}
+          downloadable={preview.downloadable}
+          onClose={() => setPreview(null)}
+        />
       )}
 
       {/* 공유·스크랩 토스트 */}
