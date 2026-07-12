@@ -194,7 +194,7 @@ export default function DropdownCalendar({
         <div
           role="dialog"
           aria-label="날짜 범위 선택"
-          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
+          className="shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
         >
           {/* 월 네비게이션 */}
           <div className="mb-4 flex items-center justify-between">
