@@ -16,7 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import IconLink from '@/assets/icons/icon_link.svg';
+import IconLink from '@/assets/icons/icon_linkAngled.svg';
 import IconError from '@/assets/icons/icon_error.svg';
 import { IconButton } from '@/components/common/IconButton';
 import Modal from '@/components/common/Modal/Modal';
