@@ -30,7 +30,7 @@ interface DropdownFormProps {
 const SIZE_WIDTH: Record<DropdownFormSize, string> = {
   sm: 'w-[349px]',
   md: 'w-[419px]',
-  lg: 'w-[458px]',
+  lg: 'w-[457px]',
 };
 
 export default function DropdownForm({
