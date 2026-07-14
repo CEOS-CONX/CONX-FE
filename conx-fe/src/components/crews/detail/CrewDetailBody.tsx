@@ -116,17 +116,20 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-3-semibold text-conx-common-black">{children}</h2>;
 }
 
-// 포트폴리오 카드 — png 썸네일 + 캡션. 클릭 시 미리보기(다운로드 불가)
-// TODO: 실제 png 썸네일 연결, hover 효과는 추후 추가 가능
+// 포트폴리오 카드
+// TODO: 실제 png 썸네일 연결
 function PortfolioCard({ caption, onPreview }: { caption: string; onPreview: () => void }) {
   return (
     <button
       type="button"
       onClick={onPreview}
-      className="flex cursor-pointer flex-col gap-2 text-left"
+      className="group flex cursor-pointer flex-col gap-2 text-left"
     >
-      <div className="bg-conx-gray-100 aspect-5/3 w-full rounded-md" />
-      <p className="text-kor-body-1-bold text-conx-common-black">{caption}</p>
+      <div className="aspect-5/3 w-full overflow-hidden rounded-md">
+        <div className="bg-conx-gray-100 h-full w-full transition-transform duration-300 group-hover:scale-120" />
+      </div>
+      {/* 최대 2줄(=48px) 초과 시 말줄임(...) */}
+      <p className="text-kor-body-1-bold text-conx-common-black line-clamp-2">{caption}</p>
     </button>
   );
 }
@@ -283,18 +286,6 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
                 {crew.intro && (
                   <p className="text-kor-body-1-medium text-conx-common-black">{crew.intro}</p>
                 )}
-                {/* {crew.experiences?.length ? (
-                  <div className="mt-6">
-                    <p className="text-kor-body-1-semibold text-conx-common-black">주요 경험</p>
-                    <ul className="mt-2 flex list-disc flex-col gap-1 pl-5">
-                      {crew.experiences.map((e, i) => (
-                        <li key={i} className="text-kor-body-1-medium text-conx-common-black">
-                          {e}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null} */}
               </section>
             )}
 
@@ -302,7 +293,8 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
             {crew.strengths?.length ? (
               <section>
                 <SectionTitle>핵심 강점</SectionTitle>
-                <div className="mt-4 flex flex-wrap gap-2">
+                {/* 939px 컨테이너 안에서 자동 줄바꿈. 개수 무제한 — 가로/세로 gap 동일 12px */}
+                <div className="mt-4 flex flex-wrap gap-3">
                   {crew.strengths.map((s, i) => (
                     <Tag key={i} type="cyan" label={s} />
                   ))}
@@ -314,13 +306,14 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
             {crew.specialties?.length ? (
               <section>
                 <SectionTitle>전문 분야</SectionTitle>
-                <ul className="mt-4 grid grid-cols-3 gap-x-6 gap-y-3">
-                  {crew.specialties.map((s, i) => (
+                {/* 3열 고정(항목당 최대 286px, 939px 컨테이너 기준) — 최대 12개 입력 제한 */}
+                <ul className="mt-4 grid grid-cols-3 gap-x-10 gap-y-3">
+                  {crew.specialties.slice(0, 12).map((s, i) => (
                     <li
                       key={i}
-                      className="text-kor-body-1-medium text-conx-gray-600 flex items-center gap-2"
+                      className="text-kor-body-1-medium text-conx-gray-600 flex items-start gap-2.25"
                     >
-                      <IconRoundedCheckbox className="h-5 w-5 shrink-0" />
+                      <IconRoundedCheckbox className="mt-0.5 h-5 w-5 shrink-0" />
                       {s}
                     </li>
                   ))}
