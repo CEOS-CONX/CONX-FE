@@ -55,8 +55,16 @@
   --color-conx-green-500: #0ea845;
 
   /* Blue */
-  --color-conx-blue-100: #c6dfff;
+  --color-conx-blue-100: #dbeaff;
   --color-conx-blue-500: #0058cb;
+
+  /* Purple */
+  --color-conx-purple-100: #efe8ff;
+  --color-conx-purple-500: #8f35e8;
+
+  /* Cyan */
+  --color-conx-cyan-100: #d1f9ff;
+  --color-conx-cyan-500: #0099c4;
 
   /* Red */
   --color-conx-red-100: #ffe4e4;
