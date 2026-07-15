@@ -14,6 +14,7 @@ import { Toast } from '@/components/common/Toast';
 import FilePreviewModal from '@/components/projects/detail/FilePreviewModal';
 import LinkCard from '@/components/projects/detail/LinkCard';
 import UploadCard from '@/components/projects/detail/UploadCard';
+import { CREW_PROJECTS, type CrewProject, formatWorkType } from '../project';
 
 // navbar와 동일한 max-w-400(1600px) + 좌우 90px
 const CONTAINER = 'mx-auto max-w-400 px-[90px]';
@@ -41,26 +42,6 @@ interface CrewData {
   links?: { label: string; url: string; info?: string }[];
   portfolio?: string[];
   projects?: CrewProject[];
-}
-
-// 대표 프로젝트 이력 카드 데이터
-interface CrewProject {
-  name: string;
-  brand: string;
-  // 결과물별 플랫폼·콘텐츠 유형 목록 (등록 페이지에서 여러 개 입력 가능)
-  // 작업 유형 = 첫 번째 결과물만 표시, 여러 개면 '외 n개'
-  outputs: { platform: string; contentType: string }[];
-  rating: number;
-  startDate: string;
-  endDate: string;
-}
-
-// 작업 유형 표시 문자열: '플랫폼·콘텐츠 유형' (+ '외 n개')
-function formatWorkType(outputs: CrewProject['outputs']): string {
-  if (outputs.length === 0) return '';
-  const [first] = outputs;
-  const base = `${first.platform}·${first.contentType}`;
-  return outputs.length > 1 ? `${base} 외 ${outputs.length - 1}개` : base;
 }
 
 // 데이터 케이스: '1' = 선택 항목까지 채워진 크루 / '2' = 필수만 (기본·최소)
@@ -106,11 +87,7 @@ const CREWS: Record<string, CrewData> = {
       '포트폴리오명',
       '포트폴리오명',
     ],
-    projects: [
-      { name: '여름 시즌 숏폼 콘텐츠 제작', brand: '오브제 스튜디오', outputs: [{ platform: '인스타그램', contentType: '릴스' }, { platform: '유튜브', contentType: '쇼츠' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
-      { name: '프로젝트명', brand: '브랜드명', outputs: [{ platform: '플랫폼명', contentType: '콘텐츠 유형' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
-      { name: '프로젝트명', brand: '브랜드명', outputs: [{ platform: '플랫폼명', contentType: '콘텐츠 유형' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
-    ],
+    projects: CREW_PROJECTS.slice(0, 3), // 상세 사이드바는 최대 3개
   },
   '2': {
     name: '크루 이름',
@@ -305,7 +282,7 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
               <MetaItem label="인원수" value={`${crew.memberCount}명`} />
             )}
             {crew.rating != null && (
-              <MetaItem label="기업 평가" value={<StarRating rating={crew.rating} />} />
+              <MetaItem label="프로젝트 평가" value={<StarRating rating={crew.rating} />} />
             )}
           </div>
           <div className="flex shrink-0 items-center gap-3">
