@@ -86,7 +86,7 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
       role="region"
       tabIndex={-1}
       aria-label="알림"
-      className="z-conx-dropdown shadow-conx-drop-gray bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px] focus:outline-none"
+      className="z-conx-dropdown shadow-conx-drop-gray-15 bg-conx-gray-50 absolute top-full -right-5 mt-3 flex w-[425px] flex-col overflow-hidden rounded-[12px] focus:outline-none"
     >
       {/* Header (white) */}
       <div className="bg-conx-common-white shrink-0">
