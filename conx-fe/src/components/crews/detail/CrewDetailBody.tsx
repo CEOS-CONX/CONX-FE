@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 import IconRoundedCheckbox from '@/assets/icons/icon_rounded_checkbox.svg';
 import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
@@ -39,6 +40,27 @@ interface CrewData {
   files?: { name: string; info?: string }[];
   links?: { label: string; url: string; info?: string }[];
   portfolio?: string[];
+  projects?: CrewProject[];
+}
+
+// 대표 프로젝트 이력 카드 데이터
+interface CrewProject {
+  name: string;
+  brand: string;
+  // 결과물별 플랫폼·콘텐츠 유형 목록 (등록 페이지에서 여러 개 입력 가능)
+  // 작업 유형 = 첫 번째 결과물만 표시, 여러 개면 '외 n개'
+  outputs: { platform: string; contentType: string }[];
+  rating: number;
+  startDate: string;
+  endDate: string;
+}
+
+// 작업 유형 표시 문자열: '플랫폼·콘텐츠 유형' (+ '외 n개')
+function formatWorkType(outputs: CrewProject['outputs']): string {
+  if (outputs.length === 0) return '';
+  const [first] = outputs;
+  const base = `${first.platform}·${first.contentType}`;
+  return outputs.length > 1 ? `${base} 외 ${outputs.length - 1}개` : base;
 }
 
 // 데이터 케이스: '1' = 선택 항목까지 채워진 크루 / '2' = 필수만 (기본·최소)
@@ -84,6 +106,11 @@ const CREWS: Record<string, CrewData> = {
       '포트폴리오명',
       '포트폴리오명',
     ],
+    projects: [
+      { name: '여름 시즌 숏폼 콘텐츠 제작', brand: '오브제 스튜디오', outputs: [{ platform: '인스타그램', contentType: '릴스' }, { platform: '유튜브', contentType: '쇼츠' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
+      { name: '프로젝트명', brand: '브랜드명', outputs: [{ platform: '플랫폼명', contentType: '콘텐츠 유형' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
+      { name: '프로젝트명', brand: '브랜드명', outputs: [{ platform: '플랫폼명', contentType: '콘텐츠 유형' }], rating: 4.2, startDate: '2000.00.00', endDate: '2000.00.00' }, // prettier-ignore
+    ],
   },
   '2': {
     name: '크루 이름',
@@ -114,6 +141,35 @@ function StarRating({ rating }: { rating: number }) {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-3-semibold text-conx-common-black">{children}</h2>;
+}
+
+// 대표 프로젝트 이력 카드
+function CrewProjectCard({ project }: { project: CrewProject }) {
+  return (
+    <div className="border-conx-gray-150 bg-conx-common-white flex w-full flex-col items-start gap-6 rounded-md border px-6 py-5">
+      <div className="flex flex-col gap-1">
+        <p className="text-kor-body-1-bold text-conx-common-black">{project.name}</p>
+        <p className="text-kor-label-1-medium text-conx-common-black">{project.brand}</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span className="text-kor-label-1-medium text-conx-gray-350">작업 유형</span>
+        <span className="text-kor-body-1-medium text-conx-common-black">
+          {formatWorkType(project.outputs)}
+        </span>
+      </div>
+      <div className="w-full gap-2">
+        <span className="text-kor-label-1-medium text-conx-gray-350">프로젝트 평가</span>
+        <div className="flex items-center justify-between">
+          <span className="text-eng-label-1-medium text-conx-gray-600">
+            <StarRating rating={project.rating} />
+          </span>
+          <span className="text-kor-label-1-semibold text-conx-gray-200">
+            {project.startDate} ~ {project.endDate}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // 포트폴리오 카드
@@ -156,9 +212,9 @@ function SchoolMetaItem({ schools }: { schools: string[] }) {
       {truncated && (
         // top-full=학교명 하단, left-0=학교명 시작점. pt-2는 hover가 끊기지 않게 다리 역할
         <div className="z-conx-dropdown absolute top-full left-0 hidden pt-2 group-hover:block">
-          <div className="border-conx-gray-100 bg-conx-common-white w-[180px] rounded-md border p-3 shadow-lg">
+          <div className="border-conx-gray-100 bg-conx-common-white w-45 rounded-md border p-3 shadow-lg">
             <p className="text-kor-label-1-medium text-conx-gray-450">전체 소속 학교</p>
-            <ul className="[&::-webkit-scrollbar-thumb]:bg-conx-gray-100 [scrollbar-thin] mt-2 flex max-h-[160px] [scrollbar-color:#EBEFF5_transparent] flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+            <ul className="[&::-webkit-scrollbar-thumb]:bg-conx-gray-100 [scrollbar-thin] mt-2 flex max-h-40 [scrollbar-color:#EBEFF5_transparent] flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
               {schools.map((s, i) => (
                 <li
                   key={i}
@@ -276,10 +332,13 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* ───── 선택 입력 섹션 (gap 100px, 값 있는 것만 노출) ───── */}
-        {hasDetail && (
-          <div className="mt-8 flex flex-col gap-[100px]">
+      {/* ───── 상세 (전체 상태): 왼쪽 선택 입력 섹션 + 오른쪽 대표 프로젝트 이력 ───── */}
+      {hasDetail ? (
+        <div className="flex justify-between">
+          {/* 왼쪽: 선택 입력 섹션 (939px, gap 100px, 값 있는 것만) */}
+          <div className="mt-8 flex w-[939px] flex-col gap-[100px]">
             {/* 1. 소개글 + 주요 경험 */}
             {(crew.intro || crew.experiences?.length) && (
               <section>
@@ -357,11 +416,31 @@ export default function CrewDetailBody({ crewId }: { crewId: string }) {
               </section>
             ) : null}
           </div>
-        )}
-      </div>
 
-      {/* ───── 최소 상태 — 상세 정보 없음 ───── */}
-      {!hasDetail && (
+          {/* 오른쪽: 대표 프로젝트 이력 */}
+          {crew.projects?.length ? (
+            <aside className="w-[337px] shrink-0">
+              <div className="flex items-center justify-between">
+                <SectionTitle>대표 프로젝트 이력</SectionTitle>
+                {/* 전체보기 → 대표 프로젝트 페이지 (추후 제작). hover/active는 기존 아이콘 버튼과 동일 */}
+                <button
+                  type="button"
+                  onClick={() => router.push(`/crews/${crewId}/projects`)}
+                  className="text-kor-label-1-medium text-conx-gray-450 hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center gap-0.5 rounded-md px-2 py-1 transition-colors active:bg-transparent"
+                >
+                  전체보기
+                  <IconArrowRight className="[&_path]:stroke-conx-gray-450 h-4 w-4" />
+                </button>
+              </div>
+              <div className="mt-4 flex flex-col gap-3">
+                {crew.projects.map((p, i) => (
+                  <CrewProjectCard key={i} project={p} />
+                ))}
+              </div>
+            </aside>
+          ) : null}
+        </div>
+      ) : (
         <div className="flex py-40 pl-94">
           <span className="text-kor-body-1-semibold text-conx-gray-500">
             아직 공개된 상세 정보가 없습니다.
