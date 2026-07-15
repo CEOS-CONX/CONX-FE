@@ -1,6 +1,6 @@
 import IconError from '@/assets/icons/icon_error.svg';
 
-type TextFieldSize = 'sm' | 'md' | 'lg';
+type TextFieldSize = 'sm' | 'md' | 'lg' | 'full';
 
 interface TextFieldInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   size?: TextFieldSize;
@@ -15,6 +15,7 @@ const SIZE_WIDTH: Record<TextFieldSize, string> = {
   sm: 'w-[349px]',
   md: 'w-[419px]',
   lg: 'w-[457px]',
+  full: 'w-full',
 };
 
 export default function TextFieldInput({
@@ -39,7 +40,9 @@ export default function TextFieldInput({
       ].join(' ');
 
   return (
-    <div className={`flex shrink-0 flex-col gap-3 ${SIZE_WIDTH[size]} ${className ?? ''}`}>
+    <div
+      className={`flex flex-col gap-3 ${size !== 'full' ? 'shrink-0' : ''} ${SIZE_WIDTH[size]} ${className ?? ''}`}
+    >
       {(label || helperText) && (
         <div className="flex flex-col gap-0.5">
           {label && (

@@ -5,8 +5,7 @@ const VARIANT_STYLES = {
     'disabled:bg-transparent disabled:text-conx-gray-250',
   ].join(' '),
   primary: [
-    // 색 토큰 정의해야 함
-    'bg-[#1D2229] text-conx-primary-300',
+    'bg-conx-common-black text-conx-primary-200',
     'hover:bg-conx-gray-600 active:bg-conx-gray-500',
     'disabled:bg-conx-gray-100 disabled:text-conx-gray-250',
   ].join(' '),
@@ -17,7 +16,7 @@ const VARIANT_STYLES = {
   ].join(' '),
   tertiary: [
     'bg-conx-common-white text-conx-common-black border border-conx-gray-150',
-    'hover:bg-conx-gray-50 hover:border-conx-gray-150 active:bg-conx-gray-150',
+    'hover:bg-conx-gray-50 hover:border-conx-gray-150 active:bg-conx-gray-150 active:border-conx-gray-250',
     'disabled:bg-conx-gray-100 disabled:text-conx-gray-250 disabled:border-transparent',
   ].join(' '),
 } as const;
