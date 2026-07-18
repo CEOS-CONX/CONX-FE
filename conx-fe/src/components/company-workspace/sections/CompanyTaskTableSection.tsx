@@ -18,16 +18,16 @@ const STATUS_OPTIONS = [
 
 const ROWS_PER_PAGE = 10;
 
-interface TaskTableSectionProps {
+interface CompanyTaskTableSectionProps {
   tasks: WorkspaceTask[];
 }
 
 function getTaskUrl(task: WorkspaceTask): string {
-  if (task.taskType === 'settlement') return '/crew-workspace/settlement';
-  return `/crew-workspace/project-tasks/${task.projectId ?? ''}`;
+  if (task.taskType === 'settlement') return '/company-workspace/settlement';
+  return `/company-workspace/project-status/${task.projectId ?? ''}`;
 }
 
-export default function TaskTableSection({ tasks }: TaskTableSectionProps) {
+export default function CompanyTaskTableSection({ tasks }: CompanyTaskTableSectionProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(tasks.length / ROWS_PER_PAGE));
@@ -70,7 +70,9 @@ export default function TaskTableSection({ tasks }: TaskTableSectionProps) {
                   onClick={() => router.push(getTaskUrl(task))}
                   className="hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 cursor-pointer"
                 >
-                  <TableCell type="text">{task.taskName}</TableCell>
+                  <TableCell type="text" className="px-8.25!">
+                    {task.taskName}
+                  </TableCell>
                   <TableCell type="tag">
                     <TagIndicator type={task.indicatorType} label={task.indicatorLabel} />
                   </TableCell>

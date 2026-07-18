@@ -102,8 +102,9 @@ function LinkCard({
   function isValidUrl(url: string): boolean {
     if (!url) return true;
     try {
-      new URL(`https://${url}`);
-      return true;
+      const parsed = new URL(`https://${url}`);
+      // 도메인에 최소 하나의 . 필요 (예: example.com)
+      return parsed.hostname.includes('.');
     } catch {
       return false;
     }
@@ -134,31 +135,31 @@ function LinkCard({
         )}
         <div
           ref={cardRef}
-          className={`flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-md border bg-white p-4 ${borderClass}`}
+          className={`relative flex w-full cursor-pointer flex-col gap-3 overflow-hidden rounded-md border bg-white p-4 ${borderClass}`}
           onClick={() => setIsFocused(true)}
           onBlur={handleBlur}
         >
+          {isHovered && (
+            <div className="absolute top-4 right-4">
+              <IconButton
+                variant="trash"
+                onClick={() => onDelete(item.id)}
+                aria-label="링크 삭제"
+              />
+            </div>
+          )}
           {isFocused ? (
             <>
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-1">
-                  <IconLink className={`size-5.5 shrink-0 ${iconColor}`} />
-                  <input
-                    type="text"
-                    placeholder="링크명"
-                    autoFocus
-                    value={item.name}
-                    onChange={(e) => onUpdate(item.id, 'name', e.target.value)}
-                    className="text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 flex-1 outline-none"
-                  />
-                </div>
-                {isHovered && (
-                  <IconButton
-                    variant="trash"
-                    onClick={() => onDelete(item.id)}
-                    aria-label="링크 삭제"
-                  />
-                )}
+              <div className="flex items-start gap-1">
+                <IconLink className={`size-5.5 shrink-0 ${iconColor}`} />
+                <input
+                  type="text"
+                  placeholder="링크명"
+                  autoFocus
+                  value={item.name}
+                  onChange={(e) => onUpdate(item.id, 'name', e.target.value)}
+                  className="text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 flex-1 outline-none"
+                />
               </div>
               <div className="flex flex-col gap-3 pl-6.5">
                 <div className="flex items-start">
@@ -184,22 +185,13 @@ function LinkCard({
             </>
           ) : (
             <>
-              <div className="flex items-start justify-between">
-                <div className="flex items-start gap-1">
-                  <IconLink className={`size-5.5 shrink-0 ${iconColor}`} />
-                  <span
-                    className={`text-kor-body-1-semibold ${filled && item.name ? 'text-conx-common-black' : 'text-conx-gray-300'}`}
-                  >
-                    {item.name || '링크명'}
-                  </span>
-                </div>
-                {isHovered && (
-                  <IconButton
-                    variant="trash"
-                    onClick={() => onDelete(item.id)}
-                    aria-label="링크 삭제"
-                  />
-                )}
+              <div className="flex items-start gap-1">
+                <IconLink className={`size-5.5 shrink-0 ${iconColor}`} />
+                <span
+                  className={`text-kor-body-1-semibold ${filled && item.name ? 'text-conx-common-black' : 'text-conx-gray-300'}`}
+                >
+                  {item.name || '링크명'}
+                </span>
               </div>
               <div className="flex flex-col gap-3 pl-6.5">
                 <p
@@ -218,7 +210,7 @@ function LinkCard({
         </div>
       </div>
       {urlError && (
-        <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1">
+        <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1 self-start">
           <IconError className="h-4 w-4 shrink-0" />
           링크 형식이 올바르지 않습니다
         </p>

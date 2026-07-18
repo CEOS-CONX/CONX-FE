@@ -34,7 +34,15 @@ export const CREW_TYPE_OPTIONS = [
   { value: 'CLUB', label: '동아리' },
   { value: 'SMALLMEETING', label: '소모임' },
   { value: 'COUNCIL', label: '학생회' },
-  { value: 'ETC', label: '기타' },
+];
+
+export const ACTIVITY_FIELD_OPTIONS = [
+  { value: 'MARKETING', label: '마케팅' },
+  { value: 'DESIGN', label: '디자인' },
+  { value: 'BUSINESS', label: '경영·컨설팅' },
+  { value: 'FINANCE', label: '금융' },
+  { value: 'STARTUP', label: '창업' },
+  { value: 'DEV_IT', label: '개발·IT' },
 ];
 
 export const RATING_OPTIONS = [

@@ -6,6 +6,7 @@ interface CardProps {
   imageSrc: string;
   imageAlt: string;
   tag?: { type: TagType; label: string };
+  tags?: { type: TagType; label: string }[];
   defaultScraped?: boolean;
   onScrapChange?: (scraped: boolean) => void;
   title: string;
@@ -30,6 +31,7 @@ export default function Card({
   imageSrc,
   imageAlt,
   tag,
+  tags,
   defaultScraped,
   onScrapChange,
   title,
@@ -47,6 +49,7 @@ export default function Card({
         src={imageSrc}
         alt={imageAlt}
         tag={tag}
+        tags={tags}
         defaultScraped={defaultScraped}
         onScrapChange={onScrapChange}
       />

@@ -14,12 +14,14 @@ interface ResultsTableSectionProps {
   results: ResultItem[];
   onResultClick?: (result: ResultItem) => void;
   onUploadClick?: () => void;
+  showUploadButton?: boolean;
 }
 
 export default function ResultsTableSection({
   results,
   onResultClick,
   onUploadClick,
+  showUploadButton = true,
 }: ResultsTableSectionProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(results.length / ROWS_PER_PAGE));
@@ -73,18 +75,26 @@ export default function ResultsTableSection({
         </p>
       )}
 
-      <div className="flex items-center justify-between pt-6">
-        <div className="flex-1" />
+      <div
+        className={`flex items-center pt-6 ${showUploadButton ? 'justify-between' : 'justify-center'}`}
+      >
+        {showUploadButton && <div className="flex-1" />}
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
         />
-        <div className="flex flex-1 justify-end">
-          <Button variant="tertiary" className="h-12 w-54.25 px-11.75 py-3" onClick={onUploadClick}>
-            결과물 업로드하기
-          </Button>
-        </div>
+        {showUploadButton && (
+          <div className="flex flex-1 justify-end">
+            <Button
+              variant="tertiary"
+              className="h-12 w-54.25 px-11.75 py-3"
+              onClick={onUploadClick}
+            >
+              결과물 업로드하기
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

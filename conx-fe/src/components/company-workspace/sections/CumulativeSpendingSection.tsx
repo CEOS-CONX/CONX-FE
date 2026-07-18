@@ -1,22 +1,22 @@
 import Link from 'next/link';
 import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 
-interface CumulativeFundingSectionProps {
+interface CumulativeSpendingSectionProps {
   amount: string;
   message: string;
 }
 
-export default function CumulativeFundingSection({
+export default function CumulativeSpendingSection({
   amount,
   message,
-}: CumulativeFundingSectionProps) {
+}: CumulativeSpendingSectionProps) {
   return (
     <section className="flex min-w-0 flex-1 flex-col items-end gap-3.5">
       <div className="flex w-full items-end justify-between">
         <div className="flex items-center gap-0.5">
-          <h2 className="text-kor-heading-3-bold text-conx-common-black">누적 지원금</h2>
+          <h2 className="text-kor-heading-3-bold text-conx-common-black">누적 지출 금액</h2>
           <Link
-            href="/crew-workspace/settlement"
+            href="/company-workspace/settlement"
             className="hover:bg-conx-opacity-gray-6 flex items-center justify-center rounded-md p-1.5 active:bg-transparent"
           >
             <IconArrowRight className="size-4.5" />
