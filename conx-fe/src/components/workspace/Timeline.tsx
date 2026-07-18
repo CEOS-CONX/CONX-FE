@@ -18,7 +18,7 @@ const LABEL_COLORS: Record<TimelineType, string> = {
 
 export default function Timeline({ type, label, date, number, showLine = true }: TimelineProps) {
   return (
-    <div className="flex items-start gap-5">
+    <div className="flex h-18 items-start gap-5">
       <div className="relative inline-grid shrink-0">
         <TimelineNumber type={type} number={number} />
         {showLine && (
