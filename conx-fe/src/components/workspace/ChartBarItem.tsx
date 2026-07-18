@@ -14,7 +14,7 @@ function ChartLine() {
 
 export default function ChartBarItem({ value }: ChartBarItemProps) {
   return (
-    <div className="flex items-center gap-5.25">
+    <div className="flex w-162.25 items-center gap-5.25">
       <ChartValue value={value} />
       <ChartLine />
     </div>

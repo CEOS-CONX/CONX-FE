@@ -20,8 +20,10 @@ export default function StatusCard({
     <button
       type="button"
       onClick={onClick}
-      className={`border-conx-gray-150 flex flex-col gap-2.5 rounded-md border px-5 py-4 text-left ${
-        active ? 'bg-conx-gray-100' : 'bg-conx-common-white hover:bg-conx-gray-50'
+      className={`border-conx-gray-150 flex w-54 flex-col items-start gap-2.5 rounded-md border px-5 py-4 text-left ${
+        active
+          ? 'bg-conx-gray-100'
+          : 'bg-conx-common-white hover:bg-conx-gray-50 active:bg-conx-gray-100'
       }`}
     >
       <Tag type={tagType} label={tagLabel} />
