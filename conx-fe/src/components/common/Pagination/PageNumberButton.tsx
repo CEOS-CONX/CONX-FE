@@ -1,6 +1,5 @@
 interface PageNumberButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   page: number;
-  /** 현재 페이지면 true → 진한 색 + aria-current */
   selected?: boolean;
 }
 
@@ -15,8 +14,10 @@ export default function PageNumberButton({
       type="button"
       aria-label={`${page}페이지`}
       aria-current={selected ? 'page' : undefined}
-      className={`text-kor-body-1-medium flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-md ${
-        selected ? 'text-conx-common-black' : 'text-conx-gray-400 hover:bg-conx-opacity-gray-6'
+      className={`font-jakarta flex h-7.5 w-7.5 cursor-pointer items-center justify-center rounded-md ${
+        selected
+          ? 'bg-conx-gray-600 text-eng-label-1-bold text-conx-common-white'
+          : 'text-eng-label-1-medium text-conx-common-black hover:bg-conx-opacity-gray-6'
       } ${className ?? ''}`}
       {...props}
     >

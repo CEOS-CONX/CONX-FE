@@ -17,7 +17,7 @@ const NAV_LINKS = [
   { label: '홈', href: '/' },
   { label: '프로젝트 둘러보기', href: '/projects' },
   { label: '크루 둘러보기', href: '/crews' },
-  { label: '워크스페이스', href: '#' },
+  { label: '워크스페이스', href: '/workspace' },
 ] as const;
 
 const NAV_LINK_BASE = 'text-conx-common-black rounded-md px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
