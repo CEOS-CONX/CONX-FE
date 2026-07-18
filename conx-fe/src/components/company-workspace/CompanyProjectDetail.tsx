@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import IconArrowLeftStroke from '@/assets/icons/icon_arrowLeft_stroke.svg';
 import Button from '@/components/common/Button/Button';
 import TaskProgressSection from '@/components/workspace/sections/TaskProgressSection';
@@ -10,7 +10,6 @@ import SubmissionCriteriaSection from '@/components/workspace/sections/Submissio
 import SettlementStatusSection from '@/components/workspace/sections/SettlementStatusSection';
 import ResultsTableSection from '@/components/workspace/sections/ResultsTableSection';
 import Pagination from '@/components/common/Pagination/Pagination';
-import Toast from '@/components/common/Toast/Toast';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
 import {
@@ -42,12 +41,10 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   const isMatched = !!data.matchedCrew;
 
   const router = useRouter();
-  const searchParams = useSearchParams();
   const basePath = `/company-workspace/project-status/${projectId}`;
 
   const [currentPage, setCurrentPage] = useState(1);
   const [criteria, setCriteria] = useState(data.submissionCriteria);
-  const [showToast, setShowToast] = useState(() => searchParams.get('toast') === 'cancelled');
 
   function handleResultClick(result: ResultItem) {
     router.push(`${basePath}/results/${result.id}`);
@@ -202,14 +199,6 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
           )}
         </section>
       </div>
-      {showToast && (
-        <Toast
-          message="작성이 취소되었습니다."
-          duration={5000}
-          onClose={() => setShowToast(false)}
-          className="z-conx-toast fixed top-222.5 left-1/2 -translate-x-1/2"
-        />
-      )}
     </div>
   );
 }

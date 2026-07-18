@@ -36,8 +36,8 @@ export default function CrewCard({
             <span className="text-kor-label-1-semibold text-conx-gray-450">{subtitle}</span>
           </div>
           <div className="flex items-center gap-1">
-            {tags.map((tag) => (
-              <Tag key={tag} type="gray" label={tag} />
+            {tags.map((tag, i) => (
+              <Tag key={`${tag}-${i}`} type="gray" label={tag} />
             ))}
           </div>
         </div>
