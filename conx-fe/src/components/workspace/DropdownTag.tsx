@@ -17,6 +17,8 @@ interface DropdownTagProps {
   value?: string;
   defaultValue?: string;
   onChange?: (value: string) => void;
+  className?: string;
+  panelClassName?: string;
 }
 
 export default function DropdownTag({
@@ -24,6 +26,8 @@ export default function DropdownTag({
   value: controlledValue,
   defaultValue,
   onChange,
+  className,
+  panelClassName,
 }: DropdownTagProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [internalValue, setInternalValue] = useState<string | undefined>(defaultValue);
@@ -60,18 +64,20 @@ export default function DropdownTag({
   }
 
   return (
-    <div ref={containerRef} className="relative inline-block">
+    <div ref={containerRef} className={`relative inline-block ${className ?? ''}`}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
         className="flex cursor-pointer items-center gap-1"
       >
-        <Tag type={selected.tagType} label={selected.label} />
-        {isOpen ? (
-          <IconArrowUpFill className="text-conx-gray-450 size-4" />
-        ) : (
-          <IconArrowDownStroke className="text-conx-gray-450 size-4" />
-        )}
+        <Tag type={selected.tagType} label={selected.label} compact />
+        <span className="hover:bg-conx-opacity-gray-6 flex items-center justify-center rounded-md">
+          {isOpen ? (
+            <IconArrowUpFill className="text-conx-gray-450 size-7.5 p-1.5" />
+          ) : (
+            <IconArrowDownStroke className="text-conx-gray-450 size-7.5 p-1.5" />
+          )}
+        </span>
       </button>
 
       {isOpen && (
@@ -85,7 +91,7 @@ export default function DropdownTag({
               onClick={() => handleSelect(opt.value)}
               className="cursor-pointer p-1 text-left"
             >
-              <Tag type={opt.tagType} label={opt.label} />
+              <Tag type={opt.tagType} label={opt.label} compact />
             </button>
           ))}
         </div>
