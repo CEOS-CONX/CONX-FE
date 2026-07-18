@@ -20,7 +20,7 @@ export default function TaskDetailHeader({
   return (
     <div className="flex flex-col gap-5">
       <Link
-        href="/workspace/project-tasks"
+        href="/crew-workspace/project-tasks"
         className="text-kor-body-1-semibold text-conx-gray-450 flex w-29.5 items-center"
       >
         <IconArrowLeftStroke className="size-7.5 p-1.5" />

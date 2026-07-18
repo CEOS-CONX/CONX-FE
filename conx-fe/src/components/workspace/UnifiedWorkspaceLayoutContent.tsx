@@ -7,7 +7,7 @@ import CompanyWorkspaceSidebar from '@/components/company-workspace/CompanyWorks
 export default function UnifiedWorkspaceLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isCompanyWorkspace = pathname.startsWith('/company-workspace');
-  const isCrewDetailPage = /^\/workspace\/project-tasks\/.+/.test(pathname);
+  const isCrewDetailPage = /^\/crew-workspace\/project-tasks\/.+/.test(pathname);
   const isCompanyDetailPage = /^\/company-workspace\/project-status\/.+/.test(pathname);
 
   if (isCrewDetailPage || isCompanyDetailPage) {

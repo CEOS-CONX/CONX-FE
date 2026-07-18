@@ -82,7 +82,7 @@ export default function WorkspaceSettlement() {
               {pagedRows.map((row) => (
                 <tr
                   key={row.id}
-                  onClick={() => router.push(`/workspace/project-tasks/${row.id}`)}
+                  onClick={() => router.push(`/crew-workspace/project-tasks/${row.id}`)}
                   className="hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 cursor-pointer"
                 >
                   <TableCell type="dropdownTag">

@@ -16,7 +16,7 @@ export default function CumulativeFundingSection({
         <div className="flex items-center gap-0.5">
           <h2 className="text-kor-heading-3-bold text-conx-common-black">누적 지원금</h2>
           <Link
-            href="/workspace/settlement"
+            href="/crew-workspace/settlement"
             className="hover:bg-conx-opacity-gray-6 flex items-center justify-center rounded-md p-1.5 active:bg-transparent"
           >
             <IconArrowRight className="size-4.5" />

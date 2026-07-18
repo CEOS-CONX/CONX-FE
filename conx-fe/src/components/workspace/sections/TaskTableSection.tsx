@@ -23,8 +23,8 @@ interface TaskTableSectionProps {
 }
 
 function getTaskUrl(task: WorkspaceTask): string {
-  if (task.taskType === 'settlement') return '/workspace/settlement';
-  return `/workspace/project-tasks/${task.projectId ?? ''}`;
+  if (task.taskType === 'settlement') return '/crew-workspace/settlement';
+  return `/crew-workspace/project-tasks/${task.projectId ?? ''}`;
 }
 
 export default function TaskTableSection({ tasks }: TaskTableSectionProps) {
