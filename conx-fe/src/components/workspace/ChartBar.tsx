@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import IconTooltipTail from '@/assets/icons/icon_tooltip_tail.svg';
 
 type ChartBarState = 'default' | 'active' | 'disabled';
 
@@ -8,6 +8,7 @@ interface ChartBarProps {
   score: number;
   maxScore?: number;
   state?: ChartBarState;
+  showTooltip?: boolean;
   onClick?: () => void;
 }
 
@@ -28,18 +29,19 @@ export default function ChartBar({
   score,
   maxScore = 5,
   state = 'default',
+  showTooltip: showTooltipProp,
   onClick,
 }: ChartBarProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const heightPercent = maxScore > 0 ? (score / maxScore) * 100 : 0;
-  const showTooltip = state === 'active' || (state === 'default' && isHovered);
+  const MAX_BAR_HEIGHT = 206;
+  const barHeight = maxScore > 0 ? (score / maxScore) * MAX_BAR_HEIGHT : 0;
+  const isTooltipVisible = (state === 'active' || showTooltipProp) && barHeight > 0;
 
   const barColor =
     state === 'active'
       ? BAR_COLORS.active
       : state === 'disabled'
         ? BAR_COLORS.disabled
-        : isHovered
+        : showTooltipProp
           ? BAR_HOVER_COLOR
           : BAR_COLORS.default;
 
@@ -47,25 +49,18 @@ export default function ChartBar({
     state === 'active' ? TOOLTIP_TEXT_COLOR.active : TOOLTIP_TEXT_COLOR.hover;
 
   return (
-    <div
-      className="flex w-10 flex-col items-center justify-end"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      onClick={onClick}
-    >
-      {showTooltip && heightPercent > 0 && (
-        <div className="mb-1 flex flex-col items-center">
-          <div className="shadow-conx-drop-gray bg-conx-common-white rounded-md px-1.5 py-1">
+    <div className="flex w-10 flex-col items-center justify-end" onClick={onClick}>
+      {isTooltipVisible && (
+        <div className="drop-shadow-conx-drop-gray mb-1 flex flex-col items-center gap-0">
+          <div className="bg-conx-common-white rounded-md px-1.5 py-1">
             <span className={`text-kor-caption-1-semibold ${tooltipTextColor}`}>
               {score.toFixed(1)}
             </span>
           </div>
-          <svg width="11" height="7" viewBox="0 0 11 7" fill="none">
-            <path d="M5.5 7L0 0H11L5.5 7Z" fill="white" />
-          </svg>
+          <IconTooltipTail className="h-2 w-2.75" />
         </div>
       )}
-      <div className={`w-full rounded-t-md ${barColor}`} style={{ height: `${heightPercent}%` }} />
+      <div className={`w-full rounded-t-md ${barColor}`} style={{ height: `${barHeight}px` }} />
     </div>
   );
 }
