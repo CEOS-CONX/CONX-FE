@@ -1,27 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
-const SIDEBAR_ITEMS = ['대시보드', '프로젝트 현황', '정산 관리'] as const;
+const SIDEBAR_ITEMS = [
+  { label: '대시보드', href: '/workspace' },
+  { label: '프로젝트 현황', href: '/workspace/project-tasks' },
+  { label: '정산 관리', href: '/workspace/settlement' },
+] as const;
 
 export default function WorkspaceSidebar() {
-  const [activeItem] = useState<string>('대시보드');
+  const pathname = usePathname();
 
   return (
     <nav className="flex w-45 shrink-0 flex-col gap-1">
-      {SIDEBAR_ITEMS.map((item) => (
-        <button
-          key={item}
-          type="button"
-          className={`hover:bg-conx-opacity-gray-6 rounded-md px-3 py-2.5 text-left ${
-            activeItem === item
-              ? 'text-kor-body-1-bold text-conx-common-black'
-              : 'text-kor-body-1-medium text-conx-common-black'
-          }`}
-        >
-          {item}
-        </button>
-      ))}
+      {SIDEBAR_ITEMS.map(({ label, href }) => {
+        const isActive = href === '/workspace' ? pathname === href : pathname.startsWith(href);
+
+        return (
+          <Link
+            key={label}
+            href={href}
+            className={`hover:bg-conx-opacity-gray-6 rounded-md px-3 py-2.5 text-left ${
+              isActive
+                ? 'text-kor-body-1-bold text-conx-common-black'
+                : 'text-kor-body-1-medium text-conx-common-black'
+            }`}
+          >
+            {label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
