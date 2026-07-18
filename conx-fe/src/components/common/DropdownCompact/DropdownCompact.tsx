@@ -88,8 +88,9 @@ export default function DropdownCompact({
   }, [isOpen]);
 
   function handleSelect(newValue: string) {
-    if (!isControlled) setInternalValue(newValue);
-    onChange?.(newValue);
+    const isDeselect = newValue === value;
+    if (!isControlled) setInternalValue(isDeselect ? undefined : newValue);
+    onChange?.(isDeselect ? '' : newValue);
     setIsOpen(false);
   }
 

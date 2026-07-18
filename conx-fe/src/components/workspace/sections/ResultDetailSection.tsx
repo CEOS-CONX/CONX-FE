@@ -1,6 +1,10 @@
+'use client';
+
+import { useState } from 'react';
 import IconFile from '@/assets/icons/icon_file.svg';
 import IconLink from '@/assets/icons/icon_link.svg';
 import IconArrowRightStroke from '@/assets/icons/icon_arrowRight_stroke.svg';
+import FilePreviewModal from '@/components/projects/detail/FilePreviewModal';
 import type { ResultItem, ResultFileItem, ResultLinkItem } from '@/types/workspace';
 
 function FilesBlock({
@@ -10,6 +14,8 @@ function FilesBlock({
   files: ResultFileItem[];
   hasFilesAbove?: boolean;
 }) {
+  const [previewFile, setPreviewFile] = useState<string | null>(null);
+
   return (
     <div className={`flex flex-col gap-2 ${hasFilesAbove ? 'pt-5' : 'pt-13'}`}>
       <h4 className="text-kor-body-1-semibold text-conx-common-black">파일</h4>
@@ -27,14 +33,15 @@ function FilesBlock({
               <div className="flex items-center gap-3">
                 <button
                   type="button"
-                  className="text-kor-label-1-semibold text-conx-common-black flex h-10 w-25.5 cursor-pointer items-center gap-1 px-3 py-2"
+                  onClick={() => setPreviewFile(file.name)}
+                  className="text-kor-body-1-semibold text-conx-common-black hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
                 >
                   미리보기
                   <IconArrowRightStroke className="size-4.5" />
                 </button>
                 <button
                   type="button"
-                  className="text-kor-label-1-semibold text-conx-common-black flex h-10 w-25.5 cursor-pointer items-center gap-1 px-3 py-2"
+                  className="text-kor-body-1-bold text-conx-common-black hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 flex cursor-pointer items-center gap-1 rounded-md px-3 py-2"
                 >
                   다운로드
                   <IconArrowRightStroke className="size-4.5" />
@@ -49,6 +56,9 @@ function FilesBlock({
           </div>
         ))}
       </div>
+      {previewFile && (
+        <FilePreviewModal fileName={previewFile} onClose={() => setPreviewFile(null)} />
+      )}
     </div>
   );
 }
@@ -65,18 +75,24 @@ function LinksBlock({
       <h4 className="text-kor-body-1-semibold text-conx-common-black">링크</h4>
       <div className="flex flex-col gap-2">
         {links.map((link, i) => (
-          <div key={i} className="bg-conx-gray-50 flex flex-col gap-3 rounded-md p-4">
+          <a
+            key={i}
+            href={link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-conx-gray-50 hover:bg-conx-gray-100 active:bg-conx-gray-150 flex cursor-pointer flex-col gap-3 rounded-md p-4 transition-colors"
+          >
             <div className="flex items-start gap-1">
               <IconLink className="text-conx-common-black size-5.5 shrink-0" />
               <span className="text-kor-body-1-semibold text-conx-gray-550">{link.label}</span>
             </div>
             <span className="text-eng-body-1-medium text-conx-gray-550 pl-6.5">{link.url}</span>
             {link.description && (
-              <span className="text-kor-label-1-medium text-conx-gray-550 pl-6.5">
+              <span className="text-kor-body-1-medium text-conx-gray-550 pl-6.5">
                 {link.description}
               </span>
             )}
-          </div>
+          </a>
         ))}
       </div>
     </div>

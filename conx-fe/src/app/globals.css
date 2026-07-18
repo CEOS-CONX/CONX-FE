@@ -5,6 +5,10 @@
   --foreground: #121212;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ========== Breakpoints (Desktop-first) ========== */
 /* 기본값(prefix 없음) → xxlarge (1600px 이상) — 기본 디자인 값
   large:              → 1200px 미만 (실질 최소 992px)
