@@ -223,7 +223,7 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
         <div
           role="dialog"
           aria-label="날짜 선택"
-          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
+          className={`drop-shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full mt-2 w-90 rounded-md p-4 ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
           <div className="mb-4 flex items-center justify-between">
             <button
