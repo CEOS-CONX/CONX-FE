@@ -82,7 +82,7 @@ export default function DropdownTag({
 
       {isOpen && (
         <div
-          className={`drop-shadow-conx-drop-gray z-conx-dropdown bg-conx-common-white absolute top-full left-0 mt-2.25 flex flex-col gap-2 rounded-md p-2 ${panelClassName ?? ''}`}
+          className={`drop-shadow-conx-drop-gray-15 z-conx-dropdown bg-conx-common-white absolute top-full left-0 mt-2.25 flex flex-col gap-2 rounded-md p-2 ${panelClassName ?? ''}`}
         >
           {options.map((opt) => (
             <button

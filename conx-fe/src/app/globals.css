@@ -85,7 +85,7 @@
   /* ========== */
 
   /* Effect — DropShadow/Gray (이름 뒤 숫자 = 불투명도 %) + LayerBlur */
-  --drop-shadow-conx-drop-gray: 0px 2px 8px rgb(29 34 41 / 0.15);
+  --drop-shadow-conx-drop-gray-15: 0px 2px 8px rgb(29 34 41 / 0.15);
   --shadow-conx-drop-gray-4: 0 -6px 12px 0 rgb(29 34 41 / 0.04);
   --shadow-conx-drop-gray-30: 0 2px 12px 0 rgb(29 34 41 / 0.3);
   --blur-conx-layer-40: 40px;

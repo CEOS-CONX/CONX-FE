@@ -125,7 +125,7 @@ export default function DropdownCompact({
       {isOpen && (
         <ul
           role="listbox"
-          className="drop-shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
+          className="drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
         >
           {options.map((opt) => (
             <li
