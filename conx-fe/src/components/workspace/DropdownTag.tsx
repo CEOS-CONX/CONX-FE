@@ -67,7 +67,10 @@ export default function DropdownTag({
     <div ref={containerRef} className={`relative inline-block ${className ?? ''}`}>
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen((prev) => !prev);
+        }}
         className="flex cursor-pointer items-center gap-1"
       >
         <Tag type={selected.tagType} label={selected.label} compact />
@@ -88,7 +91,10 @@ export default function DropdownTag({
             <button
               key={opt.value}
               type="button"
-              onClick={() => handleSelect(opt.value)}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSelect(opt.value);
+              }}
               className="cursor-pointer p-1 text-left"
             >
               <Tag type={opt.tagType} label={opt.label} compact />

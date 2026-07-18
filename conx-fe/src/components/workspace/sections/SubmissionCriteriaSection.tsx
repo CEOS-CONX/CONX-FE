@@ -18,7 +18,7 @@ export default function SubmissionCriteriaSection({ items }: SubmissionCriteriaS
             ) : (
               <IconCheckboxDefault className="size-5.5 shrink-0" />
             )}
-            <span className="`text-kor-body-1-medium text-conx-common-black">{item.label}</span>
+            <span className="text-kor-body-1-medium text-conx-common-black">{item.label}</span>
           </div>
         ))}
       </div>

@@ -6,7 +6,6 @@ const TAG_STYLES = {
   cyan: 'bg-conx-cyan-100 text-conx-cyan-500',
   gray: 'bg-conx-gray-100 text-conx-gray-500',
   purple: 'bg-conx-purple-100 text-conx-purple-500',
-  cyan: 'bg-conx-cyan-100 text-conx-cyan-500',
 } as const;
 
 export type TagType = keyof typeof TAG_STYLES;
