@@ -5,6 +5,7 @@ export const API_ROUTES = {
     SIGNUP_CREW: '/api/auth/signup/crew',
     SIGNUP_COMPANY: '/api/auth/signup/company',
     LOGOUT: '/api/auth/logout',
+    DELETE_ACCOUNT: '/api/auth/account',
     ME: '/api/auth/me',
     REFRESH: '/api/auth/refresh',
     EMAIL_SEND: '/api/auth/email/send',
@@ -33,6 +34,7 @@ export const BACKEND_ENDPOINTS = {
     SIGNUP_SETTING_COMPANY: '/api/v1/auth/usersetting/company',
     EMAIL_SEND: '/api/v1/auth/email/send',
     EMAIL_VERIFY: '/api/v1/auth/email/verify',
+    DELETE_ACCOUNT: '/api/v1/account/me',
   },
   PROJECT: {
     CREATE: '/api/v1/companies/me/projects',
