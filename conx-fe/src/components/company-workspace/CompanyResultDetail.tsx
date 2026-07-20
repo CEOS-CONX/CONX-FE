@@ -101,7 +101,15 @@ export default function CompanyResultDetail({ projectId, resultId }: CompanyResu
 
         <section className="flex min-w-0 flex-1 flex-col gap-5 pt-1.25">
           <ResultDetailSection result={result} onBack={handleBack} />
-          {!result.feedback && <FeedbackForm key={feedbackKey} onCancel={handleFeedbackCancel} />}
+          {!result.feedback && (
+            <FeedbackForm
+              key={feedbackKey}
+              projectId={projectId}
+              submissionId={resultId}
+              onCancel={handleFeedbackCancel}
+              onSubmit={() => window.location.reload()}
+            />
+          )}
           {result.feedback && (
             <div className="flex justify-end">
               <Button variant="tertiary" onClick={handleBack}>
