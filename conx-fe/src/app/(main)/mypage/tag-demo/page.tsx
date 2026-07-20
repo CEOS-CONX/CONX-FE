@@ -4,6 +4,9 @@
 import { useState } from 'react';
 import ImageUploader from '@/components/mypage/ImageUploader';
 import { type Portfolio } from '@/components/mypage/ImageUploaderInput';
+import PageIntro from '@/components/mypage/PageIntro';
+import ProjectDetailRow from '@/components/mypage/ProjectDetailRow';
+import ProjectRow from '@/components/mypage/ProjectRow';
 import ImageUploaderSingle from '@/components/mypage/ImageUploaderSingle';
 import PortfolioUploadModal from '@/components/mypage/PortfolioUploadModal';
 import ProfileImage from '@/components/mypage/ProfileImage';
@@ -70,6 +73,49 @@ export default function TagDemoPage() {
 
   return (
     <div className="flex w-[600px] flex-col gap-10">
+      {/* PageIntro — 스크롤하면 컴팩트로 바뀜 */}
+      <PageIntro
+        title="활동 포트폴리오"
+        subText="크루의 전문성과 프로젝트 경험을 기업에게 효과적으로 소개해 보세요."
+        buttonLabel="프로필 등록"
+        onButtonClick={() => {}}
+      />
+
+      {/* Table_Row_Open + Table_ProjectHistory */}
+      <section className="flex w-[720px] flex-col gap-6">
+        <h2 className="text-kor-heading-3-bold text-conx-common-black">
+          ProjectRow (Table_Row_Open) / ProjectDetailRow
+        </h2>
+        <div>
+          <ProjectRow
+            name="프로젝트명"
+            brand="브랜드명"
+            period="2000.00.00~2000.00.00"
+            workType="프로젝트 목적"
+            rating={0}
+            defaultOpen
+            onDetailClick={() => {}}
+          />
+          <ProjectRow
+            name="프로젝트명2"
+            brand="브랜드명"
+            period="2000.00.00~2000.00.00"
+            workType="프로젝트 목적"
+            rating={4.5}
+            onDetailClick={() => {}}
+          />
+        </div>
+        <span className="text-kor-label-1-medium text-conx-gray-450">
+          Table_ProjectHistory (px-9=36)
+        </span>
+        <ProjectDetailRow
+          workType="프로젝트 목적"
+          rating={0}
+          className="px-9 py-4"
+          onDetailClick={() => {}}
+        />
+      </section>
+
       <h1 className="text-kor-title-1-bold text-conx-common-black">Tag / TagInput 데모</h1>
 
       {/* 개별 상태 */}
