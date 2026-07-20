@@ -1,35 +1,26 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { Toast } from '@/components/common/Toast';
+import { useAuthStore } from '@/stores/auth';
+import { USER_TYPE } from '@/types/auth';
 
-import { USER_TYPE, type UserType } from '@/types/auth';
-
-const MOCK_CREW_SCRAPS = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  imageSrc: `https://placehold.co/337x203/f5f5f5/f5f5f5.png`,
-  imageAlt: `스크랩한 크루 이미지 ${i + 1}`,
-  title: i === 0 ? 'CEOS 세오스' : '크루명',
-  subtitle: i === 0 ? '"신촌권 원앤온리 IT 창업 동아리"' : '캐치프레이즈',
-  category1: i === 0 ? 'IT' : '활동 분야',
-  category2: i === 0 ? '동아리' : '크루 유형',
-  rating: i === 0 ? 5.0 : 0.0,
-  totalCount: i === 0 ? 2323 : 0,
-}));
-
-const MOCK_PROJECT_SCRAPS = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  imageSrc: `https://placehold.co/337x203/f5f5f5/f5f5f5.png`,
-  imageAlt: `스크랩한 프로젝트 이미지 ${i + 1}`,
-  title: i === 0 ? 'F&B 신제품 캠퍼스 숏폼 프로젝트' : '프로젝트 이름',
-  subtitle: i === 0 ? 'Sparkle Drink' : '기업명',
-  category1: i === 0 ? 'F&B' : '카테고리',
-  category2: i === 0 ? '숏폼·UGC' : '프로젝트 유형',
-  startDate: i === 0 ? '2025.05.10' : '2000.00.00',
-  endDate: i === 0 ? '2025.05.28' : '2000.00.00',
-}));
+interface BookmarkedProject {
+  bookmarkId: number;
+  projectId: number;
+  projectImage: string[] | null;
+  projectName: string;
+  companyName: string;
+  industry: string;
+  projectType: string;
+  projectStatus: string;
+  projectStartDate: string;
+  projectDeadline: string;
+  subsidy: number;
+  incentive: boolean;
+}
 
 const EMPTY_STATE = {
   [USER_TYPE.COMPANY]: {
@@ -46,31 +37,64 @@ const EMPTY_STATE = {
   },
 } as const;
 
+function formatDate(dateStr: string): string {
+  return dateStr.replace(/-/g, '.');
+}
+
 export default function ScrapPage() {
-  // TODO: 인증 컨텍스트에서 유저 타입 가져오기
-  const userType: UserType = USER_TYPE.COMPANY;
-
+  const user = useAuthStore((s) => s.user);
+  const userType = user?.userType ?? USER_TYPE.CREW;
   const isCompany = userType === USER_TYPE.COMPANY;
-  const allScraps = isCompany ? MOCK_CREW_SCRAPS : MOCK_PROJECT_SCRAPS;
 
+  const [projects, setProjects] = useState<BookmarkedProject[]>([]);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
-  const [undoTarget, setUndoTarget] = useState<number | null>(null);
+  const [undoTarget, setUndoTarget] = useState<{ bookmarkId: number; projectId: number } | null>(
+    null,
+  );
+  const [isLoading, setIsLoading] = useState(!isCompany);
 
-  const visibleScraps = allScraps.filter((card) => !removedIds.has(card.id));
-  const isEmpty = visibleScraps.length === 0;
+  useEffect(() => {
+    const controller = new AbortController();
 
-  const handleUnscrap = useCallback((id: number) => {
-    setRemovedIds((prev) => new Set(prev).add(id));
-    setUndoTarget(id);
+    if (isCompany) {
+      // TODO: 기업 크루 북마크 API 연동
+      return;
+    }
+
+    fetch('/api/crews/me/bookmarked-projects?page=0&size=100', { signal: controller.signal })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.payload?.content) setProjects(data.payload.content);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [isCompany]);
+
+  const visibleProjects = projects.filter((p) => !removedIds.has(p.bookmarkId));
+  const isEmpty = !isLoading && visibleProjects.length === 0;
+
+  const handleUnscrap = useCallback(async (bookmarkId: number, projectId: number) => {
+    setRemovedIds((prev) => new Set(prev).add(bookmarkId));
+    setUndoTarget({ bookmarkId, projectId });
+
+    await fetch(`/api/projects/${projectId}/bookmarks`, { method: 'DELETE' });
   }, []);
 
-  const handleUndo = useCallback(() => {
-    if (undoTarget === null) return;
+  const handleUndo = useCallback(async () => {
+    if (!undoTarget) return;
     setRemovedIds((prev) => {
       const next = new Set(prev);
-      next.delete(undoTarget);
+      next.delete(undoTarget.bookmarkId);
       return next;
     });
+
+    await fetch(`/api/projects/${undoTarget.projectId}/bookmarks`, { method: 'POST' });
     setUndoTarget(null);
   }, [undoTarget]);
 
@@ -106,38 +130,24 @@ export default function ScrapPage() {
         ) : (
           <div className="mt-27.25 grid grid-cols-4 gap-x-6 gap-y-18.5">
             {isCompany
-              ? visibleScraps.map((card) => (
+              ? null // TODO: 기업 크루 북마크 카드 렌더링
+              : visibleProjects.map((project) => (
                   <Card
-                    key={card.id}
-                    imageSrc={card.imageSrc}
-                    imageAlt={card.imageAlt}
+                    key={project.bookmarkId}
+                    imageSrc={
+                      project.projectImage?.[0] || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
+                    }
+                    imageAlt={project.projectName}
                     defaultScraped
                     onScrapChange={(scraped) => {
-                      if (!scraped) handleUnscrap(card.id);
+                      if (!scraped) handleUnscrap(project.bookmarkId, project.projectId);
                     }}
-                    title={card.title}
-                    subtitle={card.subtitle}
-                    category1={card.category1}
-                    category2={card.category2}
-                    rating={'rating' in card ? card.rating : undefined}
-                    totalCount={'totalCount' in card ? card.totalCount : undefined}
-                  />
-                ))
-              : visibleScraps.map((card) => (
-                  <Card
-                    key={card.id}
-                    imageSrc={card.imageSrc}
-                    imageAlt={card.imageAlt}
-                    defaultScraped
-                    onScrapChange={(scraped) => {
-                      if (!scraped) handleUnscrap(card.id);
-                    }}
-                    title={card.title}
-                    subtitle={card.subtitle}
-                    category1={card.category1}
-                    category2={card.category2}
-                    startDate={'startDate' in card ? card.startDate : undefined}
-                    endDate={'endDate' in card ? card.endDate : undefined}
+                    title={project.projectName}
+                    subtitle={project.companyName}
+                    category1={project.industry}
+                    category2={project.projectType}
+                    startDate={formatDate(project.projectStartDate)}
+                    endDate={formatDate(project.projectDeadline)}
                   />
                 ))}
           </div>
@@ -146,7 +156,7 @@ export default function ScrapPage() {
 
       {undoTarget !== null && (
         <Toast
-          key={undoTarget}
+          key={undoTarget.bookmarkId}
           message="스크랩을 취소했습니다"
           actionLabel="되돌리기"
           onAction={handleUndo}
