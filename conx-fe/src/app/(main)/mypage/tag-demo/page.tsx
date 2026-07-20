@@ -2,6 +2,10 @@
 
 // ⚠️ 임시 데모 페이지 — Tag / TagInput 확인용. 확정 후 실제 크루 마이페이지로 이동하거나 삭제.
 import { useState } from 'react';
+import ImageUploader from '@/components/mypage/ImageUploader';
+import { type Portfolio } from '@/components/mypage/ImageUploaderInput';
+import ImageUploaderSingle from '@/components/mypage/ImageUploaderSingle';
+import PortfolioUploadModal from '@/components/mypage/PortfolioUploadModal';
 import ProfileImage from '@/components/mypage/ProfileImage';
 import SelectableTag from '@/components/mypage/SelectableTag';
 import Tag from '@/components/mypage/Tag';
@@ -53,6 +57,12 @@ export default function TagDemoPage() {
   const [strengths, setStrengths] = useState<string[]>([]);
   const [text1, setText1] = useState('');
   const [phone, setPhone] = useState('');
+  const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([
+    { id: 'p1', imageLink: FAKE_IMG, name: '앱 서비스 UX/UI 리디자인' },
+    { id: 'p2', imageLink: FAKE_IMG, name: 'SNS 캠페인 포트폴리오' },
+  ]);
+  const [pfSortable, setPfSortable] = useState(true);
 
   function togglePick(t: string) {
     setPicked((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
@@ -173,6 +183,57 @@ export default function TagDemoPage() {
           error="에러메세지"
           onSelect={() => {}}
         />
+      </section>
+
+      {/* ImageUploaderSingle (①ImageCard + ②Single) */}
+      <section className="flex flex-col gap-6">
+        <h2 className="text-kor-heading-3-bold text-conx-common-black">
+          ImageUploaderSingle (빈칸 / 채움 / 에러)
+        </h2>
+        <ImageUploaderSingle label="썸네일 이미지" onSelect={() => {}} />
+        <ImageUploaderSingle
+          label="썸네일 이미지"
+          src={FAKE_IMG}
+          onSelect={() => {}}
+          onRemove={() => {}}
+        />
+        <ImageUploaderSingle label="썸네일 이미지" error="에러메세지" onSelect={() => {}} />
+      </section>
+
+      {/* ImageUploader — 포트폴리오 다중 (dnd-kit 정렬) */}
+      <section className="flex flex-col gap-4">
+        <h2 className="text-kor-heading-3-bold text-conx-common-black">
+          ImageUploader (포트폴리오 · 드래그 정렬)
+        </h2>
+        <label className="text-kor-label-1-medium text-conx-gray-450 flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={pfSortable}
+            onChange={(e) => setPfSortable(e.target.checked)}
+          />
+          sortable
+        </label>
+        <ImageUploader
+          label="포트폴리오"
+          helperText="이미지를 끌고 오거나 칸을 눌러 첨부해주세요(50mb 이하)"
+          value={portfolios}
+          onChange={setPortfolios}
+          onAdd={() => setShowPortfolioModal(true)}
+          onEdit={() => setShowPortfolioModal(true)}
+          sortable={pfSortable}
+        />
+        {showPortfolioModal && (
+          <PortfolioUploadModal
+            onClose={() => setShowPortfolioModal(false)}
+            onSubmit={(d) => {
+              setPortfolios((prev) => [
+                ...prev,
+                { id: `p${Date.now()}`, imageLink: FAKE_IMG, name: d.name },
+              ]);
+              setShowPortfolioModal(false);
+            }}
+          />
+        )}
       </section>
 
       {/* TagSelectField — 입력창 클릭 시 드롭다운 */}
