@@ -1,4 +1,3 @@
-import Image from 'next/image';
 import { Tag } from '@/components/common/Tag';
 import type { TagType } from '@/components/common/Tag';
 import ScrapButton from './ScrapButton';
@@ -25,11 +24,11 @@ export default function ImageCard({
   return (
     <div className="group xlarge:h-36.5 large:h-30 relative h-50.75 w-full overflow-hidden rounded-md">
       {/* Image */}
-      <Image
-        src={src}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'}
         alt={alt}
-        fill
-        className="object-cover transition-transform duration-300 group-hover:scale-120"
+        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-120"
       />
 
       {/* Upper overlay */}
