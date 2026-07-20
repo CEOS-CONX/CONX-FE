@@ -11,7 +11,6 @@ import { useAuthStore } from '@/stores/auth';
 
 interface DeleteAccountModalProps {
   onClose: () => void;
-  /** 탈퇴 성공 → 페이지에서 이동 처리 */
   onSuccess: () => void;
 }
 
