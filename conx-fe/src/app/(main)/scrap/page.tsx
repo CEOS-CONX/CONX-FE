@@ -22,6 +22,17 @@ interface BookmarkedProject {
   incentive: boolean;
 }
 
+interface BookmarkedCrew {
+  crewId: number;
+  profileImage: string | null;
+  crewName: string | null;
+  crewIntroduction: string | null;
+  crewType: string | null;
+  memberAmount: number;
+  cumulative: number;
+  point: number;
+}
+
 const EMPTY_STATE = {
   [USER_TYPE.COMPANY]: {
     message1: '아직 스크랩한 크루가 없어요',
@@ -47,54 +58,79 @@ export default function ScrapPage() {
   const isCompany = userType === USER_TYPE.COMPANY;
 
   const [projects, setProjects] = useState<BookmarkedProject[]>([]);
+  const [crews, setCrews] = useState<BookmarkedCrew[]>([]);
   const [removedIds, setRemovedIds] = useState<Set<number>>(new Set());
-  const [undoTarget, setUndoTarget] = useState<{ bookmarkId: number; projectId: number } | null>(
-    null,
-  );
-  const [isLoading, setIsLoading] = useState(!isCompany);
+  const [undoTarget, setUndoTarget] = useState<{
+    id: number;
+    type: 'project' | 'crew';
+    projectId?: number;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
+
     const controller = new AbortController();
 
     if (isCompany) {
-      // TODO: 기업 크루 북마크 API 연동
-      return;
+      fetch('/api/companies/me/bookmarked-crews', { signal: controller.signal })
+        .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && Array.isArray(data.payload)) setCrews(data.payload);
+        })
+        .catch((e) => {
+          if (e instanceof DOMException && e.name === 'AbortError') return;
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setIsLoading(false);
+        });
+    } else {
+      fetch('/api/crews/me/bookmarked-projects?page=0&size=100', { signal: controller.signal })
+        .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+        .then(({ ok, data }) => {
+          if (ok && data.payload?.content) setProjects(data.payload.content);
+        })
+        .catch((e) => {
+          if (e instanceof DOMException && e.name === 'AbortError') return;
+        })
+        .finally(() => {
+          if (!controller.signal.aborted) setIsLoading(false);
+        });
     }
 
-    fetch('/api/crews/me/bookmarked-projects?page=0&size=100', { signal: controller.signal })
-      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data.payload?.content) setProjects(data.payload.content);
-      })
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === 'AbortError') return;
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-
     return () => controller.abort();
-  }, [isCompany]);
+  }, [user, isCompany]);
 
   const visibleProjects = projects.filter((p) => !removedIds.has(p.bookmarkId));
-  const isEmpty = !isLoading && visibleProjects.length === 0;
+  const visibleCrews = crews.filter((c) => !removedIds.has(c.crewId));
+  const isEmpty =
+    !isLoading && (isCompany ? visibleCrews.length === 0 : visibleProjects.length === 0);
 
-  const handleUnscrap = useCallback(async (bookmarkId: number, projectId: number) => {
+  const handleUnscrapProject = useCallback((bookmarkId: number, projectId: number) => {
     setRemovedIds((prev) => new Set(prev).add(bookmarkId));
-    setUndoTarget({ bookmarkId, projectId });
+    setUndoTarget({ id: bookmarkId, type: 'project', projectId });
+    fetch(`/api/projects/${projectId}/bookmarks`, { method: 'DELETE' });
+  }, []);
 
-    await fetch(`/api/projects/${projectId}/bookmarks`, { method: 'DELETE' });
+  const handleUnscrapCrew = useCallback((crewId: number) => {
+    setRemovedIds((prev) => new Set(prev).add(crewId));
+    setUndoTarget({ id: crewId, type: 'crew' });
+    fetch(`/api/companies/me/bookmarked-crews/${crewId}`, { method: 'PATCH' });
   }, []);
 
   const handleUndo = useCallback(async () => {
     if (!undoTarget) return;
     setRemovedIds((prev) => {
       const next = new Set(prev);
-      next.delete(undoTarget.bookmarkId);
+      next.delete(undoTarget.id);
       return next;
     });
 
-    await fetch(`/api/projects/${undoTarget.projectId}/bookmarks`, { method: 'POST' });
+    if (undoTarget.type === 'project' && undoTarget.projectId) {
+      await fetch(`/api/projects/${undoTarget.projectId}/bookmarks`, { method: 'POST' });
+    } else if (undoTarget.type === 'crew') {
+      await fetch(`/api/companies/me/bookmarked-crews/${undoTarget.id}`, { method: 'PATCH' });
+    }
     setUndoTarget(null);
   }, [undoTarget]);
 
@@ -130,7 +166,22 @@ export default function ScrapPage() {
         ) : (
           <div className="mt-27.25 grid grid-cols-4 gap-x-6 gap-y-18.5">
             {isCompany
-              ? null // TODO: 기업 크루 북마크 카드 렌더링
+              ? visibleCrews.map((crew) => (
+                  <Card
+                    key={crew.crewId}
+                    imageSrc={crew.profileImage || '/images/OG_image.png'}
+                    imageAlt={crew.crewName ?? '크루 이미지'}
+                    defaultScraped
+                    onScrapChange={(scraped) => {
+                      if (!scraped) handleUnscrapCrew(crew.crewId);
+                    }}
+                    title={crew.crewName ?? '크루명'}
+                    subtitle={crew.crewIntroduction ?? ''}
+                    category1={crew.crewType ?? ''}
+                    rating={crew.point}
+                    totalCount={crew.cumulative}
+                  />
+                ))
               : visibleProjects.map((project) => (
                   <Card
                     key={project.bookmarkId}
@@ -138,7 +189,7 @@ export default function ScrapPage() {
                     imageAlt={project.projectName}
                     defaultScraped
                     onScrapChange={(scraped) => {
-                      if (!scraped) handleUnscrap(project.bookmarkId, project.projectId);
+                      if (!scraped) handleUnscrapProject(project.bookmarkId, project.projectId);
                     }}
                     title={project.projectName}
                     subtitle={project.companyName}
@@ -154,7 +205,7 @@ export default function ScrapPage() {
 
       {undoTarget !== null && (
         <Toast
-          key={undoTarget.bookmarkId}
+          key={undoTarget.id}
           message="스크랩을 취소했습니다"
           actionLabel="되돌리기"
           onAction={handleUndo}
