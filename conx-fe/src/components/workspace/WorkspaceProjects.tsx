@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import TabNumber from './TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -8,39 +9,126 @@ import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import Card from '@/components/common/Card/Card';
 import Pagination from '@/components/common/Pagination/Pagination';
 import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/constants/browse';
-import { PROJECT_TAB_COUNTS, PROJECT_CARDS, getProjectTag } from './mockData';
 import type { TagType } from '@/components/common/Tag/Tag';
 
 const CARDS_PER_PAGE = 12;
 
+const STATUS_TAG_MAP: Record<string, { type: TagType; label: string }> = {
+  APPLIED: { type: 'blue', label: '지원' },
+  IN_PROGRESS: { type: 'green', label: '진행 중' },
+  EXECUTION_COMPLETED: { type: 'purple', label: '진행 완료' },
+  SUBMISSION_COMPLETED: { type: 'cyan', label: '제출 완료' },
+  SETTLEMENT_COMPLETED: { type: 'gray', label: '정산 완료' },
+};
+
+const TABS = [
+  { label: '전체', status: null },
+  { label: '지원', status: 'APPLIED' },
+  { label: '진행 중', status: 'IN_PROGRESS' },
+  { label: '진행 완료', status: 'EXECUTION_COMPLETED' },
+  { label: '제출 완료', status: 'SUBMISSION_COMPLETED' },
+  { label: '정산 완료', status: 'SETTLEMENT_COMPLETED' },
+] as const;
+
+interface CrewProject {
+  applicationId: number;
+  projectId: number;
+  status: string;
+  projectImage: string | null;
+  projectName: string;
+  brandName: string;
+  companyName: string;
+  category: string;
+  projectType: string;
+  projectStartDate: string;
+  projectDeadline: string;
+  submitDeadline: string;
+  subsidy: number;
+  registeredAt: string;
+}
+
 export default function WorkspaceProjects() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [projects, setProjects] = useState<CrewProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const totalPages = Math.max(1, Math.ceil(PROJECT_CARDS.length / CARDS_PER_PAGE));
-  const pagedCards = PROJECT_CARDS.slice(
-    (currentPage - 1) * CARDS_PER_PAGE,
-    currentPage * CARDS_PER_PAGE,
-  );
-  const isEmpty = PROJECT_CARDS.length === 0;
+  const [totalPages, setTotalPages] = useState(1);
+  const [tabCounts, setTabCounts] = useState<number[]>(TABS.map(() => 0));
 
-  // 3개씩 행 분리
-  const rows: (typeof pagedCards)[] = [];
-  for (let i = 0; i < pagedCards.length; i += 3) {
-    rows.push(pagedCards.slice(i, i + 3));
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchProjects() {
+      const params = new URLSearchParams();
+      const filterStatus = TABS[activeTab]?.status;
+      if (filterStatus) params.set('status', filterStatus);
+      params.set('page', String(currentPage - 1));
+      params.set('size', String(CARDS_PER_PAGE));
+
+      try {
+        const res = await fetch(`/api/crews/projects?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (res.ok && data.payload) {
+          setProjects(data.payload.content ?? []);
+          setTotalPages(Math.max(1, data.payload.totalPages ?? 1));
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    fetchProjects();
+    return () => controller.abort();
+  }, [activeTab, currentPage]);
+
+  // 탭 카운트: 전체 조회
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function fetchCounts() {
+      try {
+        const res = await fetch('/api/crews/projects?page=0&size=10000', {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (res.ok && data.payload?.content) {
+          const all: CrewProject[] = data.payload.content;
+          const counts = TABS.map((tab) =>
+            tab.status ? all.filter((p) => p.status === tab.status).length : all.length,
+          );
+          setTabCounts(counts);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    fetchCounts();
+    return () => controller.abort();
+  }, []);
+
+  const isEmpty = !isLoading && projects.length === 0;
+
+  const rows: CrewProject[][] = [];
+  for (let i = 0; i < projects.length; i += 3) {
+    rows.push(projects.slice(i, i + 3));
   }
 
   return (
     <div className="flex flex-col gap-6 pr-36 pb-63">
-      {/* 탭바 + 필터바 */}
-      <div className="flex flex-col">
-        {/* 탭바 */}
+      <div className="flex w-264.75 flex-col">
         <div className="border-conx-gray-150 flex border-b">
-          {PROJECT_TAB_COUNTS.map((tab, i) => (
+          {TABS.map((tab, i) => (
             <TabNumber
               key={tab.label}
               label={tab.label}
-              count={tab.count}
+              count={tabCounts[i]}
               state={activeTab === i ? 'active' : 'disabled'}
               onClick={() => {
                 setActiveTab(i);
@@ -50,7 +138,6 @@ export default function WorkspaceProjects() {
           ))}
         </div>
 
-        {/* 필터바 */}
         <div className="border-conx-gray-150 flex items-start justify-between border-b py-4">
           <SearchBar
             placeholder="찾고 싶은 프로젝트를 검색해 보세요."
@@ -68,10 +155,9 @@ export default function WorkspaceProjects() {
         </div>
       </div>
 
-      {/* 카드 그리드 + 페이지네이션 */}
       {isEmpty ? (
         <div className="flex flex-col items-center gap-16">
-          <p className="text-kor-heading-3-semibold text-conx-gray-500">
+          <p className="text-kor-heading-3-semibold text-conx-gray-500 pt-10">
             아직 필요한 작업이 없습니다.
           </p>
           <Pagination currentPage={currentPage} totalPages={1} onPageChange={setCurrentPage} />
@@ -81,24 +167,39 @@ export default function WorkspaceProjects() {
           <div className="flex w-full flex-col gap-18.5">
             {rows.map((row, rowIdx) => (
               <div key={rowIdx} className="flex gap-6">
-                {row.map((card) => {
-                  const tag = getProjectTag(card.status);
+                {row.map((project) => {
+                  const tag = STATUS_TAG_MAP[project.status] ?? {
+                    type: 'gray' as TagType,
+                    label: project.status,
+                  };
                   return (
-                    <div key={card.id} className="w-84.25">
+                    <div
+                      key={project.applicationId}
+                      className="w-84.25 cursor-pointer"
+                      onClick={() =>
+                        router.push(`/crew-workspace/project-tasks/${project.projectId}`)
+                      }
+                    >
                       <Card
-                        imageSrc="/placeholder.png"
-                        imageAlt={card.title}
-                        tag={{ type: tag.type as TagType, label: tag.label }}
-                        title={card.title}
-                        subtitle={card.brand}
-                        category1={card.category1}
-                        category2={card.category2}
-                        startDate={card.startDate}
-                        endDate={card.endDate}
+                        imageSrc={
+                          project.projectImage || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
+                        }
+                        imageAlt={project.projectName}
+                        tag={{ type: tag.type, label: tag.label }}
+                        title={project.projectName}
+                        subtitle={project.brandName}
+                        category1={project.category}
+                        category2={project.projectType}
+                        startDate={project.projectStartDate.replace(/-/g, '.')}
+                        endDate={project.projectDeadline.replace(/-/g, '.')}
                       />
                     </div>
                   );
                 })}
+                {row.length < 3 &&
+                  Array.from({ length: 3 - row.length }).map((_, i) => (
+                    <div key={`empty-${i}`} className="w-84.25" />
+                  ))}
               </div>
             ))}
           </div>
