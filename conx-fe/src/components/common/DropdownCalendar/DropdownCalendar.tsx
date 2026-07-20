@@ -9,9 +9,14 @@ import IconArrowRightFill from '@/assets/icons/icon_arrowRight_fill.svg';
 export type DateRange = { start: Date; end: Date };
 
 type DropdownVariant = 'line' | 'ghost';
+type DropdownSize = 'sm' | 'md';
+
+type DropdownAlign = 'left' | 'right';
 
 interface BaseProps {
   variant?: DropdownVariant;
+  size?: DropdownSize;
+  align?: DropdownAlign;
   placeholder?: string;
   subLabel?: string;
   className?: string;
@@ -40,10 +45,10 @@ const TRIGGER_STATE: Record<DropdownVariant, { closed: string; open: string; sel
   line: {
     closed: 'border-conx-gray-150 hover:border-conx-gray-300',
     open: 'border-conx-primary-300',
-    selected: 'border-conx-gray-150',
+    selected: 'border-conx-gray-600',
   },
   ghost: {
-    closed: 'hover:bg-conx-gray-100',
+    closed: 'hover:bg-conx-opacity-gray-6',
     open: '',
     selected: '',
   },
@@ -88,8 +93,20 @@ function getCalendarDays(year: number, month: number) {
   return days;
 }
 
+const TRIGGER_SIZE: Record<DropdownSize, { height: string; text: string; px: string }> = {
+  sm: { height: 'h-[35px]', text: 'text-kor-label-1-medium', px: 'px-3' },
+  md: { height: 'h-11', text: 'text-kor-body-1-medium', px: 'px-4' },
+};
+
 export default function DropdownCalendar(props: DropdownCalendarProps) {
-  const { variant = 'line', placeholder = '날짜 선택', subLabel, className } = props;
+  const {
+    variant = 'line',
+    size = 'md',
+    align = 'left',
+    placeholder = '날짜 선택',
+    subLabel,
+    className,
+  } = props;
 
   const isRange = props.mode === 'range';
 
@@ -178,7 +195,7 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
       ? 'selected'
       : 'closed';
   const stateClass = TRIGGER_STATE[variant][stateKey];
-  const textClass = isOpen || isSelected ? 'text-conx-common-black' : 'text-conx-gray-450';
+  const textClass = isOpen || isSelected ? 'text-conx-gray-600' : 'text-conx-gray-450';
 
   let triggerText: string;
   if (isRange) {
@@ -205,7 +222,7 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
           onClick={handleTriggerClick}
           aria-haspopup="dialog"
           aria-expanded={isOpen}
-          className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
+          className={`${TRIGGER_SIZE[size].text} ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex ${TRIGGER_SIZE[size].height} w-full cursor-pointer items-center justify-between gap-3 ${TRIGGER_SIZE[size].px} py-2`}
         >
           <span className="truncate">{triggerText}</span>
           {isOpen ? (
@@ -222,8 +239,8 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
       {isOpen && (
         <div
           role="dialog"
-          aria-label="날짜 범위 선택"
-          className="shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
+          aria-label="날짜 선택"
+          className={`drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full mt-2 w-90 rounded-md p-4 ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
           <div className="mb-4 flex items-center justify-between">
             <button
@@ -262,25 +279,37 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
             {days.map(({ date, isOutOfMonth }, idx) => {
               const isStart = visualStart && isSameDate(date, visualStart);
               const isEnd = visualEnd && isSameDate(date, visualEnd);
+              const isSingleSelect = isStart && !visualEnd;
               const isInRange =
                 visualStart &&
                 visualEnd &&
                 date.getTime() > visualStart.getTime() &&
                 date.getTime() < visualEnd.getTime();
 
-              let cellClass =
-                'text-kor-body-1-medium flex aspect-square items-center justify-center';
+              let outerClass = 'flex h-9 items-center justify-center';
+              let innerClass = 'text-kor-label-1-semibold flex size-9 items-center justify-center';
 
               if (isOutOfMonth) {
-                cellClass += ' text-conx-gray-300 cursor-default';
-              } else if (isStart || isEnd) {
-                cellClass +=
-                  ' bg-conx-primary-300 text-conx-common-white cursor-pointer rounded-full';
+                outerClass += ' cursor-default';
+                innerClass += ' text-conx-gray-300';
+              } else if (isStart && visualEnd) {
+                outerClass +=
+                  ' bg-[linear-gradient(to_right,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+              } else if (isEnd) {
+                outerClass +=
+                  ' bg-[linear-gradient(to_left,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+              } else if (isSingleSelect) {
+                outerClass += ' cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
               } else if (isInRange) {
-                cellClass += ' bg-conx-primary-100 text-conx-common-black cursor-pointer';
+                outerClass += ' bg-conx-primary-100 cursor-pointer';
+                innerClass += ' text-conx-common-black';
               } else {
-                cellClass +=
-                  ' text-conx-common-black hover:bg-conx-primary-100 cursor-pointer hover:rounded-md';
+                outerClass += ' cursor-pointer';
+                innerClass +=
+                  ' text-conx-common-black hover:bg-conx-opacity-gray-6 hover:rounded-full';
               }
 
               return (
@@ -289,9 +318,9 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
                   type="button"
                   onClick={() => !isOutOfMonth && handleDateClick(date)}
                   disabled={isOutOfMonth}
-                  className={cellClass}
+                  className={outerClass}
                 >
-                  {date.getDate()}
+                  <span className={innerClass}>{date.getDate()}</span>
                 </button>
               );
             })}

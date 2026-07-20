@@ -7,6 +7,7 @@ interface ImageCardProps {
   src: string;
   alt: string;
   tag?: { type: TagType; label: string };
+  tags?: { type: TagType; label: string }[];
   defaultScraped?: boolean;
   onScrapChange?: (scraped: boolean) => void;
 }
@@ -15,9 +16,12 @@ export default function ImageCard({
   src,
   alt,
   tag,
+  tags,
   defaultScraped = false,
   onScrapChange,
 }: ImageCardProps) {
+  const tagList = tags ?? (tag ? [tag] : []);
+
   return (
     <div className="group xlarge:h-36.5 large:h-30 relative h-50.75 w-full overflow-hidden rounded-md">
       {/* Image */}
@@ -36,7 +40,15 @@ export default function ImageCard({
             'linear-gradient(180deg, rgba(29, 34, 41, 0.16) 0%, rgba(29, 34, 41, 0) 100%)',
         }}
       >
-        {tag ? <Tag type={tag.type} label={tag.label} /> : <span />}
+        {tagList.length > 0 ? (
+          <div className="flex items-center gap-2">
+            {tagList.map((t, i) => (
+              <Tag key={i} type={t.type} label={t.label} />
+            ))}
+          </div>
+        ) : (
+          <span />
+        )}
         <ScrapButton defaultScraped={defaultScraped} onScrapChange={onScrapChange} />
       </div>
     </div>
