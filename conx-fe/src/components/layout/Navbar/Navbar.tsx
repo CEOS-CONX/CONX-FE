@@ -12,12 +12,12 @@ import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
 import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
 import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 
-const NAV_LINKS = [
+const BASE_NAV_LINKS = [
   { label: '홈', href: '/' },
   { label: '프로젝트 둘러보기', href: '/projects' },
   { label: '크루 둘러보기', href: '/crews' },
-  { label: '워크스페이스', href: '/crew-workspace' },
 ] as const;
 
 const NAV_LINK_BASE = 'text-conx-common-black rounded-md px-3 py-2 hover:bg-[rgba(29,34,41,0.06)]';
@@ -42,8 +42,15 @@ const ICON_BUTTONS: {
 ];
 
 export default function Navbar() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, user } = useAuth();
   const pathname = usePathname();
+
+  const workspaceHref =
+    user?.userType === USER_TYPE.COMPANY ? '/company-workspace' : '/crew-workspace';
+  const NAV_LINKS = [
+    ...BASE_NAV_LINKS,
+    ...(isLoggedIn ? [{ label: '워크스페이스', href: workspaceHref }] : []),
+  ] as const;
   const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -52,7 +59,7 @@ export default function Navbar() {
   const closeNotification = useCallback(() => {
     setNotificationOpen(false);
     bellButtonRef.current?.focus();
-  }, []);
+  }, [setNotificationOpen]);
 
   const activeLink =
     NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
