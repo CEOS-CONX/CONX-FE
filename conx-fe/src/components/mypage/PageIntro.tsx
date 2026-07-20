@@ -1,7 +1,10 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 import { Button } from '@/components/common/Button';
+
+// 네브바 높이(sticky top). 네브바 하단과 PageIntro 상단이 만나면 compact로 전환
+const NAVBAR_HEIGHT = 72;
 
 interface PageIntroProps {
   title: string;
@@ -9,8 +12,6 @@ interface PageIntroProps {
   subText: string;
   buttonLabel: string;
   onButtonClick?: () => void;
-  /** 이 스크롤(px) 초과 시 scrolled 버전 (기본 40) */
-  threshold?: number;
 }
 
 // 스크롤 구독 (set-state-in-effect 회피, SSR 안전)
@@ -19,22 +20,21 @@ function subscribe(cb: () => void) {
   return () => window.removeEventListener('scroll', cb);
 }
 
-// Page_Intro — 스크롤 전(타이틀 있음) / 스크롤 후(타이틀 없이 컴팩트). sticky
-export default function PageIntro({
-  title,
-  subText,
-  buttonLabel,
-  onButtonClick,
-  threshold = 40,
-}: PageIntroProps) {
+// Page_Intro — 스크롤 전(타이틀 있음) / 스크롤 후(타이틀 없이 컴팩트).
+// 네브바(sticky top-0) 하단에 딱 붙는 순간(= 자기 top이 네브바 높이에 도달) compact로 전환
+export default function PageIntro({ title, subText, buttonLabel, onButtonClick }: PageIntroProps) {
+  const ref = useRef<HTMLDivElement>(null);
   const scrolled = useSyncExternalStore(
     subscribe,
-    () => window.scrollY > threshold,
+    () => (ref.current ? ref.current.getBoundingClientRect().top <= NAVBAR_HEIGHT + 0.5 : false),
     () => false,
   );
 
   return (
-    <div className="border-conx-gray-100 bg-conx-common-white z-conx-card-overlay sticky top-0 border-b px-6">
+    <div
+      ref={ref}
+      className="border-conx-gray-100 bg-conx-common-white z-conx-card-overlay sticky top-[72px] border-b px-6"
+    >
       {scrolled ? (
         // 스크롤 후 — SubText(Gray-500 Body1 Medium) + 버튼
         <div className="flex items-center justify-between py-7">

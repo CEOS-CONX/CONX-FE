@@ -18,9 +18,10 @@ export default function MyPageLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // ⚠️ TEMP: 비로그인에서도 주소로 접근 가능하게 로그인 가드를 잠시 꺼둠 (계정 만들기 번거로워서).
-  //   ⇢ 복구하려면: 아래 가드 되살리고 상단 import에 useRouter/useEffect 추가,
-  //     useAuth()에서 isLoggedIn·isLoading 도 꺼내기.
+  // ⚠️ TEMP: 로그인 가드를 꺼둠 — 로컬은 API_BASE_URL(.env)이 없어 로그인 자체가 안 되고(500),
+  //   기업 마이페이지 UI + API 연동이 남아 개발 편의를 위해 비로그인 접근 허용.
+  //   ⇢ 배포/PR 전 복구: 아래 가드 되살리고 상단 import에 useRouter/useEffect 추가,
+  //     useAuth()에서 isLoggedIn·isLoading 도 꺼내기. (실제 로그인엔 API_BASE_URL + 백엔드 필요)
   //   const router = useRouter();
   //   const { isLoggedIn, isLoading } = useAuth();
   //   useEffect(() => {
@@ -28,7 +29,6 @@ export default function MyPageLayout({ children }: { children: React.ReactNode }
   //   }, [isLoading, isLoggedIn, router]);
   //   if (isLoading || !isLoggedIn) return null;
 
-  // 미로그인이라 userType이 없어 기본 '크루' 뷰. (기업 뷰 미리보려면 임시 토글 요청 주세요)
   const isCompany = user?.userType === USER_TYPE.COMPANY;
   const NAV = [
     { href: '/mypage', label: isCompany ? '기업 프로필' : '크루 프로필' },
@@ -38,8 +38,8 @@ export default function MyPageLayout({ children }: { children: React.ReactNode }
   return (
     <div className={`${CONTAINER} pb-40`}>
       <div className="flex gap-x-10 pt-25">
-        {/* 사이드바 — 프로필 / 내 정보 */}
-        <aside className="w-50 shrink-0">
+        {/* 사이드바 — 프로필 / 내 정보 (네브바 하단에 sticky) */}
+        <aside className="sticky top-[72px] w-50 shrink-0 self-start">
           <nav aria-label="마이페이지">
             <ul className="flex flex-col gap-1">
               {NAV.map(({ href, label }) => {

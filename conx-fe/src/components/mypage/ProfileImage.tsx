@@ -2,20 +2,26 @@
 
 import IconEdit from '@/assets/icons/icon_edit.svg';
 import IconTrash from '@/assets/icons/icon_trash.svg';
+import { useFileUpload } from '@/hooks/useFileUpload';
 
 interface ProfileImageProps {
   src?: string;
   alt?: string;
-  onEdit?: () => void;
+  /** 파일 선택 시 */
+  onSelect?: (file: File) => void;
   onRemove?: () => void;
+  /** 클릭 동작 override (없으면 파일 선택 다이얼로그) */
+  onEdit?: () => void;
 }
 
 export default function ProfileImage({
   src,
   alt = '프로필 이미지',
-  onEdit,
+  onSelect,
   onRemove,
+  onEdit,
 }: ProfileImageProps) {
+  const { inputRef, open, onInputChange } = useFileUpload(onSelect);
   const filled = !!src;
   // 오버레이 bg는 버튼 자체 :hover/:active + ::after (active가 hover를 안정적으로 덮음)
   const overlay = filled
@@ -24,11 +30,12 @@ export default function ProfileImage({
 
   return (
     <div className="group flex items-center gap-1.5">
-      {/* 이미지 버튼 (클릭 → 편집) */}
+      <input ref={inputRef} type="file" accept="image/*" hidden onChange={onInputChange} />
+      {/* 이미지 버튼 (클릭 → 파일 선택 / onEdit override) */}
       <button
         type="button"
         aria-label={filled ? '이미지 변경' : '이미지 추가'}
-        onClick={onEdit}
+        onClick={onEdit ?? open}
         className={`group/img relative flex h-21 w-21 shrink-0 items-center justify-center overflow-hidden rounded-md ${overlay}`}
       >
         {filled ? (

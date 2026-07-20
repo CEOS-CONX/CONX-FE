@@ -59,6 +59,8 @@ export default function TagInput({
         onChange={(e) => setDraft(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
+            // 한글 IME 조합 중 Enter는 무시 (마지막 글자 중복 방지)
+            if (e.nativeEvent.isComposing) return;
             e.preventDefault();
             addTag();
           }

@@ -38,7 +38,13 @@ const ICON_BUTTONS: {
     Fill: IconNotificationFill,
   },
   { name: 'scrap', label: '스크랩', href: '/scrap', Stroke: IconScrapStroke, Fill: IconScrapFill },
-  { name: 'profile', label: '프로필', Stroke: IconProfileStroke, Fill: IconProfileFill },
+  {
+    name: 'profile',
+    label: '프로필',
+    href: '/mypage',
+    Stroke: IconProfileStroke,
+    Fill: IconProfileFill,
+  },
 ];
 
 export default function Navbar() {
@@ -83,7 +89,7 @@ export default function Navbar() {
   }, [notificationOpen, closeNotification]);
 
   return (
-    <header className="w-full">
+    <header className="bg-conx-common-white z-conx-dropdown sticky top-0 w-full">
       <div className="xlarge:px-14 large:px-9 mx-auto max-w-400 min-w-248 px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo */}

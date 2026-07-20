@@ -48,9 +48,14 @@ function CardWithCaption({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-3">
-      <ImageCard src={pf.imageLink} onEdit={onEdit} onRemove={onRemove} />
-      <p className="text-kor-body-1-bold text-conx-common-black">{pf.name}</p>
+    <div className="flex w-[240px] flex-col gap-3">
+      <ImageCard
+        src={pf.imageLink}
+        onEdit={onEdit}
+        onRemove={onRemove}
+        className="h-[144px] w-[240px]"
+      />
+      <p className="text-kor-body-1-bold text-conx-common-black truncate">{pf.name}</p>
     </div>
   );
 }
@@ -133,6 +138,7 @@ export default function ImageUploaderInput({
         placeholder="포트폴리오 등록"
         icon={<IconPlus className="[&_path]:stroke-conx-gray-300 h-6 w-6" />}
         onEmptyClick={onAdd}
+        className="h-[144px] w-[240px]"
       />
     );
   }
@@ -151,7 +157,7 @@ export default function ImageUploaderInput({
 
       {/* 초록 + (add more) — 카드 세로중앙, sortable일 때 노출 */}
       {sortable && (
-        <div className="flex h-[273px] items-center">
+        <div className="flex h-[144px] items-center">
           <button
             type="button"
             aria-label="포트폴리오 추가"
