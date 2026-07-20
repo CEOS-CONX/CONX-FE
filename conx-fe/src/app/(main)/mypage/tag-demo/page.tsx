@@ -5,6 +5,8 @@ import { useState } from 'react';
 import ImageUploader from '@/components/mypage/ImageUploader';
 import { type Portfolio } from '@/components/mypage/ImageUploaderInput';
 import PageIntro from '@/components/mypage/PageIntro';
+import TextFieldBusinessNumber from '@/components/mypage/TextFieldBusinessNumber';
+import TextFieldUrl from '@/components/mypage/TextFieldUrl';
 import ProjectDetailRow from '@/components/mypage/ProjectDetailRow';
 import ProjectRow from '@/components/mypage/ProjectRow';
 import ImageUploaderSingle from '@/components/mypage/ImageUploaderSingle';
@@ -60,6 +62,9 @@ export default function TagDemoPage() {
   const [strengths, setStrengths] = useState<string[]>([]);
   const [text1, setText1] = useState('');
   const [phone, setPhone] = useState('');
+  const [bizNo, setBizNo] = useState('');
+  const [urlName, setUrlName] = useState('');
+  const [urlValue, setUrlValue] = useState('');
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [portfolios, setPortfolios] = useState<Portfolio[]>([
     { id: 'p1', imageLink: FAKE_IMG, name: '앱 서비스 UX/UI 리디자인' },
@@ -207,6 +212,14 @@ export default function TagDemoPage() {
           error="에러메세지"
         />
         <TextFieldPhone id="tf-phone" label="레이블" value={phone} onChange={setPhone} />
+        <TextFieldBusinessNumber id="tf-biz" value={bizNo} onChange={setBizNo} />
+        <TextFieldUrl
+          id="tf-url"
+          name={urlName}
+          url={urlValue}
+          onNameChange={setUrlName}
+          onUrlChange={setUrlValue}
+        />
       </section>
 
       {/* TextFieldUpload */}
