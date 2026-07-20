@@ -67,9 +67,13 @@ export default function CompanyWorkspaceDashboard() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchDashboard() {
       try {
-        const res = await fetch('/api/companies/me/workspace/dashboard');
+        const res = await fetch('/api/companies/me/workspace/dashboard', {
+          signal: controller.signal,
+        });
         const data = await res.json();
         if (!res.ok || !data.payload) return;
 
@@ -137,14 +141,15 @@ export default function CompanyWorkspaceDashboard() {
           }
           setTasks(allTasks);
         }
-      } catch {
-        // 네트워크 오류 시 빈 상태 유지
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
       } finally {
-        setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }
 
     fetchDashboard();
+    return () => controller.abort();
   }, []);
 
   if (isLoading) {

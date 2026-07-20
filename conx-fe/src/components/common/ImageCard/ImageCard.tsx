@@ -1,6 +1,10 @@
+import { useState } from 'react';
+import Image from 'next/image';
 import { Tag } from '@/components/common/Tag';
 import type { TagType } from '@/components/common/Tag';
 import ScrapButton from './ScrapButton';
+
+const FALLBACK_IMAGE = '/images/OG_image.png';
 
 interface ImageCardProps {
   src: string;
@@ -20,15 +24,17 @@ export default function ImageCard({
   onScrapChange,
 }: ImageCardProps) {
   const tagList = tags ?? (tag ? [tag] : []);
+  const [imgSrc, setImgSrc] = useState(src || FALLBACK_IMAGE);
 
   return (
     <div className="group xlarge:h-36.5 large:h-30 relative h-50.75 w-full overflow-hidden rounded-md">
       {/* Image */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={src || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'}
+      <Image
+        src={imgSrc}
         alt={alt}
-        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-120"
+        fill
+        className="object-cover transition-transform duration-300 group-hover:scale-120"
+        onError={() => setImgSrc(FALLBACK_IMAGE)}
       />
 
       {/* Upper overlay */}

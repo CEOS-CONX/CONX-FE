@@ -134,9 +134,7 @@ export default function ScrapPage() {
               : visibleProjects.map((project) => (
                   <Card
                     key={project.bookmarkId}
-                    imageSrc={
-                      project.projectImage?.[0] || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
-                    }
+                    imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
                     imageAlt={project.projectName}
                     defaultScraped
                     onScrapChange={(scraped) => {

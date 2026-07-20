@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import TabNumber from './TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -48,7 +48,6 @@ interface CrewProject {
 }
 
 export default function WorkspaceProjects() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<CrewProject[]>([]);
@@ -87,29 +86,34 @@ export default function WorkspaceProjects() {
     return () => controller.abort();
   }, [activeTab, currentPage]);
 
-  // 탭 카운트: 전체 조회
+  // 탭 카운트: 대시보드 API에서 가져오기
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchCounts() {
-      try {
-        const res = await fetch('/api/crews/projects?page=0&size=10000', {
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        if (res.ok && data.payload?.content) {
-          const all: CrewProject[] = data.payload.content;
-          const counts = TABS.map((tab) =>
-            tab.status ? all.filter((p) => p.status === tab.status).length : all.length,
-          );
-          setTabCounts(counts);
-        }
-      } catch {
-        // ignore
-      }
-    }
+    fetch('/api/crews/dashboard', { signal: controller.signal })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok || !data.payload?.projectInfo) return;
+        const info = data.payload.projectInfo;
+        const applied = info.appliedProjectAmount ?? 0;
+        const progress = info.progressProjectAmount ?? 0;
+        const execCompleted = info.executionCompletedProjectAmount ?? 0;
+        const submitCompleted = info.submissionCompletedProjectAmount ?? 0;
+        const settlementCompleted = info.settlementCompletedProjectAmount ?? 0;
+        const total = applied + progress + execCompleted + submitCompleted + settlementCompleted;
+        setTabCounts([
+          total,
+          applied,
+          progress,
+          execCompleted,
+          submitCompleted,
+          settlementCompleted,
+        ]);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      });
 
-    fetchCounts();
     return () => controller.abort();
   }, []);
 
@@ -173,17 +177,13 @@ export default function WorkspaceProjects() {
                     label: project.status,
                   };
                   return (
-                    <div
+                    <Link
                       key={project.applicationId}
-                      className="w-84.25 cursor-pointer"
-                      onClick={() =>
-                        router.push(`/crew-workspace/project-tasks/${project.projectId}`)
-                      }
+                      href={`/crew-workspace/project-tasks/${project.projectId}`}
+                      className="w-84.25"
                     >
                       <Card
-                        imageSrc={
-                          project.projectImage || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
-                        }
+                        imageSrc={project.projectImage || '/images/OG_image.png'}
                         imageAlt={project.projectName}
                         tag={{ type: tag.type, label: tag.label }}
                         title={project.projectName}
@@ -193,7 +193,7 @@ export default function WorkspaceProjects() {
                         startDate={project.projectStartDate.replace(/-/g, '.')}
                         endDate={project.projectDeadline.replace(/-/g, '.')}
                       />
-                    </div>
+                    </Link>
                   );
                 })}
                 {row.length < 3 &&

@@ -110,7 +110,7 @@ export default function BrowseCrewsPage() {
           : crews.map((crew) => (
               <Card
                 key={crew.crewId}
-                imageSrc={crew.profileImage ?? 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'}
+                imageSrc={crew.profileImage ?? '/images/OG_image.png'}
                 imageAlt={crew.crewName ?? '크루 이미지'}
                 title={crew.crewName ?? '크루명'}
                 subtitle={crew.crewIntroduction ?? ''}

@@ -116,9 +116,7 @@ export default function BrowseProjectsPage() {
           : projects.map((project) => (
               <Card
                 key={project.projectId}
-                imageSrc={
-                  project.projectImage?.[0] || 'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
-                }
+                imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
                 imageAlt={project.projectName}
                 tag={project.isImminent ? { type: 'red' as const, label: '마감임박' } : undefined}
                 title={project.projectName}

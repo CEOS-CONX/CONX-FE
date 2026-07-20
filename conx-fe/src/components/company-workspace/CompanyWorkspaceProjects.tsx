@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import TabNumber from '@/components/workspace/TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -44,13 +44,12 @@ interface CompanyProject {
   companyName: string;
   industry: string;
   projectType: string;
-  projectStartDate: string;
-  projectDeadline: string;
+  projectStartDate: string | null;
+  projectDeadline: string | null;
   views: number;
 }
 
 export default function CompanyWorkspaceProjects() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<CompanyProject[]>([]);
@@ -88,28 +87,27 @@ export default function CompanyWorkspaceProjects() {
     return () => controller.abort();
   }, [activeTab, currentPage]);
 
-  // 탭 카운트: 전체 조회해서 status별 집계
+  // 탭 카운트: 대시보드 API에서 가져오기
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchCounts() {
-      try {
-        const res = await fetch('/api/companies/me/projects?page=0&size=1000', {
-          signal: controller.signal,
-        });
-        const data = await res.json();
-        if (res.ok && data.payload?.content) {
-          const all: CompanyProject[] = data.payload.content;
-          const counts = TABS.map((tab) =>
-            tab.status ? all.filter((p) => p.status === tab.status).length : all.length,
-          );
-          setTabCounts(counts);
-        }
-      } catch {
-        // ignore
-      }
-    }
-    fetchCounts();
+    fetch('/api/companies/me/workspace/dashboard', { signal: controller.signal })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (!ok || !data.payload?.projectStatus) return;
+        const s = data.payload.projectStatus;
+        const recruiting = s.recruiting ?? 0;
+        const progress = s.progress ?? 0;
+        const inspection = s.waiting_inspection ?? 0;
+        const adjusting = s.waiting_settlement ?? 0;
+        const done = s.done ?? 0;
+        const total = recruiting + progress + inspection + adjusting + done;
+        setTabCounts([total, recruiting, progress, inspection, adjusting, done]);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      });
+
     return () => controller.abort();
   }, []);
 
@@ -181,28 +179,23 @@ export default function CompanyWorkspaceProjects() {
                     cardTags.push({ type: 'red', label: `D-${project.deadlineCount}` });
                   }
                   return (
-                    <div
+                    <Link
                       key={project.projectId}
-                      className="w-84.25 cursor-pointer"
-                      onClick={() =>
-                        router.push(`/company-workspace/project-status/${project.projectId}`)
-                      }
+                      href={`/company-workspace/project-status/${project.projectId}`}
+                      className="w-84.25"
                     >
                       <Card
-                        imageSrc={
-                          project.projectImage?.[0] ||
-                          'https://placehold.co/337x203/f5f5f5/f5f5f5.png'
-                        }
+                        imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
                         imageAlt={project.name}
                         tags={cardTags}
                         title={project.name}
                         subtitle={project.companyName}
                         category1={project.industry}
                         category2={project.projectType}
-                        startDate={project.projectStartDate.replace(/-/g, '.')}
-                        endDate={project.projectDeadline.replace(/-/g, '.')}
+                        startDate={project.projectStartDate?.replace(/-/g, '.') ?? ''}
+                        endDate={project.projectDeadline?.replace(/-/g, '.') ?? ''}
                       />
-                    </div>
+                    </Link>
                   );
                 })}
                 {row.length < 3 &&
