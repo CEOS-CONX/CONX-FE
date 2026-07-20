@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { BACKEND_ENDPOINTS } from '@/constants/api';
+import { BACKEND_ENDPOINTS, COOKIE_CONFIG } from '@/constants/api';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
@@ -28,5 +28,27 @@ export async function DELETE() {
     );
   }
 
-  return NextResponse.json(data);
+  const res = NextResponse.json(data);
+
+  const cookieDefaults = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 0,
+  };
+
+  res.cookies.set(COOKIE_CONFIG.ACCESS_TOKEN.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.ACCESS_TOKEN.path,
+  });
+  res.cookies.set(COOKIE_CONFIG.USER.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.USER.path,
+  });
+  res.cookies.set(COOKIE_CONFIG.REFRESH_TOKEN.name, '', {
+    ...cookieDefaults,
+    path: COOKIE_CONFIG.REFRESH_TOKEN.path,
+  });
+
+  return res;
 }

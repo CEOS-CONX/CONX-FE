@@ -22,10 +22,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { hostname: 'picsum.photos' },
       { hostname: 'placehold.co' },
-      {
-        hostname:
-          'conx-dev-s3-files-394489192136-ap-northeast-2-an.s3.ap-northeast-2.amazonaws.com',
-      },
+      ...(process.env.S3_HOSTNAME ? [{ hostname: process.env.S3_HOSTNAME }] : []),
     ],
   },
   turbopack: {

@@ -190,6 +190,14 @@ export default function WorkspaceSettlement() {
                       defaultValue={row.crewPaymentStatus}
                       panelClassName="w-21.75"
                       onChange={async (value) => {
+                        const prev = row.crewPaymentStatus;
+                        setSettlements((s) =>
+                          s.map((item) =>
+                            item.settlementId === row.settlementId
+                              ? { ...item, crewPaymentStatus: value }
+                              : item,
+                          ),
+                        );
                         try {
                           const res = await fetch(
                             `/api/crews/settlements/${row.settlementId}/payment-status`,
@@ -202,9 +210,23 @@ export default function WorkspaceSettlement() {
                           if (!res.ok) {
                             const data = await res.json().catch(() => ({}));
                             alert(data.message ?? '상태 변경에 실패했습니다.');
+                            setSettlements((s) =>
+                              s.map((item) =>
+                                item.settlementId === row.settlementId
+                                  ? { ...item, crewPaymentStatus: prev }
+                                  : item,
+                              ),
+                            );
                           }
                         } catch {
                           alert('네트워크 오류가 발생했습니다.');
+                          setSettlements((s) =>
+                            s.map((item) =>
+                              item.settlementId === row.settlementId
+                                ? { ...item, crewPaymentStatus: prev }
+                                : item,
+                            ),
+                          );
                         }
                       }}
                     />
