@@ -38,7 +38,8 @@ export default async function BrowseProjectsPage({
     // 네트워크 오류 시 빈 목록 유지
   }
 
-  return <BrowseProjectsClient initialProjects={projects} initialParams={params} />;
+  const paramsKey = JSON.stringify(params);
+  return <BrowseProjectsClient key={paramsKey} initialProjects={projects} initialParams={params} />;
 }
 
 interface Project {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/common/Card';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
@@ -32,6 +32,29 @@ interface BrowseCrewsClientProps {
 const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
   <div key={i} className="h-60 animate-pulse rounded-lg bg-gray-100" />
 ));
+
+const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
+  const handleScrapChange = useCallback(() => {
+    fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
+      method: 'PATCH',
+    });
+  }, [crew.crewId]);
+
+  return (
+    <Card
+      imageSrc={crew.profileImage || '/images/OG_image.png'}
+      imageAlt={crew.crewName ?? '크루 이미지'}
+      defaultScraped={crew.bookmarked}
+      onScrapChange={handleScrapChange}
+      title={crew.crewName ?? '크루명'}
+      subtitle={crew.crewIntroduction ?? ''}
+      category1={crew.category ?? ''}
+      category2={crew.crewType ?? ''}
+      rating={crew.point}
+      totalCount={crew.cumulative}
+    />
+  );
+});
 
 export default function BrowseCrewsClient({ initialCrews, initialParams }: BrowseCrewsClientProps) {
   const [searchQuery, setSearchQuery] = useState(initialParams.keyword ?? '');
@@ -127,25 +150,7 @@ export default function BrowseCrewsClient({ initialCrews, initialParams }: Brows
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : crews.map((crew) => (
-              <Card
-                key={crew.crewId}
-                imageSrc={crew.profileImage || '/images/OG_image.png'}
-                imageAlt={crew.crewName ?? '크루 이미지'}
-                defaultScraped={crew.bookmarked}
-                onScrapChange={() => {
-                  fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
-                    method: 'PATCH',
-                  });
-                }}
-                title={crew.crewName ?? '크루명'}
-                subtitle={crew.crewIntroduction ?? ''}
-                category1={crew.category ?? ''}
-                category2={crew.crewType ?? ''}
-                rating={crew.point}
-                totalCount={crew.cumulative}
-              />
-            ))}
+          : crews.map((crew) => <CrewCard key={crew.crewId} crew={crew} />)}
       </div>
     </main>
   );

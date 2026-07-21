@@ -17,7 +17,6 @@ export default async function BrowseCrewsPage({
   if (params.keyword) query.set('keyword', params.keyword);
   if (params.category) query.set('category', params.category);
   if (params.crewType) query.set('crewType', params.crewType);
-  if (params.sort) query.set('sort', params.sort);
   query.set('sort', params.sort ?? 'RECENT');
   query.set('page', '0');
   query.set('size', '12');
@@ -37,7 +36,8 @@ export default async function BrowseCrewsPage({
     // 네트워크 오류 시 빈 목록 유지
   }
 
-  return <BrowseCrewsClient initialCrews={crews} initialParams={params} />;
+  const paramsKey = JSON.stringify(params);
+  return <BrowseCrewsClient key={paramsKey} initialCrews={crews} initialParams={params} />;
 }
 
 interface Crew {

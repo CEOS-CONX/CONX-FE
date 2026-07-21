@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { memo, useState, useEffect, useCallback, useRef } from 'react';
 import { Card } from '@/components/common/Card';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import type { DateRange } from '@/components/common/DropdownCalendar';
@@ -36,6 +36,35 @@ function formatDate(dateStr: string): string {
 const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
   <div key={i} className="h-60 animate-pulse rounded-lg bg-gray-100" />
 ));
+
+const IMMINENT_TAG = { type: 'red' as const, label: '마감임박' };
+
+const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
+  const handleScrapChange = useCallback(
+    (scraped: boolean) => {
+      fetch(`/api/projects/${project.projectId}/bookmarks`, {
+        method: scraped ? 'POST' : 'DELETE',
+      });
+    },
+    [project.projectId],
+  );
+
+  return (
+    <Card
+      imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
+      imageAlt={project.projectName}
+      tag={project.isImminent ? IMMINENT_TAG : undefined}
+      defaultScraped={project.isBookmarked}
+      onScrapChange={handleScrapChange}
+      title={project.projectName}
+      subtitle={project.companyName}
+      category1={project.category}
+      category2={project.projectType}
+      startDate={formatDate(project.projectStartDate)}
+      endDate={formatDate(project.projectDeadline)}
+    />
+  );
+});
 
 export default function BrowseProjectsClient({
   initialProjects,
@@ -140,26 +169,7 @@ export default function BrowseProjectsClient({
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : projects.map((project) => (
-              <Card
-                key={project.projectId}
-                imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
-                imageAlt={project.projectName}
-                tag={project.isImminent ? { type: 'red' as const, label: '마감임박' } : undefined}
-                defaultScraped={project.isBookmarked}
-                onScrapChange={(scraped) => {
-                  fetch(`/api/projects/${project.projectId}/bookmarks`, {
-                    method: scraped ? 'POST' : 'DELETE',
-                  });
-                }}
-                title={project.projectName}
-                subtitle={project.companyName}
-                category1={project.category}
-                category2={project.projectType}
-                startDate={formatDate(project.projectStartDate)}
-                endDate={formatDate(project.projectDeadline)}
-              />
-            ))}
+          : projects.map((project) => <ProjectCard key={project.projectId} project={project} />)}
       </div>
     </main>
   );
