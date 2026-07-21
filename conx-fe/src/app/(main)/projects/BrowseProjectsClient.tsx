@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import type { DateRange } from '@/components/common/DropdownCalendar';
@@ -50,19 +51,21 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
   );
 
   return (
-    <Card
-      imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
-      imageAlt={project.projectName}
-      tag={project.isImminent ? IMMINENT_TAG : undefined}
-      defaultScraped={project.isBookmarked}
-      onScrapChange={handleScrapChange}
-      title={project.projectName}
-      subtitle={project.companyName}
-      category1={project.category}
-      category2={project.projectType}
-      startDate={formatDate(project.projectStartDate)}
-      endDate={formatDate(project.projectDeadline)}
-    />
+    <Link href={`/projects/${project.projectId}`}>
+      <Card
+        imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
+        imageAlt={project.projectName}
+        tag={project.isImminent ? IMMINENT_TAG : undefined}
+        defaultScraped={project.isBookmarked}
+        onScrapChange={handleScrapChange}
+        title={project.projectName}
+        subtitle={project.companyName}
+        category1={project.category}
+        category2={project.projectType}
+        startDate={formatDate(project.projectStartDate)}
+        endDate={formatDate(project.projectDeadline)}
+      />
+    </Link>
   );
 });
 
