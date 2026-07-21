@@ -42,6 +42,7 @@ interface ProjectCommon {
 interface Application {
   applicationId: number;
   crewId: number;
+  crewName: string | null;
   crewImageLink: string | null;
   crewType: string;
   motivation: string;
@@ -323,7 +324,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
                             <CrewCard
                               key={crew.applicationId}
                               profileSrc={crew.crewImageLink ?? '/placeholder.png'}
-                              name={crew.crewType}
+                              name={crew.crewName ?? '크루명'}
                               subtitle={crew.crewType}
                               tags={crew.keywords}
                               motivation={crew.motivation}
