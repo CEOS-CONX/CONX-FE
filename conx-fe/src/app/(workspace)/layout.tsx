@@ -1,7 +1,16 @@
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import UnifiedWorkspaceLayoutContent from '@/components/workspace/UnifiedWorkspaceLayoutContent';
 
-export default function WorkspaceLayout({ children }: { children: React.ReactNode }) {
+export default async function WorkspaceLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (!accessToken) {
+    redirect('/login');
+  }
+
   return (
     <>
       <Navbar />

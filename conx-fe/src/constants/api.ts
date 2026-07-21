@@ -9,9 +9,14 @@ export const API_ROUTES = {
     REFRESH: '/api/auth/refresh',
     EMAIL_SEND: '/api/auth/email/send',
     EMAIL_VERIFY: '/api/auth/email/verify',
+    DELETE_ACCOUNT: '/api/account/delete',
   },
   PROJECT: {
     CREATE: '/api/projects/create',
+    LIST: '/api/projects',
+  },
+  CREW: {
+    LIST: '/api/crews',
   },
   FILE: {
     UPLOAD: '/api/files/upload',
@@ -31,11 +36,18 @@ export const BACKEND_ENDPOINTS = {
     SIGNUP_USERINFO_COMPANY: '/api/v1/auth/userinfo/company',
     SIGNUP_SETTING_CREW: '/api/v1/auth/usersetting/crew',
     SIGNUP_SETTING_COMPANY: '/api/v1/auth/usersetting/company',
+    LOGOUT: '/api/v1/logout',
     EMAIL_SEND: '/api/v1/auth/email/send',
     EMAIL_VERIFY: '/api/v1/auth/email/verify',
+    REFRESH: '/api/v1/login/refresh',
+    DELETE_ACCOUNT: '/api/v1/account/me',
   },
   PROJECT: {
     CREATE: '/api/v1/companies/me/projects',
+    LIST: '/api/v1/projects',
+  },
+  CREW: {
+    LIST: '/api/v1/crews',
   },
   FILE: {
     UPLOAD: '/api/v1/files/presigned-url',

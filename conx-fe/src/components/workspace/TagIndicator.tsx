@@ -1,4 +1,4 @@
-type TagIndicatorType = 'blue' | 'green' | 'gray';
+type TagIndicatorType = 'blue' | 'green' | 'gray' | 'cyan' | 'purple';
 
 interface TagIndicatorProps {
   type: TagIndicatorType;
@@ -20,6 +20,16 @@ const STYLES: Record<TagIndicatorType, { border: string; dot: string; text: stri
     border: 'border-conx-gray-100',
     dot: 'bg-conx-gray-500',
     text: 'text-conx-gray-500',
+  },
+  cyan: {
+    border: 'border-conx-cyan-100',
+    dot: 'bg-conx-cyan-500',
+    text: 'text-conx-cyan-500',
+  },
+  purple: {
+    border: 'border-conx-purple-100',
+    dot: 'bg-conx-purple-500',
+    text: 'text-conx-purple-500',
   },
 };
 

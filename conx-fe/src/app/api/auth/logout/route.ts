@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server';
-import { COOKIE_CONFIG } from '@/constants/api';
+import { cookies } from 'next/headers';
+import { BACKEND_ENDPOINTS, COOKIE_CONFIG } from '@/constants/api';
+
+const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function POST() {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+
+  if (accessToken) {
+    await fetch(`${API_BASE_URL}${BACKEND_ENDPOINTS.AUTH.LOGOUT}`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    }).catch(() => {});
+  }
+
   const res = NextResponse.json({ success: true });
 
   const cookieDefaults = {

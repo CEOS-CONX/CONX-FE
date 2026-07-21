@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/common/Card';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
+import { API_ROUTES } from '@/constants/api';
 import {
   CREW_TYPE_OPTIONS,
   INDUSTRY_OPTIONS,
@@ -11,24 +12,52 @@ import {
   SORT_OPTIONS,
 } from '@/constants/browse';
 
-const MOCK_CARDS = Array.from({ length: 12 }, (_, i) => ({
-  id: i,
-  imageSrc: `https://placehold.co/337x203/f5f5f5/f5f5f5.png`,
-  imageAlt: `크루 이미지 ${i + 1}`,
-  title: i === 0 ? 'CEOS 세오스' : '크루명',
-  subtitle: i === 0 ? '"신촌권 원앤온리 IT 창업 동아리"' : '캐치프레이즈',
-  category1: i === 0 ? 'IT' : '활동 분야',
-  category2: i === 0 ? '동아리' : '크루 유형',
-  rating: i === 0 ? 5.0 : 0.0,
-  totalCount: i === 0 ? 2323 : 0,
-}));
+interface Crew {
+  crewId: number;
+  profileImage: string | null;
+  crewName: string | null;
+  crewIntroduction: string | null;
+  category: string | null;
+  crewType: string | null;
+  point: number;
+  cumulative: number;
+  bookmarked: boolean;
+}
 
 export default function BrowseCrewsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [field, setField] = useState<string>();
   const [crewType, setCrewType] = useState<string>();
   const [rating, setRating] = useState<string>();
-  const [sort, setSort] = useState('latest');
+  const [sort, setSort] = useState('RECENT');
+  const [crews, setCrews] = useState<Crew[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const params = new URLSearchParams();
+    if (searchQuery) params.set('keyword', searchQuery);
+    if (field) params.set('category', field);
+    if (crewType) params.set('crewType', crewType);
+    if (sort) params.set('sort', sort);
+    params.set('page', '0');
+    params.set('size', '12');
+
+    fetch(`${API_ROUTES.CREW.LIST}?${params.toString()}`, { signal: controller.signal })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.payload?.content) setCrews(data.payload.content);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [searchQuery, field, crewType, sort]);
 
   return (
     <main className="xlarge:max-w-272 large:max-w-230 mx-auto w-full max-w-367 px-6 pt-25 pb-82.5">
@@ -74,19 +103,23 @@ export default function BrowseCrewsPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
-        {MOCK_CARDS.map((card) => (
-          <Card
-            key={card.id}
-            imageSrc={card.imageSrc}
-            imageAlt={card.imageAlt}
-            title={card.title}
-            subtitle={card.subtitle}
-            category1={card.category1}
-            category2={card.category2}
-            rating={card.rating}
-            totalCount={card.totalCount}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 12 }, (_, i) => (
+              <div key={i} className="h-60 animate-pulse rounded-lg bg-gray-100" />
+            ))
+          : crews.map((crew) => (
+              <Card
+                key={crew.crewId}
+                imageSrc={crew.profileImage ?? '/images/OG_image.png'}
+                imageAlt={crew.crewName ?? '크루 이미지'}
+                title={crew.crewName ?? '크루명'}
+                subtitle={crew.crewIntroduction ?? ''}
+                category1={crew.category ?? ''}
+                category2={crew.crewType ?? ''}
+                rating={crew.point}
+                totalCount={crew.cumulative}
+              />
+            ))}
       </div>
     </main>
   );
