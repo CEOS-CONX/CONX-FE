@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import IconStar from '@/assets/icons/icon_star_fill.svg';
 import { ImageCard } from '@/components/common/ImageCard';
 import type { TagType } from '@/components/common/Tag';
@@ -27,7 +28,7 @@ function Divider() {
   );
 }
 
-export default function Card({
+export default memo(function Card({
   imageSrc,
   imageAlt,
   tag,
@@ -97,4 +98,4 @@ export default function Card({
       </div>
     </div>
   );
-}
+});
