@@ -73,7 +73,11 @@ export default function CompanyWorkspaceProjects() {
         });
         const data = await res.json();
         if (res.ok && data.payload) {
-          setProjects(data.payload.content ?? []);
+          const content: CompanyProject[] = data.payload.content ?? [];
+          const filtered = filterStatus
+            ? content.filter((p) => p.status === filterStatus)
+            : content;
+          setProjects(filtered);
           setTotalPages(Math.max(1, data.payload.totalPages ?? 1));
         }
       } catch (e) {

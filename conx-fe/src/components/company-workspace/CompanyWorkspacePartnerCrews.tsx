@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import TabNumber from '@/components/workspace/TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -98,7 +99,7 @@ export default function CompanyWorkspacePartnerCrews() {
                 {row.map((card) => {
                   const tag = getPartnerCrewTag(card.status);
                   return (
-                    <div key={card.id} className="w-84.25">
+                    <Link key={card.id} href={`/crews/${card.id}`} className="w-84.25">
                       <Card
                         imageSrc="/placeholder.png"
                         imageAlt={card.name}
@@ -110,7 +111,7 @@ export default function CompanyWorkspacePartnerCrews() {
                         rating={card.rating}
                         totalCount={card.totalCount}
                       />
-                    </div>
+                    </Link>
                   );
                 })}
                 {row.length < 3 &&

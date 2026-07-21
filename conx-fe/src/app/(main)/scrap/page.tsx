@@ -167,37 +167,39 @@ export default function ScrapPage() {
           <div className="mt-27.25 grid grid-cols-4 gap-x-6 gap-y-18.5">
             {isCompany
               ? visibleCrews.map((crew) => (
-                  <Card
-                    key={crew.crewId}
-                    imageSrc={crew.profileImage || '/images/OG_image.png'}
-                    imageAlt={crew.crewName ?? '크루 이미지'}
-                    defaultScraped
-                    onScrapChange={(scraped) => {
-                      if (!scraped) handleUnscrapCrew(crew.crewId);
-                    }}
-                    title={crew.crewName ?? '크루명'}
-                    subtitle={crew.crewIntroduction ?? ''}
-                    category1={crew.crewType ?? ''}
-                    rating={crew.point}
-                    totalCount={crew.cumulative}
-                  />
+                  <Link key={crew.crewId} href={`/crews/${crew.crewId}`}>
+                    <Card
+                      imageSrc={crew.profileImage || '/images/OG_image.png'}
+                      imageAlt={crew.crewName ?? '크루 이미지'}
+                      defaultScraped
+                      onScrapChange={(scraped) => {
+                        if (!scraped) handleUnscrapCrew(crew.crewId);
+                      }}
+                      title={crew.crewName ?? '크루명'}
+                      subtitle={crew.crewIntroduction ?? ''}
+                      category1={crew.crewType ?? ''}
+                      rating={crew.point}
+                      totalCount={crew.cumulative}
+                    />
+                  </Link>
                 ))
               : visibleProjects.map((project) => (
-                  <Card
-                    key={project.bookmarkId}
-                    imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
-                    imageAlt={project.projectName}
-                    defaultScraped
-                    onScrapChange={(scraped) => {
-                      if (!scraped) handleUnscrapProject(project.bookmarkId, project.projectId);
-                    }}
-                    title={project.projectName}
-                    subtitle={project.companyName}
-                    category1={project.industry}
-                    category2={project.projectType}
-                    startDate={formatDate(project.projectStartDate)}
-                    endDate={formatDate(project.projectDeadline)}
-                  />
+                  <Link key={project.bookmarkId} href={`/projects/${project.projectId}`}>
+                    <Card
+                      imageSrc={project.projectImage?.[0] || '/images/OG_image.png'}
+                      imageAlt={project.projectName}
+                      defaultScraped
+                      onScrapChange={(scraped) => {
+                        if (!scraped) handleUnscrapProject(project.bookmarkId, project.projectId);
+                      }}
+                      title={project.projectName}
+                      subtitle={project.companyName}
+                      category1={project.industry}
+                      category2={project.projectType}
+                      startDate={formatDate(project.projectStartDate)}
+                      endDate={formatDate(project.projectDeadline)}
+                    />
+                  </Link>
                 ))}
           </div>
         )}

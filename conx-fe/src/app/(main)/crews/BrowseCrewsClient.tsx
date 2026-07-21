@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useState, useEffect, useCallback, useRef } from 'react';
+import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
@@ -41,18 +42,20 @@ const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
   }, [crew.crewId]);
 
   return (
-    <Card
-      imageSrc={crew.profileImage || '/images/OG_image.png'}
-      imageAlt={crew.crewName ?? '크루 이미지'}
-      defaultScraped={crew.bookmarked}
-      onScrapChange={handleScrapChange}
-      title={crew.crewName ?? '크루명'}
-      subtitle={crew.crewIntroduction ?? ''}
-      category1={crew.category ?? ''}
-      category2={crew.crewType ?? ''}
-      rating={crew.point}
-      totalCount={crew.cumulative}
-    />
+    <Link href={`/crews/${crew.crewId}`}>
+      <Card
+        imageSrc={crew.profileImage || '/images/OG_image.png'}
+        imageAlt={crew.crewName ?? '크루 이미지'}
+        defaultScraped={crew.bookmarked}
+        onScrapChange={handleScrapChange}
+        title={crew.crewName ?? '크루명'}
+        subtitle={crew.crewIntroduction ?? ''}
+        category1={crew.category ?? ''}
+        category2={crew.crewType ?? ''}
+        rating={crew.point}
+        totalCount={crew.cumulative}
+      />
+    </Link>
   );
 });
 
