@@ -12,7 +12,7 @@ interface ImageCardProps {
   tag?: { type: TagType; label: string };
   tags?: { type: TagType; label: string }[];
   defaultScraped?: boolean;
-  onScrapChange?: (scraped: boolean) => void;
+  onScrapChange?: (scraped: boolean) => Promise<void> | void;
 }
 
 export default function ImageCard({
