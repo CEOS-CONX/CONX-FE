@@ -193,7 +193,7 @@ export default function ScrapPage() {
                       imageAlt={crew.crewName ?? '크루 이미지'}
                       defaultScraped
                       onScrapChange={(scraped) => {
-                        if (!scraped) handleUnscrapCrew(crew.crewId);
+                        if (!scraped) return handleUnscrapCrew(crew.crewId);
                       }}
                       title={crew.crewName ?? '크루명'}
                       subtitle={crew.crewIntroduction ?? ''}
@@ -210,7 +210,8 @@ export default function ScrapPage() {
                       imageAlt={project.projectName}
                       defaultScraped
                       onScrapChange={(scraped) => {
-                        if (!scraped) handleUnscrapProject(project.bookmarkId, project.projectId);
+                        if (!scraped)
+                          return handleUnscrapProject(project.bookmarkId, project.projectId);
                       }}
                       title={project.projectName}
                       subtitle={project.companyName}
