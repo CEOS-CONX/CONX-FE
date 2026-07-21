@@ -9,7 +9,7 @@ interface CardProps {
   tag?: { type: TagType; label: string };
   tags?: { type: TagType; label: string }[];
   defaultScraped?: boolean;
-  onScrapChange?: (scraped: boolean) => void;
+  onScrapChange?: (scraped: boolean) => Promise<void> | void;
   title: string;
   subtitle?: string;
   category1?: string;

@@ -106,16 +106,36 @@ export default function ScrapPage() {
   const isEmpty =
     !isLoading && (isCompany ? visibleCrews.length === 0 : visibleProjects.length === 0);
 
-  const handleUnscrapProject = useCallback((bookmarkId: number, projectId: number) => {
+  const handleUnscrapProject = useCallback(async (bookmarkId: number, projectId: number) => {
     setRemovedIds((prev) => new Set(prev).add(bookmarkId));
     setUndoTarget({ id: bookmarkId, type: 'project', projectId });
-    fetch(`/api/projects/${projectId}/bookmarks`, { method: 'DELETE' });
+    try {
+      const res = await fetch(`/api/projects/${projectId}/bookmarks`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+    } catch {
+      setRemovedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(bookmarkId);
+        return next;
+      });
+      setUndoTarget(null);
+    }
   }, []);
 
-  const handleUnscrapCrew = useCallback((crewId: number) => {
+  const handleUnscrapCrew = useCallback(async (crewId: number) => {
     setRemovedIds((prev) => new Set(prev).add(crewId));
     setUndoTarget({ id: crewId, type: 'crew' });
-    fetch(`/api/companies/me/bookmarked-crews/${crewId}`, { method: 'PATCH' });
+    try {
+      const res = await fetch(`/api/companies/me/bookmarked-crews/${crewId}`, { method: 'PATCH' });
+      if (!res.ok) throw new Error();
+    } catch {
+      setRemovedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(crewId);
+        return next;
+      });
+      setUndoTarget(null);
+    }
   }, []);
 
   const handleUndo = useCallback(async () => {
