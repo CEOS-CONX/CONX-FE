@@ -46,7 +46,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex flex-col gap-12">
+    <div className="mb-100 flex flex-col gap-12">
       <div className="flex w-28 flex-col gap-9">
         <LogoConxTitle className="h-6.25 w-28" />
         <h1 className="text-kor-title-1-bold text-conx-common-black">로그인</h1>
