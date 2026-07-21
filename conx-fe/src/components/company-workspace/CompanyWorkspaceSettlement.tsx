@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import CardSummary from '@/components/workspace/CardSummary';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -68,55 +68,57 @@ export default function CompanyWorkspaceSettlement() {
     return () => controller.abort();
   }, []);
 
-  const filteredRows = statusFilter
-    ? settlements.filter((row) => row.settlementStatus === statusFilter)
-    : settlements;
+  // 필터링 + 페이징 — statusFilter, currentPage가 변경될 때만 재계산
+  const { pagedRows, totalPages } = useMemo(() => {
+    const filtered = statusFilter
+      ? settlements.filter((row) => row.settlementStatus === statusFilter)
+      : settlements;
+    const pages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
+    const paged = filtered.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+    return { pagedRows: paged, totalPages: pages };
+  }, [settlements, statusFilter, currentPage]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ROWS_PER_PAGE));
-  const pagedRows = filteredRows.slice(
-    (currentPage - 1) * ROWS_PER_PAGE,
-    currentPage * ROWS_PER_PAGE,
-  );
+  // 요약 카드 계산 — settlements가 변경될 때만 재계산
+  const summaryCards = useMemo(() => {
+    const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
+    const pendingAmount = settlements
+      .filter((s) => s.settlementStatus === 'WAITING')
+      .reduce((sum, s) => sum + s.amount, 0);
+    const pendingDates = settlements
+      .filter((s) => s.settlementStatus === 'WAITING' && s.expectedPaymentDate)
+      .map((s) => s.expectedPaymentDate)
+      .sort();
+    const nextPaymentDate = pendingDates[0]?.replace(/-/g, '.') ?? '-';
+    const now = new Date();
+    const thisMonthAmount = settlements
+      .filter((s) => {
+        if (!s.expectedPaymentDate) return false;
+        const d = new Date(s.expectedPaymentDate);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      })
+      .reduce((sum, s) => sum + s.amount, 0);
 
-  // 요약 카드 계산
-  const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
-  const pendingAmount = settlements
-    .filter((s) => s.settlementStatus === 'WAITING')
-    .reduce((sum, s) => sum + s.amount, 0);
-  const pendingDates = settlements
-    .filter((s) => s.settlementStatus === 'WAITING' && s.expectedPaymentDate)
-    .map((s) => s.expectedPaymentDate)
-    .sort();
-  const nextPaymentDate = pendingDates[0]?.replace(/-/g, '.') ?? '-';
-  const now = new Date();
-  const thisMonthAmount = settlements
-    .filter((s) => {
-      if (!s.expectedPaymentDate) return false;
-      const d = new Date(s.expectedPaymentDate);
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-    })
-    .reduce((sum, s) => sum + s.amount, 0);
-
-  const summaryCards = [
-    {
-      title: '누적 지원금',
-      value: formatAmount(totalAmount),
-      description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} 기준`,
-      width: 'w-114.25',
-    },
-    {
-      title: '지급 예정',
-      value: formatAmount(pendingAmount),
-      description: `다음 지급 예정일: ${nextPaymentDate}`,
-      width: 'w-84.25',
-    },
-    {
-      title: '이번 달 지원금',
-      value: formatAmount(thisMonthAmount),
-      description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')} 기준`,
-      width: 'w-84.25',
-    },
-  ];
+    return [
+      {
+        title: '누적 지원금',
+        value: formatAmount(totalAmount),
+        description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} 기준`,
+        width: 'w-114.25',
+      },
+      {
+        title: '지급 예정',
+        value: formatAmount(pendingAmount),
+        description: `다음 지급 예정일: ${nextPaymentDate}`,
+        width: 'w-84.25',
+      },
+      {
+        title: '이번 달 지원금',
+        value: formatAmount(thisMonthAmount),
+        description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')} 기준`,
+        width: 'w-84.25',
+      },
+    ];
+  }, [settlements]);
 
   if (isLoading) {
     return (

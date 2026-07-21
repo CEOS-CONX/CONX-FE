@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import NotificationModal from './NotificationModal';
@@ -41,16 +41,19 @@ const ICON_BUTTONS: {
   { name: 'profile', label: '프로필', Stroke: IconProfileStroke, Fill: IconProfileFill },
 ];
 
-export default function Navbar() {
+export default memo(function Navbar() {
   const { isLoggedIn, user } = useAuth();
   const pathname = usePathname();
 
   const workspaceHref =
     user?.userType === USER_TYPE.COMPANY ? '/company-workspace' : '/crew-workspace';
-  const NAV_LINKS = [
-    ...BASE_NAV_LINKS,
-    ...(isLoggedIn ? [{ label: '워크스페이스', href: workspaceHref }] : []),
-  ] as const;
+  const NAV_LINKS = useMemo(
+    () => [
+      ...BASE_NAV_LINKS,
+      ...(isLoggedIn ? [{ label: '워크스페이스' as const, href: workspaceHref }] : []),
+    ],
+    [isLoggedIn, workspaceHref],
+  );
   const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -61,11 +64,16 @@ export default function Navbar() {
     bellButtonRef.current?.focus();
   }, [setNotificationOpen]);
 
-  const activeLink =
-    NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
-    (pathname === '/' ? '홈' : null);
-  const activeIcon: IconName | null =
-    ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null;
+  const activeLink = useMemo(
+    () =>
+      NAV_LINKS.find(({ href }) => href !== '/' && pathname.startsWith(href))?.label ??
+      (pathname === '/' ? '홈' : null),
+    [NAV_LINKS, pathname],
+  );
+  const activeIcon: IconName | null = useMemo(
+    () => ICON_BUTTONS.find((btn) => btn.href && pathname.startsWith(btn.href))?.name ?? null,
+    [pathname],
+  );
 
   // 알림 모달: 바깥 클릭 / Esc 로 닫기
   useEffect(() => {
@@ -186,4 +194,4 @@ export default function Navbar() {
       </div>
     </header>
   );
-}
+});

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import TabNumber from './TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
@@ -119,10 +119,13 @@ export default function WorkspaceProjects() {
 
   const isEmpty = !isLoading && projects.length === 0;
 
-  const rows: CrewProject[][] = [];
-  for (let i = 0; i < projects.length; i += 3) {
-    rows.push(projects.slice(i, i + 3));
-  }
+  const rows = useMemo(() => {
+    const result: CrewProject[][] = [];
+    for (let i = 0; i < projects.length; i += 3) {
+      result.push(projects.slice(i, i + 3));
+    }
+    return result;
+  }, [projects]);
 
   return (
     <div className="flex flex-col gap-6 pr-36 pb-63">
