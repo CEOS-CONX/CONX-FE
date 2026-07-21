@@ -42,10 +42,11 @@ const IMMINENT_TAG = { type: 'red' as const, label: '마감임박' };
 
 const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
   const handleScrapChange = useCallback(
-    (scraped: boolean) => {
-      fetch(`/api/projects/${project.projectId}/bookmarks`, {
+    async (scraped: boolean) => {
+      const res = await fetch(`/api/projects/${project.projectId}/bookmarks`, {
         method: scraped ? 'POST' : 'DELETE',
       });
+      if (!res.ok) throw new Error('scrap failed');
     },
     [project.projectId],
   );

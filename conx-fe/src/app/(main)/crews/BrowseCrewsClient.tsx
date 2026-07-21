@@ -35,10 +35,11 @@ const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
 ));
 
 const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
-  const handleScrapChange = useCallback(() => {
-    fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
+  const handleScrapChange = useCallback(async () => {
+    const res = await fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
       method: 'PATCH',
     });
+    if (!res.ok) throw new Error('scrap failed');
   }, [crew.crewId]);
 
   return (
