@@ -5,6 +5,10 @@
   --foreground: #121212;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 /* ========== Breakpoints (Desktop-first) ========== */
 /* 기본값(prefix 없음) → xxlarge (1600px 이상) — 기본 디자인 값
   large:              → 1200px 미만 (실질 최소 992px)
@@ -55,8 +59,16 @@
   --color-conx-green-500: #0ea845;
 
   /* Blue */
-  --color-conx-blue-100: #c6dfff;
+  --color-conx-blue-100: #dbeaff;
   --color-conx-blue-500: #0058cb;
+
+  /* Purple */
+  --color-conx-purple-100: #efe8ff;
+  --color-conx-purple-500: #8f35e8;
+
+  /* Cyan */
+  --color-conx-cyan-100: #d1f9ff;
+  --color-conx-cyan-500: #0099c4;
 
   /* Red */
   --color-conx-red-100: #ffe4e4;
@@ -66,14 +78,27 @@
   --color-conx-yellow-100: #fff6d0;
   --color-conx-yellow-500: #f17d08;
 
+  /* Cyan */
+  --color-conx-cyan-100: #d1f9ff;
+  --color-conx-cyan-500: #0099c4;
+
+  /* Purple */
+  --color-conx-purple-100: #efe8ff;
+  --color-conx-purple-500: #8f35e8;
+
   /* ========== */
 
-  /* Effect */
-  --shadow-conx-drop-gray: 0 2px 8px 0 rgb(29 34 41 / 0.15);
+  /* Effect — DropShadow/Gray (이름 뒤 숫자 = 불투명도 %) + LayerBlur */
+  --drop-shadow-conx-drop-gray-15: 0px 2px 8px rgb(29 34 41 / 0.15);
+  --shadow-conx-drop-gray-4: 0 -6px 12px 0 rgb(29 34 41 / 0.04);
+  --shadow-conx-drop-gray-30: 0 2px 12px 0 rgb(29 34 41 / 0.3);
+  --blur-conx-layer-40: 40px;
 
   /* Opacity */
   --color-conx-opacity-gray-6: rgb(29 34 41 / 0.06);
   --color-conx-opacity-gray-30: rgb(29 34 41 / 0.3);
+  --color-conx-opacity-gray-50: rgb(29 34 41 / 0.5);
+  --color-conx-opacity-gray-85: rgb(0 0 0 / 0.85);
 
   /* Gradient — Figma의 Gradient_white/100_0, 0_100 (섹션 경계용, 세로 100% white) */
   --background-image-conx-gradient-white-top: linear-gradient(

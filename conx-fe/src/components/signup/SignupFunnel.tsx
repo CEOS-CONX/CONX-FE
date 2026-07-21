@@ -105,7 +105,9 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
       {step === 'complete' && userType && (
         <SignupCompleteModal
           userType={userType}
-          onPrimaryAction={() => router.push('/')}
+          onPrimaryAction={() =>
+            router.push(userType === USER_TYPE.COMPANY ? '/project-create' : '/crew-workspace')
+          }
           onSecondaryAction={() => router.push('/')}
           onClose={handleClose}
         />

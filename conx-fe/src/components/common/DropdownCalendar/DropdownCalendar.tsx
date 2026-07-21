@@ -9,14 +9,32 @@ import IconArrowRightFill from '@/assets/icons/icon_arrowRight_fill.svg';
 export type DateRange = { start: Date; end: Date };
 
 type DropdownVariant = 'line' | 'ghost';
+type DropdownSize = 'sm' | 'md';
 
-interface DropdownCalendarProps {
+type DropdownAlign = 'left' | 'right';
+
+interface BaseProps {
   variant?: DropdownVariant;
-  value?: DateRange;
-  onChange?: (range: DateRange) => void;
+  size?: DropdownSize;
+  align?: DropdownAlign;
   placeholder?: string;
+  subLabel?: string;
   className?: string;
 }
+
+interface SingleProps extends BaseProps {
+  mode?: 'single';
+  value?: Date;
+  onChange?: (date: Date) => void;
+}
+
+interface RangeProps extends BaseProps {
+  mode: 'range';
+  value?: DateRange;
+  onChange?: (range: DateRange) => void;
+}
+
+type DropdownCalendarProps = SingleProps | RangeProps;
 
 const TRIGGER_BASE: Record<DropdownVariant, string> = {
   line: 'bg-conx-common-white rounded-md border',
@@ -25,12 +43,12 @@ const TRIGGER_BASE: Record<DropdownVariant, string> = {
 
 const TRIGGER_STATE: Record<DropdownVariant, { closed: string; open: string; selected: string }> = {
   line: {
-    closed: 'border-conx-gray-200 hover:border-conx-gray-450',
+    closed: 'border-conx-gray-150 hover:border-conx-gray-300',
     open: 'border-conx-primary-300',
-    selected: 'border-conx-gray-650',
+    selected: 'border-conx-gray-600',
   },
   ghost: {
-    closed: 'hover:bg-conx-gray-100',
+    closed: 'hover:bg-conx-opacity-gray-6',
     open: '',
     selected: '',
   },
@@ -75,25 +93,40 @@ function getCalendarDays(year: number, month: number) {
   return days;
 }
 
-export default function DropdownCalendar({
-  variant = 'line',
-  value: controlledValue,
-  onChange,
-  placeholder = '날짜 범위 선택',
-  className,
-}: DropdownCalendarProps) {
+const TRIGGER_SIZE: Record<DropdownSize, { height: string; text: string; px: string }> = {
+  sm: { height: 'h-[35px]', text: 'text-kor-label-1-medium', px: 'px-3' },
+  md: { height: 'h-11', text: 'text-kor-body-1-medium', px: 'px-4' },
+};
+
+export default function DropdownCalendar(props: DropdownCalendarProps) {
+  const {
+    variant = 'line',
+    size = 'md',
+    align = 'left',
+    placeholder = '날짜 선택',
+    subLabel,
+    className,
+  } = props;
+
+  const isRange = props.mode === 'range';
+
   const [isOpen, setIsOpen] = useState(false);
+  const [internalSingle, setInternalSingle] = useState<Date | undefined>(undefined);
   const [internalRange, setInternalRange] = useState<DateRange | undefined>(undefined);
   const [pickingStart, setPickingStart] = useState<Date | null>(null);
   const [viewMonth, setViewMonth] = useState(() => {
-    const seed = controlledValue?.start ?? new Date();
+    const seed = isRange
+      ? ((props.value as DateRange | undefined)?.start ?? new Date())
+      : ((props.value as Date | undefined) ?? new Date());
     return { year: seed.getFullYear(), month: seed.getMonth() };
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isControlled = controlledValue !== undefined;
-  const currentRange = isControlled ? controlledValue : internalRange;
-  const isSelected = !!currentRange;
+  const currentSingle = isRange ? undefined : ((props.value as Date | undefined) ?? internalSingle);
+  const currentRange = isRange
+    ? ((props.value as DateRange | undefined) ?? internalRange)
+    : undefined;
+  const isSelected = isRange ? !!currentRange : !!currentSingle;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,30 +152,32 @@ export default function DropdownCalendar({
 
   function handleTriggerClick() {
     if (!isOpen) {
-      // 열 때 viewMonth를 현재 선택된 범위(또는 오늘)로 리셋
-      const seed = currentRange?.start ?? new Date();
+      const seed = isRange ? (currentRange?.start ?? new Date()) : (currentSingle ?? new Date());
       setViewMonth({ year: seed.getFullYear(), month: seed.getMonth() });
     } else {
-      // 닫을 때 mid-selection 상태 초기화 (다음 세션에 영향 X)
       setPickingStart(null);
     }
     setIsOpen((prev) => !prev);
   }
 
   function handleDateClick(date: Date) {
-    if (pickingStart) {
-      // 두 번째 클릭: range 확정
-      const [s, e] =
-        date.getTime() < pickingStart.getTime() ? [date, pickingStart] : [pickingStart, date];
-      const newRange: DateRange = { start: s, end: e };
-      setPickingStart(null);
-      if (!isControlled) setInternalRange(newRange);
-      onChange?.(newRange);
-      setIsOpen(false);
+    if (isRange) {
+      if (pickingStart) {
+        const [s, e] =
+          date.getTime() < pickingStart.getTime() ? [date, pickingStart] : [pickingStart, date];
+        const newRange: DateRange = { start: s, end: e };
+        setPickingStart(null);
+        setInternalRange(newRange);
+        (props as RangeProps).onChange?.(newRange);
+        setIsOpen(false);
+      } else {
+        setPickingStart(date);
+        setInternalRange(undefined);
+      }
     } else {
-      // 첫 번째 클릭: 시작일 설정
-      setPickingStart(date);
-      if (!isControlled) setInternalRange(undefined);
+      setInternalSingle(date);
+      (props as SingleProps).onChange?.(date);
+      setIsOpen(false);
     }
   }
 
@@ -160,43 +195,53 @@ export default function DropdownCalendar({
       ? 'selected'
       : 'closed';
   const stateClass = TRIGGER_STATE[variant][stateKey];
-  const textClass = isOpen || isSelected ? 'text-conx-common-black' : 'text-conx-gray-450';
+  const textClass = isOpen || isSelected ? 'text-conx-gray-600' : 'text-conx-gray-450';
 
-  const triggerText = currentRange
-    ? `${formatDate(currentRange.start)} ~ ${formatDate(currentRange.end)}`
-    : placeholder;
+  let triggerText: string;
+  if (isRange) {
+    triggerText = currentRange
+      ? `${formatDate(currentRange.start)} ~ ${formatDate(currentRange.end)}`
+      : placeholder;
+  } else {
+    triggerText = currentSingle ? formatDate(currentSingle) : placeholder;
+  }
 
-  // 그리드 셀별 시각 상태 계산용
-  const visualStart = pickingStart ?? currentRange?.start ?? null;
-  const visualEnd = pickingStart ? null : (currentRange?.end ?? null);
+  const visualStart = isRange
+    ? (pickingStart ?? currentRange?.start ?? null)
+    : (currentSingle ?? null);
+  const visualEnd = isRange ? (pickingStart ? null : (currentRange?.end ?? null)) : null;
 
   return (
     <div
       ref={containerRef}
       className={`relative inline-block max-w-75 min-w-26 ${className ?? ''}`}
     >
-      <button
-        type="button"
-        onClick={handleTriggerClick}
-        aria-haspopup="dialog"
-        aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
-      >
-        <span className="truncate">{triggerText}</span>
-        {isOpen ? (
-          <IconArrowUpFill className="h-4 w-4 shrink-0" />
-        ) : (
-          <IconArrowDownStroke className="h-4 w-4 shrink-0" />
+      <div className="flex flex-col gap-1">
+        <button
+          type="button"
+          onClick={handleTriggerClick}
+          aria-haspopup="dialog"
+          aria-expanded={isOpen}
+          className={`${TRIGGER_SIZE[size].text} ${TRIGGER_BASE[variant]} ${stateClass} ${textClass} flex ${TRIGGER_SIZE[size].height} w-full cursor-pointer items-center justify-between gap-3 ${TRIGGER_SIZE[size].px} py-2`}
+        >
+          <span className="truncate">{triggerText}</span>
+          {isOpen ? (
+            <IconArrowUpFill className="h-4 w-4 shrink-0" />
+          ) : (
+            <IconArrowDownStroke className="h-4 w-4 shrink-0" />
+          )}
+        </button>
+        {isSelected && subLabel && (
+          <span className="text-kor-label-1-medium text-conx-gray-450 px-1">{subLabel}</span>
         )}
-      </button>
+      </div>
 
       {isOpen && (
         <div
           role="dialog"
-          aria-label="날짜 범위 선택"
-          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-90 rounded-md p-4"
+          aria-label="날짜 선택"
+          className={`drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full mt-2 w-90 rounded-md p-4 ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
-          {/* 월 네비게이션 */}
           <div className="mb-4 flex items-center justify-between">
             <button
               type="button"
@@ -219,7 +264,6 @@ export default function DropdownCalendar({
             </button>
           </div>
 
-          {/* 요일 헤더 */}
           <div className="grid grid-cols-7">
             {WEEKDAYS.map((day) => (
               <div
@@ -231,30 +275,41 @@ export default function DropdownCalendar({
             ))}
           </div>
 
-          {/* 날짜 그리드 */}
           <div className="grid grid-cols-7">
             {days.map(({ date, isOutOfMonth }, idx) => {
               const isStart = visualStart && isSameDate(date, visualStart);
               const isEnd = visualEnd && isSameDate(date, visualEnd);
+              const isSingleSelect = isStart && !visualEnd;
               const isInRange =
                 visualStart &&
                 visualEnd &&
                 date.getTime() > visualStart.getTime() &&
                 date.getTime() < visualEnd.getTime();
 
-              let cellClass =
-                'text-kor-body-1-medium flex aspect-square items-center justify-center';
+              let outerClass = 'flex h-9 items-center justify-center';
+              let innerClass = 'text-kor-label-1-semibold flex size-9 items-center justify-center';
 
               if (isOutOfMonth) {
-                cellClass += ' text-conx-gray-300 cursor-default';
-              } else if (isStart || isEnd) {
-                cellClass +=
-                  ' bg-conx-primary-300 text-conx-common-black cursor-pointer rounded-full';
+                outerClass += ' cursor-default';
+                innerClass += ' text-conx-gray-300';
+              } else if (isStart && visualEnd) {
+                outerClass +=
+                  ' bg-[linear-gradient(to_right,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+              } else if (isEnd) {
+                outerClass +=
+                  ' bg-[linear-gradient(to_left,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+              } else if (isSingleSelect) {
+                outerClass += ' cursor-pointer';
+                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
               } else if (isInRange) {
-                cellClass += ' bg-conx-primary-100 text-conx-common-black cursor-pointer';
+                outerClass += ' bg-conx-primary-100 cursor-pointer';
+                innerClass += ' text-conx-common-black';
               } else {
-                cellClass +=
-                  ' text-conx-common-black hover:bg-conx-primary-100 cursor-pointer hover:rounded-md';
+                outerClass += ' cursor-pointer';
+                innerClass +=
+                  ' text-conx-common-black hover:bg-conx-opacity-gray-6 hover:rounded-full';
               }
 
               return (
@@ -263,9 +318,9 @@ export default function DropdownCalendar({
                   type="button"
                   onClick={() => !isOutOfMonth && handleDateClick(date)}
                   disabled={isOutOfMonth}
-                  className={cellClass}
+                  className={outerClass}
                 >
-                  {date.getDate()}
+                  <span className={innerClass}>{date.getDate()}</span>
                 </button>
               );
             })}

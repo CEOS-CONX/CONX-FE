@@ -9,9 +9,11 @@ export type DropdownCompactOption = {
 };
 
 type DropdownCompactType = 'line' | 'ghost';
+type DropdownCompactSize = 'sm' | 'md';
 
 interface DropdownCompactProps {
   type?: DropdownCompactType;
+  size?: DropdownCompactSize;
   options: DropdownCompactOption[];
   value?: string;
   defaultValue?: string;
@@ -19,6 +21,11 @@ interface DropdownCompactProps {
   placeholder?: string;
   className?: string;
 }
+
+const TRIGGER_SIZE: Record<DropdownCompactSize, { height: string; text: string; px: string }> = {
+  sm: { height: 'h-[35px]', text: 'text-kor-label-1-medium', px: 'px-3' },
+  md: { height: 'h-11', text: 'text-kor-body-1-medium', px: 'px-4' },
+};
 
 const TRIGGER_BASE: Record<DropdownCompactType, string> = {
   line: 'bg-conx-common-white rounded-md border',
@@ -43,6 +50,7 @@ const TRIGGER_STATE: Record<
 
 export default function DropdownCompact({
   type = 'line',
+  size = 'md',
   options,
   value: controlledValue,
   defaultValue,
@@ -80,8 +88,9 @@ export default function DropdownCompact({
   }, [isOpen]);
 
   function handleSelect(newValue: string) {
-    if (!isControlled) setInternalValue(newValue);
-    onChange?.(newValue);
+    const isDeselect = newValue === value;
+    if (!isControlled) setInternalValue(isDeselect ? undefined : newValue);
+    onChange?.(isDeselect ? '' : newValue);
     setIsOpen(false);
   }
 
@@ -91,7 +100,7 @@ export default function DropdownCompact({
       ? 'selected'
       : 'closed';
   const stateClass = TRIGGER_STATE[type][stateKey];
-  const textClass = isOpen || isSelected ? 'text-conx-common-black' : 'text-conx-gray-450';
+  const textClass = isOpen || isSelected ? 'text-conx-gray-600' : 'text-conx-gray-450';
 
   return (
     <div
@@ -104,7 +113,7 @@ export default function DropdownCompact({
         onClick={() => setIsOpen((prev) => !prev)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`text-kor-body-1-medium ${TRIGGER_BASE[type]} ${stateClass} ${textClass} flex h-11 w-full cursor-pointer items-center justify-between gap-3 px-4 py-2`}
+        className={`${TRIGGER_SIZE[size].text} ${TRIGGER_BASE[type]} ${stateClass} ${textClass} flex ${TRIGGER_SIZE[size].height} w-full cursor-pointer items-center justify-between gap-3 ${TRIGGER_SIZE[size].px} py-2`}
       >
         <span className="truncate">{selectedOption?.label ?? placeholder}</span>
         {isOpen ? (
@@ -117,7 +126,7 @@ export default function DropdownCompact({
       {isOpen && (
         <ul
           role="listbox"
-          className="shadow-conx-drop-gray bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
+          className="drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full left-0 mt-1 w-full min-w-22 overflow-y-auto rounded-md p-2"
         >
           {options.map((opt) => (
             <li
@@ -125,7 +134,7 @@ export default function DropdownCompact({
               role="option"
               aria-selected={opt.value === value}
               onClick={() => handleSelect(opt.value)}
-              className="text-kor-label-1-semibold text-conx-gray-500 hover:bg-conx-opacity-gray-6 active:text-conx-common-black cursor-pointer truncate rounded-md px-2 py-2"
+              className="text-kor-label-1-semibold text-conx-gray-500 hover:bg-conx-opacity-gray-6 active:text-conx-common-black cursor-pointer truncate rounded-md px-2 py-2 active:bg-transparent"
             >
               {opt.label}
             </li>

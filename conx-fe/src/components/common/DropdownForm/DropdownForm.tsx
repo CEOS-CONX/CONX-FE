@@ -30,7 +30,7 @@ interface DropdownFormProps {
 const SIZE_WIDTH: Record<DropdownFormSize, string> = {
   sm: 'w-[349px]',
   md: 'w-[419px]',
-  lg: 'w-[458px]',
+  lg: 'w-[457px]',
 };
 
 export default function DropdownForm({
@@ -134,7 +134,7 @@ export default function DropdownForm({
         {isOpen && (
           <ul
             role="listbox"
-            className="shadow-conx-drop-gray bg-conx-common-white absolute top-full left-0 z-10 mt-1 flex w-full flex-col gap-1 rounded-lg p-2"
+            className="drop-shadow-conx-drop-gray-15 bg-conx-common-white absolute top-full left-0 z-10 mt-1 flex w-full flex-col gap-1 rounded-lg p-2"
           >
             {options.map((opt) => (
               <li

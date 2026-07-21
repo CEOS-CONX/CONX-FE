@@ -13,7 +13,7 @@ export default function SearchBar({ className, placeholder = '검색창', ...pro
       <input
         type="text"
         placeholder={placeholder}
-        className="text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-450 min-w-0 flex-1 truncate bg-transparent outline-none"
+        className="text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-450 group-hover:placeholder:text-conx-gray-550 min-w-0 flex-1 truncate bg-transparent outline-none"
         {...props}
       />
     </label>

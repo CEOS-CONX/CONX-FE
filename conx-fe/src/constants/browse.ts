@@ -23,10 +23,14 @@ export const INDUSTRY_OPTIONS = [
 ];
 
 export const PROJECT_TYPE_OPTIONS = [
-  { value: 'side-project', label: '사이드 프로젝트' },
-  { value: 'competition', label: '공모전' },
-  { value: 'study', label: '스터디' },
-  { value: 'internship', label: '인턴십' },
+  { value: 'RESEARCH', label: '리서치/인사이트' },
+  { value: 'MARKETING', label: '마케팅 전략/기획' },
+  { value: 'UGC', label: '숏폼/UGC' },
+  { value: 'SAMPLING', label: '샘플링/오프라인' },
+  { value: 'CAMPAIGN', label: '브랜드 캠페인/프로모션' },
+  { value: 'APPTEST', label: '앱/서비스 테스트' },
+  { value: 'COALITION', label: '학생회/동아리 제휴' },
+  { value: 'ETC', label: '기타' },
 ];
 
 export const CREW_TYPE_OPTIONS = [
@@ -34,7 +38,15 @@ export const CREW_TYPE_OPTIONS = [
   { value: 'CLUB', label: '동아리' },
   { value: 'SMALLMEETING', label: '소모임' },
   { value: 'COUNCIL', label: '학생회' },
-  { value: 'ETC', label: '기타' },
+];
+
+export const ACTIVITY_FIELD_OPTIONS = [
+  { value: 'MARKETING', label: '마케팅' },
+  { value: 'DESIGN', label: '디자인' },
+  { value: 'BUSINESS', label: '경영·컨설팅' },
+  { value: 'FINANCE', label: '금융' },
+  { value: 'STARTUP', label: '창업' },
+  { value: 'DEV_IT', label: '개발·IT' },
 ];
 
 export const RATING_OPTIONS = [
@@ -47,7 +59,8 @@ export const RATING_OPTIONS = [
 ];
 
 export const SORT_OPTIONS = [
-  { value: 'latest', label: '최신등록순' },
-  { value: 'recommended', label: '추천순' },
-  { value: 'popular', label: '인기순' },
+  { value: 'RECENT', label: '최신등록순' },
+  { value: 'RECOMMENDED', label: '추천순' },
+  { value: 'POPULAR', label: '인기순' },
+  { value: 'RATING', label: '평점순' },
 ];
