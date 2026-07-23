@@ -87,7 +87,7 @@ export default function DeleteAccountModal({ onClose, onSuccess }: DeleteAccount
           />
         </div>
 
-        {/* 비밀번호 찾기 + 탈퇴하기 (입력창에서 40px 아래) */}
+        {/* 비밀번호 찾기 + 탈퇴하기 */}
         <div className="mt-10 flex items-center justify-between">
           <TextLineButton onClick={() => router.push('/find-account')}>
             비밀번호를 잊으셨나요?

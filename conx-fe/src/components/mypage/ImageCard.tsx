@@ -6,26 +6,19 @@ import IconTrash from '@/assets/icons/icon_trash.svg';
 import { useFileUpload } from '@/hooks/useFileUpload';
 
 interface ImageCardProps {
-  /** 있으면 filled(실제 이미지 표시) */
   src?: string;
   alt?: string;
-  /** 빈칸 문구 (기본 "이미지 첨부") */
   placeholder?: string;
   onSelect?: (file: File) => void;
   onRemove?: () => void;
-  /** 편집 버튼 클릭 (없으면 파일 다시 선택) */
   onEdit?: () => void;
   error?: boolean;
   accept?: string;
-  /** 빈칸 클릭 동작 override (예: 등록 모달 열기). 없으면 파일 선택 */
   onEmptyClick?: () => void;
-  /** 빈칸 아이콘 override (기본 icon_image). 등록카드는 plus 등 */
   icon?: React.ReactNode;
   className?: string;
 }
 
-// Img_Card — 이미지 슬롯 1칸. 456×273, 보더 상태는 TextFieldUpload와 동일
-// 빈칸: icon_image + "이미지 첨부"(gray-300) / 채움: 실제 이미지 + hover 우상단 수정·삭제
 export default function ImageCard({
   src,
   alt = '이미지',
@@ -84,7 +77,6 @@ export default function ImageCard({
         </div>
       ) : (
         <button type="button" onClick={onEmptyClick ?? open} className={base} {...dragProps}>
-          {/* icon(24) + 텍스트, 갭 4px */}
           <span className="flex flex-col items-center gap-1">
             {icon}
             <span className="text-kor-body-1-semibold text-conx-gray-300">{placeholder}</span>

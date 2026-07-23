@@ -37,7 +37,6 @@ interface ImageUploaderInputProps {
   sortable?: boolean;
 }
 
-// 카드(썸네일) + 캡션(Body1 Bold), 이미지-캡션 gap 12px
 function CardWithCaption({
   pf,
   onEdit,
@@ -60,7 +59,7 @@ function CardWithCaption({
   );
 }
 
-// 드래그핸들(카드와 gap 12px, 상단정렬) + 카드
+// 드래그핸들 + 카드
 function SortableItem({
   pf,
   onEdit,

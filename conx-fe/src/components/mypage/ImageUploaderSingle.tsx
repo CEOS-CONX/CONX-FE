@@ -4,7 +4,6 @@ import IconError from '@/assets/icons/icon_error.svg';
 import ImageCard from './ImageCard';
 
 interface ImageUploaderSingleProps {
-  /** 레이블 (Gray-350) */
   label: string;
   src?: string;
   onSelect?: (file: File) => void;
@@ -15,7 +14,6 @@ interface ImageUploaderSingleProps {
   placeholder?: string;
 }
 
-// Img_Uploader_Single — 라벨 + ImageCard 1칸 + 에러메시지 (단일 이미지 필드, 예: 썸네일)
 export default function ImageUploaderSingle({
   label,
   src,

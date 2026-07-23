@@ -16,7 +16,7 @@ interface EditFieldModalProps {
   onSubmit: (value: string) => void;
 }
 
-// 단일 텍스트 필드 편집 팝업 (이름·직무 등에 재사용)
+// 단일 텍스트 필드 편집 팝업
 export default function EditFieldModal({
   title,
   label,

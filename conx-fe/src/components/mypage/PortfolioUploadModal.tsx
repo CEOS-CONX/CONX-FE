@@ -19,9 +19,6 @@ interface PortfolioUploadModalProps {
   onSubmit: (draft: PortfolioDraft) => void;
 }
 
-// Popup_Portfolio — 포트폴리오 업로드 모달
-// 썸네일 이미지(ImageCard) + 제목(TextFieldLabeled) + pdf 파일(TextFieldUpload) + 등록하기
-// 패딩 상20·좌우24·하20 / 라벨-인풋 12px / 항목 28px / 마지막-버튼 40px
 export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUploadModalProps) {
   const dialogRef = useDialog<HTMLDivElement>(onClose);
   const [thumbFile, setThumbFile] = useState<File | null>(null);
@@ -79,7 +76,7 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
           파일을 끌고 오거나 칸을 눌러 첨부해주세요(50mb 이하)
         </p>
 
-        {/* 필드 (항목 간 28px) */}
+        {/* 필드 */}
         <div className="mt-5 flex flex-col gap-7">
           {/* 썸네일 이미지 */}
           <div className="flex flex-col gap-3">
@@ -87,7 +84,7 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
               썸네일 이미지
             </label>
             <ImageCard
-              className="aspect-[456/273] w-full"
+              className="aspect-456/273 w-full"
               src={thumbUrl || undefined}
               onSelect={(f) => setThumb(f)}
               onRemove={() => setThumb(null)}
@@ -114,7 +111,7 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
           />
         </div>
 
-        {/* 등록하기 (마지막 필드에서 40px) */}
+        {/* 등록하기 */}
         <CTAButton
           className="mt-10"
           disabled={!canSubmit}

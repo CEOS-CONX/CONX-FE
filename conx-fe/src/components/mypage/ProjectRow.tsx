@@ -31,7 +31,6 @@ interface ProjectRowProps {
 }
 
 // Table_Row_Open — 대표 프로젝트 선택 테이블 행 (체크박스 + 컬럼 + 펼침 상세)
-// 컬럼 폭은 PROJECT_COLS로 헤더행과 공유 · 좌패딩 14 / 컬럼 간 36(ml-9) / 우패딩 11
 export default function ProjectRow({
   name,
   brand,

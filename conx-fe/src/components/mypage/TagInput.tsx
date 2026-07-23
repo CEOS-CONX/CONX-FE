@@ -11,13 +11,10 @@ interface TagInputProps {
   /** 입력창 id (라벨 htmlFor 연결용) */
   id?: string;
   className?: string;
-  /** 입력창 포커스 (드롭다운 열기 등) */
   onInputFocus?: () => void;
 }
 
 // 입력 후 Enter → 방금 입력한 단어가 태그로 추가. Backspace(빈 입력)로 마지막 태그 삭제.
-// 보더: 빈 상태 gray-150 / 태그 있으면(입력됨) gray-400, hover gray-300, focus primary-300, bg White
-// 내부 패딩: 빈 상태 16px / 태그 있으면 py 12px (px는 항상 16px) — 높이 56px 유지
 export default function TagInput({
   value,
   onChange,

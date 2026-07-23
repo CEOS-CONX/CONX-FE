@@ -8,7 +8,6 @@ import IconTrash from '@/assets/icons/icon_trash.svg';
 
 interface TextFieldUploadProps {
   label: string;
-  /** 첨부된 파일 표시명 (있으면 filled). 예: "첨부 파일명[jpg, 1.2MB]" */
   fileName?: string;
   onSelect?: (file: File) => void;
   onRemove?: () => void;
@@ -18,8 +17,6 @@ interface TextFieldUploadProps {
   id?: string;
 }
 
-// TextField_Upload_Single — 파일 첨부 필드 (단일)
-// 기본/hover/focus/filled/error 보더는 기존 TextField와 동일, drag·filled-hover는 특이 상태
 export default function TextFieldUpload({
   label,
   fileName,

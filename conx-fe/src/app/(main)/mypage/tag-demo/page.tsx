@@ -5,7 +5,7 @@ import { useState } from 'react';
 import ImageUploader from '@/components/mypage/ImageUploader';
 import { type Portfolio } from '@/components/mypage/ImageUploaderInput';
 import PageIntro from '@/components/mypage/PageIntro';
-import TextFieldBusinessNumber from '@/components/mypage/TextFieldBusinessNumber';
+import TextFieldNumber from '@/components/mypage/TextFieldNumber';
 import TextFieldUrl from '@/components/mypage/TextFieldUrl';
 import ProjectDetailRow from '@/components/mypage/ProjectDetailRow';
 import ProjectRow from '@/components/mypage/ProjectRow';
@@ -17,7 +17,6 @@ import Tag from '@/components/mypage/Tag';
 import TagInput from '@/components/mypage/TagInput';
 import TagSelectField, { type TagCategory } from '@/components/mypage/TagSelectField';
 import TextFieldLabeled from '@/components/mypage/TextFieldLabeled';
-import TextFieldPhone from '@/components/mypage/TextFieldPhone';
 import TextFieldTagInput from '@/components/mypage/TextFieldTagInput';
 import TextFieldUpload from '@/components/mypage/TextFieldUpload';
 
@@ -191,10 +190,10 @@ export default function TagDemoPage() {
         />
       </section>
 
-      {/* TextFieldLabeled / TextFieldPhone */}
+      {/* TextFieldLabeled / TextFieldNumber */}
       <section className="flex w-[440px] flex-col gap-6">
         <h2 className="text-kor-heading-3-bold text-conx-common-black">
-          TextFieldLabeled / TextFieldPhone
+          TextFieldLabeled / TextFieldNumber
         </h2>
         <TextFieldLabeled
           id="tf1"
@@ -211,8 +210,14 @@ export default function TagDemoPage() {
           maxLength={35}
           error="에러메세지"
         />
-        <TextFieldPhone id="tf-phone" label="레이블" value={phone} onChange={setPhone} />
-        <TextFieldBusinessNumber id="tf-biz" value={bizNo} onChange={setBizNo} />
+        <TextFieldNumber
+          format="phone"
+          id="tf-phone"
+          label="레이블"
+          value={phone}
+          onChange={setPhone}
+        />
+        <TextFieldNumber format="businessNumber" id="tf-biz" value={bizNo} onChange={setBizNo} />
         <TextFieldUrl
           id="tf-url"
           name={urlName}

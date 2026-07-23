@@ -13,8 +13,6 @@ interface ProfileRegisterModalProps {
   onClose: () => void;
 }
 
-// 등록 확인 팝업 — "작성 중인 내용을 등록할까요?"
-// 배경 Opacity/Gray/30, 초록 등록 버튼 + 흰 나가기 버튼
 export default function ProfileRegisterModal({
   onRegister,
   onLeave,

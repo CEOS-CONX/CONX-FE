@@ -3,18 +3,14 @@
 import TagInput from './TagInput';
 
 interface TextFieldTagInputProps {
-  /** 타이틀 */
   label: string;
-  /** 도움말 텍스트 */
   helperText?: string;
   value: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
   variant?: 'editable' | 'removable';
-  /** "총 N개" 카운터 노출 (기본 true) */
   showCount?: boolean;
   id?: string;
-  /** 입력창 포커스 (드롭다운 열기 등) */
   onInputFocus?: () => void;
 }
 

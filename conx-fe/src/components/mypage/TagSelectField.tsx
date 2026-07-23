@@ -10,12 +10,10 @@ export interface TagCategory {
 }
 
 interface TagSelectFieldProps {
-  /** 타이틀 */
   label: string;
   helperText?: string;
   value: string[];
   onChange: (tags: string[]) => void;
-  /** 드롭다운 카테고리별 태그 목록 */
   options: TagCategory[];
   placeholder?: string;
   id?: string;
@@ -70,7 +68,6 @@ export default function TagSelectField({
       />
 
       {open && (
-        // 드롭다운 — 입력창에서 12px 아래 / 상24·좌18·우40·하5 패딩
         <div className="shadow-conx-drop-gray-15 bg-conx-common-white mt-3 h-[276px] overflow-y-auto rounded-md pt-6 pr-10 pb-[5px] pl-4.5">
           {options.map((cat, i) => (
             <div

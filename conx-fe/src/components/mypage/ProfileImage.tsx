@@ -23,7 +23,6 @@ export default function ProfileImage({
 }: ProfileImageProps) {
   const { inputRef, open, onInputChange } = useFileUpload(onSelect);
   const filled = !!src;
-  // 오버레이 bg는 버튼 자체 :hover/:active + ::after (active가 hover를 안정적으로 덮음)
   const overlay = filled
     ? "after:pointer-events-none after:absolute after:inset-0 after:rounded-md after:transition-colors after:content-[''] hover:after:bg-conx-opacity-gray-50 active:after:bg-conx-opacity-gray-85"
     : "after:pointer-events-none after:absolute after:inset-0 after:rounded-md after:transition-colors after:content-[''] hover:after:bg-conx-opacity-gray-30 active:after:bg-conx-opacity-gray-50";

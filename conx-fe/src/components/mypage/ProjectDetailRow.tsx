@@ -3,7 +3,6 @@
 import IconStar from '@/assets/icons/icon_star_fill.svg';
 import { TextLineButton } from '@/components/common/TextLineButton';
 
-// 평점 — icon_star_fill + 점수(Gray-600 · ENG Label1 Medium)
 function StarRating({ rating }: { rating: number }) {
   return (
     <span className="flex items-center gap-1">
@@ -14,11 +13,9 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 interface ProjectDetailRowProps {
-  /** 작업 유형 값 (라벨 아래) */
   workType: string;
   rating: number;
   onDetailClick?: () => void;
-  /** 패딩 — Table_Row_Open 상세: px-[50px] / Table_ProjectHistory: px-9(36) */
   className?: string;
 }
 
