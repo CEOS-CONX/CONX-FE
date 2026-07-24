@@ -3,60 +3,33 @@
 import { useEffect, useRef, useState } from 'react';
 import IconDelete from '@/assets/icons/icon_delete.svg';
 import { Chip } from '@/components/common/Chip';
+import { API_ROUTES } from '@/constants/api';
 import MessageCard from './MessageCard';
 
-type NotificationCategory = 'qna' | 'project';
-type FilterValue = 'all' | NotificationCategory;
+// 백엔드 filter 값 (카테고리 필터링은 서버에서 처리)
+const FILTER_OPTIONS = [
+  { value: 'ALL', label: '전체' },
+  { value: 'PROJECT_QUESTION_ANSWER', label: '담당자 Q&A' },
+  { value: 'PROJECT', label: '프로젝트' },
+] as const;
+type FilterValue = (typeof FILTER_OPTIONS)[number]['value'];
 
-const FILTER_OPTIONS: { value: FilterValue; label: string }[] = [
-  { value: 'all', label: '전체' },
-  { value: 'qna', label: '담당자 Q&A' },
-  { value: 'project', label: '프로젝트' },
-];
-
+// GET /api/v1/notifications 응답 아이템
 interface NotificationItem {
   id: number;
-  category: NotificationCategory;
-  sender: string;
-  time: string;
+  type: string;
   message: string;
-  // TODO(나중에): API 연동 시 각 알림의 실제 읽음 여부 채우기 → MessageCard read로 전달
-  //              + 안읽은 개수(read=false 개수)로 벨 아이콘 뱃지 표시
-  read?: boolean;
+  isRead: boolean;
+  arriveTime: string; // ISO date-time
+  sender: string;
 }
 
-// 임시 mock — 나중에 API 연동으로 교체
-const MOCK_NOTIFICATIONS: NotificationItem[] = [
-  {
-    id: 1,
-    category: 'project',
-    sender: '크루명 or 회사명',
-    time: '오전 10:58',
-    message: '[프로젝트 검수 완료] "프로젝트 이름"이 등록되었어요! 지금 바로 확인해보세요.',
-  },
-  {
-    id: 2,
-    category: 'project',
-    sender: '보낸 이',
-    time: '오전 10:58',
-    message:
-      '[제출 알림] "크루 이름"이 "프로젝트 이름"의 결과물을 제출했어요! 지금 바로 확인해보세요.',
-  },
-  {
-    id: 3,
-    category: 'qna',
-    sender: '보낸 이',
-    time: '오전 10:58',
-    message: '"CEOS 세오스"에서 새로운 메일이 도착했어요',
-  },
-  {
-    id: 4,
-    category: 'project',
-    sender: '보낸 이',
-    time: '오전 10:58',
-    message: '[크루 추천] "프로젝트 이름"에 딱 맞는 크루를 찾았어요! 지금 바로 확인해보세요.',
-  },
-];
+// ISO date-time → "오전 10:58"
+function formatTime(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
 
 interface NotificationModalProps {
   open: boolean;
@@ -64,22 +37,36 @@ interface NotificationModalProps {
 }
 
 export default function NotificationModal({ open, onClose }: NotificationModalProps) {
-  const [filter, setFilter] = useState<FilterValue>('all');
+  const [filter, setFilter] = useState<FilterValue>('ALL');
+  const [items, setItems] = useState<NotificationItem[] | null>(null); // null = 로딩 중
   const dialogRef = useRef<HTMLDivElement>(null);
 
-  // 비모달 드롭다운: 열릴 때 패널로 포커스만 이동 (포커스 트랩 없음 — 바깥 콘텐츠 자유 탐색 허용)
+  // 비모달 드롭다운: 열릴 때 패널로 포커스만 이동 (포커스 트랩 없음)
   useEffect(() => {
     if (open) dialogRef.current?.focus();
   }, [open]);
 
+  // 열림 / 필터 변경 시 목록 조회 (setState는 async 콜백 안에서만 → set-state-in-effect 회피)
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    fetch(`${API_ROUTES.NOTIFICATION.LIST}?filter=${filter}`)
+      .then((r) => (r.ok ? r.json() : { payload: [] }))
+      .then((d) => {
+        if (active) setItems(Array.isArray(d.payload) ? d.payload : []);
+      })
+      .catch(() => {
+        if (active) setItems([]);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, filter]);
+
   if (!open) return null;
 
-  const items =
-    filter === 'all' ? MOCK_NOTIFICATIONS : MOCK_NOTIFICATIONS.filter((n) => n.category === filter);
-
   return (
-    // 벨 wrapper 기준 앵커: 우측 끝을 스크랩 아이콘 왼쪽 끝에 맞춤
-    // (-right-5 = 벨↔스크랩 간격 gap-5(20px)만큼 오른쪽으로), 폭 425px 고정
+    // 벨 wrapper 기준 앵커: 우측 끝을 스크랩 아이콘 왼쪽 끝에 맞춤 (-right-5), 폭 425px 고정
     // 비모달 드롭다운 → role="region" + aria-label (aria-modal 미사용: 배경 자유 탐색 허용)
     <div
       ref={dialogRef}
@@ -101,13 +88,17 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
             <IconDelete className="h-5.5 w-5.5" />
           </button>
         </div>
-        {/* 카테고리 필터: 칩 3개 단순 토글이라 radiogroup(화살표 키 필수) 대신 toolbar + 토글 칩 */}
+        {/* 카테고리 필터: 칩 3개 단순 토글이라 radiogroup 대신 toolbar + 토글 칩 */}
         <div role="toolbar" aria-label="알림 카테고리 필터" className="flex gap-2 px-5 pb-4">
           {FILTER_OPTIONS.map((opt) => (
             <Chip
               key={opt.value}
               selected={filter === opt.value}
-              onClick={() => setFilter(opt.value)}
+              onClick={() => {
+                if (filter === opt.value) return;
+                setItems(null); // 로딩 표시
+                setFilter(opt.value);
+              }}
             >
               {opt.label}
             </Chip>
@@ -115,18 +106,22 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
         </div>
       </div>
 
-      {/* Content: 영역 높이를 카드 4개(=444px)에 맞춤. 초과 시 스크롤 / 미만 시 아래 빈칸 */}
-      {items.length > 0 ? (
+      {/* Content: 카드 4개(=444px) 높이. 초과 시 스크롤 */}
+      {items === null ? (
+        <div className="flex h-[444px] items-center justify-center">
+          <p className="text-kor-body-1-medium text-conx-gray-400">불러오는 중…</p>
+        </div>
+      ) : items.length > 0 ? (
         // role="list": Safari/VoiceOver는 list-style:none ul의 list role을 제거하므로 명시 복원
         <ul role="list" className="scrollbar-hide m-0 h-[444px] list-none overflow-y-auto p-0">
           {items.map((n) => (
             <li key={n.id}>
               <MessageCard
                 sender={n.sender}
-                time={n.time}
+                time={formatTime(n.arriveTime)}
                 message={n.message}
-                read={n.read}
-                // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동
+                read={n.isRead}
+                // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동 + 읽음 처리
               />
             </li>
           ))}
