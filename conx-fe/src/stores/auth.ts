@@ -8,6 +8,7 @@ interface AuthState {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<{ success: boolean; error?: string }>;
   hydrate: () => Promise<void>;
 }
 
@@ -41,6 +42,25 @@ export const useAuthStore = create<AuthState>((set) => ({
     hydrateController?.abort();
     await fetch(API_ROUTES.AUTH.LOGOUT, { method: 'POST' });
     set({ isLoggedIn: false, user: null });
+  },
+
+  deleteAccount: async (password) => {
+    hydrateController?.abort();
+    try {
+      const res = await fetch(API_ROUTES.AUTH.DELETE_ACCOUNT, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        set({ isLoggedIn: false, user: null });
+        return { success: true };
+      }
+      return { success: false, error: data.message };
+    } catch {
+      return { success: false, error: '네트워크 오류가 발생했습니다.' };
+    }
   },
 
   hydrate: async () => {

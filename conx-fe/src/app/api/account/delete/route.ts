@@ -4,6 +4,7 @@ import { BACKEND_ENDPOINTS, COOKIE_CONFIG } from '@/constants/api';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
+// 명세상 DELETE /api/v1/account/me 는 요청 바디 없음 — accessToken(쿠키)로만 본인 확인
 export async function DELETE() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
