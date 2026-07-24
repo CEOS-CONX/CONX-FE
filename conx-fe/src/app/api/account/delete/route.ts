@@ -1,10 +1,11 @@
-import { type NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { BACKEND_ENDPOINTS, COOKIE_CONFIG } from '@/constants/api';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
-export async function DELETE(request: NextRequest) {
+// 명세상 DELETE /api/v1/account/me 는 요청 바디 없음 — accessToken(쿠키)로만 본인 확인
+export async function DELETE() {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -12,16 +13,9 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
   }
 
-  // 탈퇴 확인용 비밀번호({ password })를 그대로 백엔드로 전달
-  const body = await request.json().catch(() => ({}));
-
   const backendRes = await fetch(`${API_BASE_URL}${BACKEND_ENDPOINTS.AUTH.DELETE_ACCOUNT}`, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(body),
+    headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   const data = await backendRes.json().catch(() => ({
