@@ -72,6 +72,29 @@ export default function ProjectDetailBody({
     return () => observer.disconnect();
   }, []);
 
+  // 제출한 지원 동기 복원 — 서버 isApplied=true 로 들어온 경우(새로고침) 지원 현황에서 이 프로젝트의 동기를 가져옴.
+  // (이번 세션에서 방금 제출했으면 submittedMotive 가 이미 있어 skip)
+  // ※ motivation 필드는 백엔드 추가 대기 중 — 오기 전엔 값이 없어 빈 칸, 추가되면 자동으로 채워짐
+  useEffect(() => {
+    if (!applied || submittedMotive) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/crews/applications');
+        if (!res.ok) return;
+        const data = await res.json();
+        const apps: { projectId: number; motivation?: string }[] = data.payload?.applications ?? [];
+        const mine = apps.find((a) => String(a.projectId) === String(projectId));
+        if (mine?.motivation && !cancelled) setSubmittedMotive(mine.motivation);
+      } catch {
+        /* 조회 실패 시 빈 값 유지 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [applied, submittedMotive, projectId]);
+
   // 탭 클릭 → 해당 섹션으로 스크롤 (섹션의 scroll-mt가 스티키 탭 높이만큼 보정)
   function handleSelect(value: string) {
     setActive(value);
