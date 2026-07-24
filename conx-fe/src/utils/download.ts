@@ -5,3 +5,13 @@ export function fileDownloadUrl(url: string, fileName: string): string {
   const params = new URLSearchParams({ url, name: fileName });
   return `/api/files/download?${params.toString()}`;
 }
+
+// 다운로드 프록시를 거쳐 실제 저장 트리거 (앵커 생성 → 클릭). 클라이언트 이벤트 핸들러에서만 호출.
+export function triggerDownload(url: string, fileName: string) {
+  const a = document.createElement('a');
+  a.href = fileDownloadUrl(url, fileName);
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}

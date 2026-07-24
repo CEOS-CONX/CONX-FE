@@ -19,7 +19,7 @@ import UploadCard from './UploadCard';
 import { CREW_TYPE_OPTIONS, INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/constants/browse';
 import { useAuth } from '@/context/AuthContext';
 import type { ProjectDetail, ProjectFile } from '@/types/projectDetail';
-import { fileDownloadUrl } from '@/utils/download';
+import { triggerDownload } from '@/utils/download';
 
 /* ───────── 공통 ───────── */
 
@@ -41,15 +41,6 @@ function fmtDateTime(s: string): string {
   if (Number.isNaN(d.getTime())) return s;
   const p = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
-}
-// 파일 다운로드 — 같은 출처 프록시(/api/files/download)를 거쳐 attachment 로 받아 실제 저장
-function triggerDownload(url: string, fileName: string) {
-  const a = document.createElement('a');
-  a.href = fileDownloadUrl(url, fileName);
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {

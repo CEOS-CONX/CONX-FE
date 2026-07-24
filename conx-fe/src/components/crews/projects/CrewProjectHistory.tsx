@@ -4,7 +4,8 @@ import { useState } from 'react';
 import IconStar from '@/assets/icons/icon_star_fill.svg';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { Pagination } from '@/components/common/Pagination';
-import { CREW_PROJECTS, type CrewProject, formatWorkType, type ProjectStatus } from '../project';
+import type { CrewProjectHistory as CrewProjectItem } from '@/types/crewDetail';
+import { formatWorkType, type ProjectStatus } from '../project';
 
 // navbar와 동일한 max-w-400(1600px) + 좌우 90px
 const CONTAINER = 'mx-auto max-w-400 px-[90px]';
@@ -15,6 +16,12 @@ const SORT_OPTIONS = [
   { value: 'ratingDesc', label: '평점 높은순' },
   { value: 'ratingAsc', label: '평점 낮은순' },
 ];
+
+const fmtDate = (s?: string) => (s ? s.slice(0, 10).replace(/-/g, '.') : '');
+
+// 상태 배지는 진행 중/완료 2종 — 종료 계열 상태를 '완료'로, 나머지는 '진행 중'으로 매핑 (근사)
+const DONE_STATUSES = new Set(['DONE', 'ADJUSTED', 'EXPIRED']);
+const toBadgeStatus = (s: string): ProjectStatus => (DONE_STATUSES.has(s) ? '완료' : '진행 중');
 
 /* ───────── 서브 컴포넌트 ───────── */
 
@@ -61,20 +68,23 @@ function Field({
 }
 
 // 프로젝트 이력 카드
-function ProjectHistoryCard({ project }: { project: CrewProject }) {
+function ProjectHistoryCard({ project }: { project: CrewProjectItem }) {
   return (
     <div className="border-conx-gray-150 bg-conx-common-white flex flex-col rounded-md border px-6 py-4">
-      <StatusBadge status={project.status} />
-      <p className="text-kor-body-1-bold text-conx-common-black mt-2">{project.name}</p>
+      <StatusBadge status={toBadgeStatus(project.status)} />
+      <p className="text-kor-body-1-bold text-conx-common-black mt-2">{project.projectName}</p>
       <div className="mt-5 flex gap-x-10">
-        <Field label="브랜드명" value={project.brand} className="w-32" />
-        <Field label="작업 유형" value={formatWorkType(project.outputs)} className="w-40" />
+        <Field label="브랜드명" value={project.brandName} className="w-32" />
+        <Field label="작업 유형" value={formatWorkType(project.resultForm)} className="w-40" />
         <Field
           label="프로젝트 평가"
-          value={<StarRating rating={project.rating} />}
+          value={<StarRating rating={project.point} />}
           className="w-24"
         />
-        <Field label="기간" value={`${project.startDate} ~ ${project.endDate}`} />
+        <Field
+          label="기간"
+          value={`${fmtDate(project.projectStartDate)} ~ ${fmtDate(project.projectDeadline)}`}
+        />
       </div>
     </div>
   );
@@ -82,14 +92,20 @@ function ProjectHistoryCard({ project }: { project: CrewProject }) {
 
 /* ───────── 본문 ───────── */
 
-export default function CrewProjectHistory({ crewId }: { crewId: string }) {
+export default function CrewProjectHistory({
+  crewId,
+  projects,
+}: {
+  crewId: string;
+  projects: CrewProjectItem[];
+}) {
   const [sort, setSort] = useState('latest');
   const [page, setPage] = useState(1);
 
-  // 정렬 TODO: crewId로 실제 데이터 조회
-  const sorted = [...CREW_PROJECTS].sort((a, b) => {
-    if (sort === 'ratingDesc') return b.rating - a.rating;
-    if (sort === 'ratingAsc') return a.rating - b.rating;
+  // 정렬은 클라이언트에서 (latest = 서버 순서 유지, 평점순 = point 기준)
+  const sorted = [...projects].sort((a, b) => {
+    if (sort === 'ratingDesc') return b.point - a.point;
+    if (sort === 'ratingAsc') return a.point - b.point;
     return 0;
   });
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
@@ -101,30 +117,40 @@ export default function CrewProjectHistory({ crewId }: { crewId: string }) {
       <div className="w-[939px] pt-[100px]">
         <h1 className="text-kor-title-1-bold text-conx-common-black">프로젝트 이력</h1>
 
-        {/* 정렬 드롭다운 (오른쪽), 기본값 최신등록순 */}
-        <div className="mt-6 flex justify-end">
-          <DropdownCompact
-            type="ghost"
-            options={SORT_OPTIONS}
-            value={sort}
-            onChange={(v) => {
-              setSort(v);
-              setPage(1); // 정렬 바뀌면 첫 페이지로
-            }}
-          />
-        </div>
+        {projects.length === 0 ? (
+          <div className="flex py-40">
+            <span className="text-kor-body-1-semibold text-conx-gray-500">
+              프로젝트 이력이 없습니다.
+            </span>
+          </div>
+        ) : (
+          <>
+            {/* 정렬 드롭다운 (오른쪽), 기본값 최신등록순 */}
+            <div className="mt-6 flex justify-end">
+              <DropdownCompact
+                type="ghost"
+                options={SORT_OPTIONS}
+                value={sort}
+                onChange={(v) => {
+                  setSort(v);
+                  setPage(1); // 정렬 바뀌면 첫 페이지로
+                }}
+              />
+            </div>
 
-        {/* 카드 목록 (최대 8개/페이지) */}
-        <div className="mt-2 flex flex-col gap-3">
-          {pageProjects.map((p, i) => (
-            <ProjectHistoryCard key={i} project={p} />
-          ))}
-        </div>
+            {/* 카드 목록 (최대 8개/페이지) */}
+            <div className="mt-2 flex flex-col gap-3">
+              {pageProjects.map((p) => (
+                <ProjectHistoryCard key={p.projectId} project={p} />
+              ))}
+            </div>
 
-        {/* 페이지네이션 (가운데) */}
-        <div className="mt-8 flex justify-center">
-          <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} />
-        </div>
+            {/* 페이지네이션 (가운데) */}
+            <div className="mt-8 flex justify-center">
+              <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} />
+            </div>
+          </>
+        )}
       </div>
     </main>
   );
