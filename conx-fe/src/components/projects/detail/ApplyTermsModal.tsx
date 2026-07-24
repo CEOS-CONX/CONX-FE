@@ -6,21 +6,19 @@ import IconClose from '@/assets/icons/icon_delete.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { RadioButton } from '@/components/common/RadioButton';
 import { useDialog } from '@/hooks/useDialog';
+import type { ProjectDetail } from '@/types/projectDetail';
 import ApplyTermsDetailModal from './ApplyTermsDetailModal';
 
 interface ApplyTermsModalProps {
+  /** 상단 요약 박스에 표시할 프로젝트 정보 */
+  project: ProjectDetail | null;
   onClose: () => void;
-  /** 필수 약관 모두 동의 후 최종 제출 */
-  onSubmit: () => void;
+  /** 필수 약관 모두 동의 후 최종 제출 (비동기 제출 지원) */
+  onSubmit: () => void | Promise<void>;
 }
 
-// 상단 요약 박스 — TODO: 실제 프로젝트 데이터 연결
-const PROJECT_TITLE = '프로젝트 제목이 들어갈 자리입니다.';
-const SUMMARY = [
-  { label: '결과물 제출', value: '2026.05.03' },
-  { label: '결과물 개수', value: '3개' },
-  { label: '지원금', value: '250,000원' },
-];
+const fmtDate = (s?: string) => (s ? s.slice(0, 10).replace(/-/g, '.') : '-');
+const fmtWon = (n?: number) => (n != null ? `${n.toLocaleString('ko-KR')}원` : '-');
 
 // 지원 전 확인 사항 — TODO: 실제 약관 문구 확정되면 교체 (유진 정리 중)
 const TERMS = [
@@ -49,10 +47,22 @@ const TERMS = [
   },
 ];
 
-export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalProps) {
+export default function ApplyTermsModal({ project, onClose, onSubmit }: ApplyTermsModalProps) {
+  const projectTitle = project?.projectName ?? '프로젝트';
+  const resultCount = (project?.resultForm ?? []).reduce(
+    (sum, r) => sum + (r.numberOfResult ?? 0),
+    0,
+  );
+  const summary = [
+    { label: '결과물 제출', value: fmtDate(project?.submitDeadline) },
+    { label: '결과물 개수', value: `${resultCount}개` },
+    { label: '지원금', value: fmtWon(project?.subsidy) },
+  ];
+
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [confirmed, setConfirmed] = useState(false); // 세부 확인 사항 '확인했습니다' 완료 여부
   const [showDetail, setShowDetail] = useState(false);
+  const [submitting, setSubmitting] = useState(false); // 제출 중(중복 클릭 방지)
   const dialogRef = useDialog(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
   const allChecked = TERMS.every((t) => checked[t.id]);
@@ -108,12 +118,12 @@ export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalPr
             id="apply-terms-title"
             className="text-kor-heading-2-bold text-conx-common-black pr-8"
           >
-            {PROJECT_TITLE}
+            {projectTitle}
           </h2>
 
           {/* 요약 박스 */}
           <dl className="bg-conx-gray-50 mt-6 flex flex-col gap-3 rounded-md p-4">
-            {SUMMARY.map((row) => (
+            {summary.map((row) => (
               <div key={row.label} className="flex gap-6">
                 <dt className="text-kor-body-1-medium text-conx-gray-450 w-20 shrink-0">
                   {row.label}
@@ -164,7 +174,18 @@ export default function ApplyTermsModal({ onClose, onSubmit }: ApplyTermsModalPr
         {/* 제출 (고정) */}
         <div className="px-7 pt-4 pb-7">
           {/* 필수 동의 체크 + 세부 확인 사항 '확인했습니다' 둘 다 완료해야 활성 */}
-          <CTAButton disabled={!requiredChecked || !confirmed} onClick={onSubmit}>
+          <CTAButton
+            disabled={!requiredChecked || !confirmed || submitting}
+            onClick={async () => {
+              if (submitting) return;
+              setSubmitting(true);
+              try {
+                await onSubmit();
+              } finally {
+                setSubmitting(false);
+              }
+            }}
+          >
             지원하기
           </CTAButton>
         </div>

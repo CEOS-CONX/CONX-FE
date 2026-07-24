@@ -34,6 +34,8 @@ export interface ProjectQuestion {
 export interface ProjectDetail {
   isImminent: boolean;
   dayBeforeDeadline: number;
+  isBookmarked: boolean; // 로그인 사용자의 북마크 여부
+  isApplied: boolean; // 로그인 사용자의 지원 여부
   projectId: number;
   projectImage: string[];
   projectName: string;

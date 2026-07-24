@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
-import { Button } from '@/components/common/Button';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
@@ -48,10 +47,10 @@ export default function ProjectDetailBody({
   const router = useRouter();
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
-  const [applied, setApplied] = useState(false); // 지원 완료 상태
+  const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
   const [submittedMotive, setSubmittedMotive] = useState(''); // 제출한 지원 동기
   const [viewingApplication, setViewingApplication] = useState(false); // 지원서 보기
-  const [scrapped, setScrapped] = useState(false);
+  const [scrapped, setScrapped] = useState(project?.isBookmarked ?? false); // 북마크 여부(서버 초기값)
   const [toast, setToast] = useState<{
     message: string;
     actionLabel?: string;
@@ -89,18 +88,45 @@ export default function ProjectDetailBody({
     }
   }
 
-  // 스크랩: 아이콘 채움 토글 + 완료 시 토스트("스크랩 보기" → 스크랩 페이지 이동)
-  // TODO: 실제 스크랩 저장(API)은 나중에 — 지금은 시각 상태 + 이동만
-  function handleScrap() {
+  // 스크랩(북마크): 낙관적 토글 → API(POST 등록 / DELETE 취소). 실패 시 롤백 + 에러 토스트
+  async function handleScrap() {
     const next = !scrapped;
     setScrapped(next);
-    if (next) {
-      setToast({
-        message: '프로젝트를 스크랩했습니다',
-        actionLabel: '스크랩 보기',
-        onAction: () => router.push('/scrap'),
+    try {
+      const res = await fetch(`/api/projects/${projectId}/bookmarks`, {
+        method: next ? 'POST' : 'DELETE',
       });
+      if (!res.ok) throw new Error();
+      if (next) {
+        setToast({
+          message: '프로젝트를 스크랩했습니다',
+          actionLabel: '스크랩 보기',
+          onAction: () => router.push('/scrap'),
+        });
+      }
+    } catch {
+      setScrapped(!next); // 실패 시 원상복구
+      setToast({ message: '스크랩 처리에 실패했습니다. 다시 시도해 주세요.' });
     }
+  }
+
+  // 지원서 제출: 지원 동기를 백엔드로 전송. 성공 시 완료 상태로 전환,
+  // 실패 시 에러 토스트(백엔드 메시지: 이미 지원함/권한 없음 등) 후 throw → 약관 모달이 닫히고 재시도 가능
+  async function handleApplySubmit(motive: string) {
+    const res = await fetch(`/api/projects/${projectId}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivation: motive }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setToast({ message: data.message ?? '지원에 실패했습니다. 다시 시도해 주세요.' });
+      throw new Error('apply failed');
+    }
+    setSubmittedMotive(motive);
+    setApplied(true);
+    setApplying(false);
+    setToast({ message: '지원이 완료됐습니다.' });
   }
 
   return (
@@ -199,21 +225,14 @@ export default function ProjectDetailBody({
               </>
             ) : applying ? (
               <ApplyPanel
+                project={project}
                 onBack={() => setApplying(false)}
-                onSubmitted={(motive) => {
-                  setSubmittedMotive(motive);
-                  setApplied(true);
-                  setApplying(false);
-                  setToast({ message: '지원이 완료됐습니다.' });
-                }}
+                onSubmitted={handleApplySubmit}
               />
             ) : (
-              <>
-                <CTAButton variant="secondary" onClick={() => setApplying(true)}>
-                  지원하기
-                </CTAButton>
-                <Button variant="tertiary">Admin</Button>
-              </>
+              <CTAButton variant="secondary" onClick={() => setApplying(true)}>
+                지원하기
+              </CTAButton>
             )}
           </aside>
         </div>
