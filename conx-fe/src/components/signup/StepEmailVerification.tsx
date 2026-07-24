@@ -11,13 +11,17 @@ import { formatTime } from '@/utils/format';
 import { validateEmail } from '@/utils/validate';
 
 interface StepEmailVerificationProps {
+  initialEmail?: string;
   onNext: (email: string) => void;
 }
 
 const TIMER_SECONDS = 180;
 
-export default function StepEmailVerification({ onNext }: StepEmailVerificationProps) {
-  const [email, setEmail] = useState('');
+export default function StepEmailVerification({
+  initialEmail = '',
+  onNext,
+}: StepEmailVerificationProps) {
+  const [email, setEmail] = useState(initialEmail);
   const [emailError, setEmailError] = useState('');
   const [codeSent, setCodeSent] = useState(false);
   const [code, setCode] = useState('');

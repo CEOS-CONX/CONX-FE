@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -269,6 +269,11 @@ export default function FileUploader({ value, onChange, error }: FileUploaderPro
   const [sizeErrorId, setSizeErrorId] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
   const hasItems = value.length > 0;
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
@@ -310,10 +315,8 @@ export default function FileUploader({ value, onChange, error }: FileUploaderPro
       try {
         const uploaded = await uploadFile(file);
         onChange(
-          value.map((item) =>
-            item.id === targetItemId
-              ? { ...item, fileId: uploaded.fileId, fileUrl: uploaded.fileUrl }
-              : item,
+          valueRef.current.map((item) =>
+            item.id === targetItemId ? { ...item, fileUrl: uploaded.fileUrl } : item,
           ),
         );
       } catch (err) {
@@ -342,8 +345,8 @@ export default function FileUploader({ value, onChange, error }: FileUploaderPro
     try {
       const uploaded = await uploadFile(file);
       onChange(
-        value.map((item) =>
-          item.id === id ? { ...item, fileId: uploaded.fileId, fileUrl: uploaded.fileUrl } : item,
+        valueRef.current.map((item) =>
+          item.id === id ? { ...item, fileUrl: uploaded.fileUrl } : item,
         ),
       );
     } catch {

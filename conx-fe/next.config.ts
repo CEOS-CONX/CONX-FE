@@ -19,7 +19,11 @@ const svgrOptions = {
 
 const nextConfig: NextConfig = {
   images: {
-    remotePatterns: [{ hostname: 'picsum.photos' }, { hostname: 'placehold.co' }],
+    remotePatterns: [
+      { hostname: 'picsum.photos' },
+      { hostname: 'placehold.co' },
+      ...(process.env.S3_HOSTNAME ? [{ hostname: process.env.S3_HOSTNAME }] : []),
+    ],
   },
   turbopack: {
     rules: {

@@ -11,7 +11,7 @@ export interface CompanyRating {
   score: number;
 }
 
-export type TagIndicatorType = 'blue' | 'green' | 'gray';
+export type TagIndicatorType = 'blue' | 'green' | 'gray' | 'cyan' | 'purple';
 
 export type WorkspaceTaskType =
   | 'selection'

@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconImage from '@/assets/icons/icon_image.svg';
 import IconError from '@/assets/icons/icon_error.svg';
 import { IconButton } from '@/components/common/IconButton';
@@ -34,6 +34,11 @@ export default function ImageUploader({
   const [showToast, setShowToast] = useState(false);
   const [sizeErrorId, setSizeErrorId] = useState<string | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const valueRef = useRef(value);
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
   const hasImages = value.length > 0;
   const isFull = value.length >= MAX_IMAGES;
 
@@ -53,19 +58,17 @@ export default function ImageUploader({
   }
 
   async function fillSlot(id: string, file: File) {
+    const preview = URL.createObjectURL(file);
+
     // 로컬 미리보기 즉시 표시
-    onChange(
-      value.map((img) =>
-        img.id === id ? { ...img, file, preview: URL.createObjectURL(file) } : img,
-      ),
-    );
+    onChange(value.map((img) => (img.id === id ? { ...img, file, preview } : img)));
 
     // 서버에 즉시 업로드
     try {
       const uploaded = await uploadFile(file);
       onChange(
-        value.map((img) =>
-          img.id === id ? { ...img, fileId: uploaded.fileId, fileUrl: uploaded.fileUrl } : img,
+        valueRef.current.map((img) =>
+          img.id === id ? { ...img, file, preview, fileUrl: uploaded.fileUrl } : img,
         ),
       );
     } catch {
@@ -157,7 +160,11 @@ export default function ImageUploader({
 
       try {
         const uploaded = await uploadFile(file);
-        onChange([...value, { ...newImage, fileId: uploaded.fileId, fileUrl: uploaded.fileUrl }]);
+        onChange(
+          valueRef.current.map((img) =>
+            img.id === id ? { ...img, fileUrl: uploaded.fileUrl } : img,
+          ),
+        );
       } catch {
         setSizeErrorId(id);
       }

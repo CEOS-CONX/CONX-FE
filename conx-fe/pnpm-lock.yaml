@@ -17,6 +17,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.4)
+      '@use-funnel/browser':
+        specifier: ^0.0.17
+        version: 0.0.17(react@19.2.4)
       next:
         specifier: 16.2.6
         version: 16.2.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1433,6 +1436,16 @@ packages:
     resolution: {integrity: sha512-lrW200hZdbfRtztbygyaq/6jP6AKE8qQN2KvPcJ+x7wiD038YtnYtZ82IMNJ69GJibV7bwL3y9FgK+5w/pYt6g==}
     cpu: [x64]
     os: [win32]
+
+  '@use-funnel/browser@0.0.17':
+    resolution: {integrity: sha512-saexLJSpTwm02If0I6oY6s1Z7cPwkEGqHvBg+IVokDywcrkhZA9MpxDHT27GSrNlhJHRxis/3g/xIQ48UYfp2Q==}
+    peerDependencies:
+      react: '>=16.8'
+
+  '@use-funnel/core@0.1.0':
+    resolution: {integrity: sha512-KEjBKTbOh5wd6CQZ1jYWhI6KuGrI9Pjn9CkmUgAYzonsyZE0lsiZ2/1RwsaWcxVO5RJBgfwCM8dRpibwm7An9w==}
+    peerDependencies:
+      react: '>=16.8'
 
   acorn-jsx@5.3.2:
     resolution: {integrity: sha512-rq9s+JNhf0IChjtDXxllJ7g41oZk5SlXtp0LHwyA5cejwn7vKmKp4pPri6YEePv2PU65sAsegbXtIinmDFDXgQ==}
@@ -4664,6 +4677,15 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
+
+  '@use-funnel/browser@0.0.17(react@19.2.4)':
+    dependencies:
+      '@use-funnel/core': 0.1.0(react@19.2.4)
+      react: 19.2.4
+
+  '@use-funnel/core@0.1.0(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:

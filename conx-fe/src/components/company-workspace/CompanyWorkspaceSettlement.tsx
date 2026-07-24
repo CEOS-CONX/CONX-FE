@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import CardSummary from '@/components/workspace/CardSummary';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
@@ -9,41 +9,132 @@ import DropdownTag from '@/components/workspace/DropdownTag';
 import TableHeader from '@/components/workspace/TableHeader';
 import TableCell from '@/components/workspace/TableCell';
 import Pagination from '@/components/common/Pagination/Pagination';
-import { COMPANY_SETTLEMENT_SUMMARY, COMPANY_SETTLEMENT_ROWS } from './mockData';
 
 const STATUS_OPTIONS = [
-  { value: 'pending', label: '지급 전' },
-  { value: 'completed', label: '지급 완료' },
+  { value: 'WAITING', label: '지급 전' },
+  { value: 'PAID', label: '지급 완료' },
 ];
 
 const TAG_OPTIONS = [
-  { value: 'pending', label: '지급 전', tagType: 'cyan' as const },
-  { value: 'completed', label: '지급 완료', tagType: 'purple' as const },
+  { value: 'WAITING', label: '지급 전', tagType: 'cyan' as const },
+  { value: 'PAID', label: '지급 완료', tagType: 'purple' as const },
 ];
 
 const ROWS_PER_PAGE = 10;
+
+interface Settlement {
+  settlementId: number;
+  projectId: number;
+  projectName: string;
+  projectStatus: string;
+  crewId: number;
+  crewName: string;
+  amount: number;
+  settlementStatus: string;
+  expectedPaymentDate: string;
+}
+
+function formatAmount(value: number): string {
+  return value.toLocaleString('ko-KR');
+}
 
 export default function CompanyWorkspaceSettlement() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [settlements, setSettlements] = useState<Settlement[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredRows = statusFilter
-    ? COMPANY_SETTLEMENT_ROWS.filter((row) => row.status === statusFilter)
-    : COMPANY_SETTLEMENT_ROWS;
+  useEffect(() => {
+    const controller = new AbortController();
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / ROWS_PER_PAGE));
-  const pagedRows = filteredRows.slice(
-    (currentPage - 1) * ROWS_PER_PAGE,
-    currentPage * ROWS_PER_PAGE,
-  );
+    async function fetchSettlements() {
+      try {
+        const res = await fetch('/api/companies/me/settlements', {
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.payload)) {
+          setSettlements(data.payload);
+        }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }
+
+    fetchSettlements();
+    return () => controller.abort();
+  }, []);
+
+  // 필터링 + 페이징 — statusFilter, currentPage가 변경될 때만 재계산
+  const { pagedRows, totalPages } = useMemo(() => {
+    const filtered = statusFilter
+      ? settlements.filter((row) => row.settlementStatus === statusFilter)
+      : settlements;
+    const pages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
+    const paged = filtered.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+    return { pagedRows: paged, totalPages: pages };
+  }, [settlements, statusFilter, currentPage]);
+
+  // 요약 카드 계산 — settlements가 변경될 때만 재계산
+  const summaryCards = useMemo(() => {
+    const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
+    const pendingAmount = settlements
+      .filter((s) => s.settlementStatus === 'WAITING')
+      .reduce((sum, s) => sum + s.amount, 0);
+    const pendingDates = settlements
+      .filter((s) => s.settlementStatus === 'WAITING' && s.expectedPaymentDate)
+      .map((s) => s.expectedPaymentDate)
+      .sort();
+    const nextPaymentDate = pendingDates[0]?.replace(/-/g, '.') ?? '-';
+    const now = new Date();
+    const thisMonthAmount = settlements
+      .filter((s) => {
+        if (!s.expectedPaymentDate) return false;
+        const d = new Date(s.expectedPaymentDate);
+        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+      })
+      .reduce((sum, s) => sum + s.amount, 0);
+
+    return [
+      {
+        title: '누적 지원금',
+        value: formatAmount(totalAmount),
+        description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} 기준`,
+        width: 'w-114.25',
+      },
+      {
+        title: '지급 예정',
+        value: formatAmount(pendingAmount),
+        description: `다음 지급 예정일: ${nextPaymentDate}`,
+        width: 'w-84.25',
+      },
+      {
+        title: '이번 달 지원금',
+        value: formatAmount(thisMonthAmount),
+        description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')} 기준`,
+        width: 'w-84.25',
+      },
+    ];
+  }, [settlements]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-20 pb-58.75">
+        <div className="h-30 animate-pulse rounded-lg bg-gray-100" />
+        <div className="h-60 animate-pulse rounded-lg bg-gray-100" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-20 pb-58.75">
       <section className="flex flex-col gap-3">
         <h2 className="text-kor-heading-3-bold text-conx-common-black">지원금 현황</h2>
         <div className="flex gap-6">
-          {COMPANY_SETTLEMENT_SUMMARY.map((card) => (
+          {summaryCards.map((card) => (
             <CardSummary
               key={card.title}
               title={card.title}
@@ -93,21 +184,23 @@ export default function CompanyWorkspaceSettlement() {
             <tbody>
               {pagedRows.map((row) => (
                 <tr
-                  key={row.id}
-                  onClick={() => router.push(`/company-workspace/project-status/${row.id}`)}
+                  key={row.settlementId}
+                  onClick={() => router.push(`/company-workspace/project-status/${row.projectId}`)}
                   className="hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 cursor-pointer"
                 >
                   <TableCell type="dropdownTag">
                     <DropdownTag
                       options={TAG_OPTIONS}
-                      defaultValue={row.status}
+                      defaultValue={row.settlementStatus}
                       panelClassName="w-21.75"
                     />
                   </TableCell>
-                  <TableCell type="text">{row.amount}</TableCell>
-                  <TableCell type="text">{row.project}</TableCell>
-                  <TableCell type="text">{row.crew}</TableCell>
-                  <TableCell type="date">{row.date}</TableCell>
+                  <TableCell type="text">{formatAmount(row.amount)}</TableCell>
+                  <TableCell type="text">{row.projectName}</TableCell>
+                  <TableCell type="text">{row.crewName}</TableCell>
+                  <TableCell type="date">
+                    {row.expectedPaymentDate?.replace(/-/g, '.') ?? '-'}
+                  </TableCell>
                 </tr>
               ))}
             </tbody>

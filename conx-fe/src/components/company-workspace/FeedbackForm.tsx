@@ -8,11 +8,19 @@ import LinkInput from '@/components/project-create/LinkInput';
 import type { FileUploadItem, LinkItem } from '@/types/project';
 
 interface FeedbackFormProps {
+  projectId: string;
+  submissionId: string;
   onCancel: () => void;
   onSubmit?: () => void;
 }
 
-export default function FeedbackForm({ onCancel, onSubmit }: FeedbackFormProps) {
+export default function FeedbackForm({
+  projectId,
+  submissionId,
+  onCancel,
+  onSubmit,
+}: FeedbackFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [content, setContent] = useState('');
   const [files, setFiles] = useState<FileUploadItem[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -20,6 +28,48 @@ export default function FeedbackForm({ onCancel, onSubmit }: FeedbackFormProps) 
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
   const hasInput = content.trim().length > 0 || files.length > 0 || links.length > 0;
+
+  async function handleSubmit() {
+    setShowSubmitConfirm(false);
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        content,
+        files: files
+          .filter((f) => f.fileUrl)
+          .map((f) => ({
+            originalName: f.name,
+            fileLinks: f.fileUrl,
+            explanation: f.description || undefined,
+          })),
+        links: links
+          .filter((l) => l.url)
+          .map((l) => ({
+            linkName: l.name,
+            link: l.url,
+            explanation: l.description || undefined,
+          })),
+      };
+      const res = await fetch(
+        `/api/companies/me/projects/${projectId}/submissions/${submissionId}/feedback`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
+      );
+      if (res.ok) {
+        onSubmit?.();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message ?? '피드백 등록에 실패했습니다.');
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="border-conx-primary-300 flex w-264.75 flex-col gap-11.5 rounded-md border px-15 py-14.5">
@@ -55,8 +105,12 @@ export default function FeedbackForm({ onCancel, onSubmit }: FeedbackFormProps) 
           >
             작성 취소
           </Button>
-          <Button variant="primary" onClick={() => setShowSubmitConfirm(true)}>
-            보내기
+          <Button
+            variant="primary"
+            disabled={isSubmitting}
+            onClick={() => setShowSubmitConfirm(true)}
+          >
+            {isSubmitting ? '제출 중...' : '보내기'}
           </Button>
         </div>
       </div>
@@ -84,10 +138,7 @@ export default function FeedbackForm({ onCancel, onSubmit }: FeedbackFormProps) 
             </>
           }
           primaryLabel="제출하기"
-          onPrimaryClick={() => {
-            setShowSubmitConfirm(false);
-            onSubmit?.();
-          }}
+          onPrimaryClick={handleSubmit}
           onClose={() => setShowSubmitConfirm(false)}
         />
       )}

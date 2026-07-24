@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ProjectCreateNavbar from '@/components/project-create/ProjectCreateNavbar';
 import WritingTipButton from '@/components/project-create/WritingTipButton';
@@ -12,7 +12,12 @@ import ProjectDescriptionSection from '@/components/project-create/sections/Proj
 import CrewRequirementsSection from '@/components/project-create/sections/CrewRequirementsSection';
 import ReferencesSection from '@/components/project-create/sections/ReferencesSection';
 import { INITIAL_PROJECT_FORM, type ProjectCreateFormData } from '@/types/project';
-import { createProject } from '@/components/project-create/utils/projectApi';
+import {
+  createProject,
+  saveDraft,
+  loadDraft,
+  checkHasDraft,
+} from '@/components/project-create/utils/projectApi';
 
 export default function ProjectCreateForm() {
   const router = useRouter();
@@ -21,6 +26,16 @@ export default function ProjectCreateForm() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showBackModal, setShowBackModal] = useState(false);
   const [activeField, setActiveField] = useState<string | undefined>();
+  const [hasDraft, setHasDraft] = useState(false);
+
+  // 진입 시 임시저장 존재 여부 확인
+  useEffect(() => {
+    async function check() {
+      const exists = await checkHasDraft();
+      setHasDraft(exists);
+    }
+    check();
+  }, []);
 
   function updateField<K extends keyof ProjectCreateFormData>(
     key: K,
@@ -29,9 +44,23 @@ export default function ProjectCreateForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
-  function handleSaveDraft() {
-    // TODO: 임시 저장 API 호출
-    setShowDraftToast(true);
+  async function handleSaveDraft() {
+    try {
+      await saveDraft(form, hasDraft);
+      setHasDraft(true);
+      setShowDraftToast(true);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : '임시저장에 실패했습니다.');
+    }
+  }
+
+  async function handleLoadDraft() {
+    try {
+      const draftForm = await loadDraft();
+      setForm(draftForm);
+    } catch {
+      alert('임시저장 불러오기에 실패했습니다.');
+    }
   }
 
   function handleSubmit() {
@@ -41,7 +70,7 @@ export default function ProjectCreateForm() {
   async function handleConfirmSubmit() {
     setShowSubmitModal(false);
     try {
-      await createProject(form);
+      await createProject(form, hasDraft);
       router.push('/projects');
     } catch (e) {
       // TODO: 에러 처리 (토스트 등)
@@ -59,8 +88,10 @@ export default function ProjectCreateForm() {
   return (
     <div className="relative">
       <ProjectCreateNavbar
+        hasDraft={hasDraft}
         onBack={() => setShowBackModal(true)}
         onSaveDraft={handleSaveDraft}
+        onLoadDraft={handleLoadDraft}
         onSubmit={handleSubmit}
       />
 

@@ -10,17 +10,58 @@ import type { FileUploadItem } from '@/types/project';
 import type { LinkItem } from '@/types/project';
 
 interface ResultUploadSectionProps {
+  projectId: string;
   onCancel: () => void;
   onSubmit: () => void;
 }
 
-export default function ResultUploadSection({ onCancel, onSubmit }: ResultUploadSectionProps) {
+export default function ResultUploadSection({
+  projectId,
+  onCancel,
+  onSubmit,
+}: ResultUploadSectionProps) {
   const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [titleError, setTitleError] = useState(false);
   const [files, setFiles] = useState<FileUploadItem[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmitConfirm() {
+    setShowConfirm(false);
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        subject: title,
+        content,
+        fileLinks: files.filter((f) => f.fileUrl).map((f) => f.fileUrl),
+        links: links
+          .filter((l) => l.url)
+          .map((l) => ({
+            linkName: l.name,
+            link: l.url,
+            explanation: l.description || undefined,
+          })),
+      };
+      const res = await fetch(`/api/crews/projects/${projectId}/submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        onSubmit();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.message ?? '결과물 제출에 실패했습니다.');
+      }
+    } catch {
+      alert('네트워크 오류가 발생했습니다.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   function handleTitleBlur() {
     if (!title.trim()) setTitleError(true);
@@ -77,6 +118,8 @@ export default function ResultUploadSection({ onCancel, onSubmit }: ResultUpload
           <label className="text-kor-body-1-semibold text-conx-common-black">내용</label>
           <input
             type="text"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
             placeholder="공유할 사항이 있다면 적어주세요."
             className="text-kor-body-1-medium border-conx-gray-150 text-conx-common-black placeholder:text-conx-gray-300 not-placeholder-shown:border-conx-gray-400 h-14 rounded-md border p-4 outline-none"
           />
@@ -94,8 +137,8 @@ export default function ResultUploadSection({ onCancel, onSubmit }: ResultUpload
         <Button variant="tertiary" onClick={() => setShowCancelConfirm(true)}>
           작성 취소
         </Button>
-        <Button variant="primary" onClick={handleSubmitClick}>
-          제출하기
+        <Button variant="primary" disabled={isSubmitting} onClick={handleSubmitClick}>
+          {isSubmitting ? '제출 중...' : '제출하기'}
         </Button>
       </div>
 
@@ -110,10 +153,7 @@ export default function ResultUploadSection({ onCancel, onSubmit }: ResultUpload
             </>
           }
           primaryLabel="제출하기"
-          onPrimaryClick={() => {
-            setShowConfirm(false);
-            onSubmit();
-          }}
+          onPrimaryClick={handleSubmitConfirm}
           onClose={() => setShowConfirm(false)}
         />
       )}

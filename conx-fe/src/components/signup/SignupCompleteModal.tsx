@@ -3,7 +3,7 @@
 import { Modal } from '@/components/common/Modal';
 import type { UserType } from '@/types/auth';
 
-interface SignupCompleteModalProps {
+export interface SignupCompleteModalProps {
   userType: UserType;
   onPrimaryAction: () => void;
   onSecondaryAction: () => void;
