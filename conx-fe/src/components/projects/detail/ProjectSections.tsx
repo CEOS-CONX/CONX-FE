@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import IconCheckboxChecked from '@/assets/icons/icon_checkbox_checked.svg';
 import IconCheckboxDefault from '@/assets/icons/icon_checkbox_default.svg';
 import { Button } from '@/components/common/Button';
@@ -16,8 +16,31 @@ import LinkCard from './LinkCard';
 import OutcomeCard from './OutcomeCard';
 import QnaCard, { type QnaItem } from './QnaCard';
 import UploadCard from './UploadCard';
+import { CREW_TYPE_OPTIONS, INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/constants/browse';
+import { useAuth } from '@/context/AuthContext';
+import type { ProjectDetail } from '@/types/projectDetail';
 
 /* ───────── 공통 ───────── */
+
+// 각 섹션은 상세 데이터를 slice 해서 사용 (page.tsx → ProjectDetailBody → 각 섹션)
+type SectionProps = { project: ProjectDetail | null };
+
+const labelOf = (opts: { value: string; label: string }[], v: string | null | undefined) =>
+  v ? (opts.find((o) => o.value === v)?.label ?? v) : '-';
+const fmtDate = (s: string | null | undefined) => (s ? s.replace(/-/g, '.') : '-');
+const fmtWon = (n: number | null | undefined) =>
+  n != null ? `${n.toLocaleString('ko-KR')}원` : '-';
+function fmtSize(bytes: number): string {
+  if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+  if (bytes >= 1024) return `${Math.round(bytes / 1024)}KB`;
+  return `${bytes}B`;
+}
+function fmtDateTime(s: string): string {
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return s;
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}.${p(d.getMonth() + 1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-2-bold text-conx-common-black pt-8">{children}</h2>;
@@ -35,33 +58,26 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 /* ───────── 1. 프로젝트 설명 ───────── */
 
-const SCHEDULE = [
-  { label: '크루 모집 마감일', date: '2026.05.03' },
-  { label: '프로젝트 시작일', date: '2026.05.03' },
-  { label: '프로젝트 마감일', date: '2026.05.03' },
-  { label: '결과물 제출일', date: '2026.05.03' },
-];
+export function DescriptionSection({ project }: SectionProps) {
+  const schedule = [
+    { label: '크루 모집 마감일', date: fmtDate(project?.recruitDeadLine) },
+    { label: '프로젝트 시작일', date: fmtDate(project?.projectStartDate) },
+    { label: '프로젝트 마감일', date: fmtDate(project?.projectDeadline) },
+    { label: '결과물 제출일', date: fmtDate(project?.submitDeadline) },
+  ];
+  const outcomes = project?.resultForm ?? [];
 
-const OUTCOMES: { desc: string | null }[] = [
-  { desc: '결과물에 반드시 포함되어야 하는 내용이나 전달 기준이 있다면 작성해주세요.' },
-  { desc: null },
-];
-
-export function DescriptionSection() {
   return (
     <>
       <SectionTitle>프로젝트 설명</SectionTitle>
 
       <Field label="목표">
-        <p className="max-w-[900px]">
-          신제품 출시를 앞두고 대학생 타깃의 실제 사용 반응과 인식을 확인하고자 합니다. 제품 특징,
-          브랜드 메시지가 자연스럽게 전달될 수 있도록 기획 및 제작해주세요.
-        </p>
+        <p className="max-w-[900px] whitespace-pre-wrap">{project?.projectExplanation ?? '-'}</p>
       </Field>
 
       <Field label="일정">
         <div className="flex flex-wrap items-center gap-2">
-          {SCHEDULE.map((s, i) => (
+          {schedule.map((s, i) => (
             <Fragment key={s.label}>
               {i > 0 && (
                 <span aria-hidden className="text-conx-gray-450 px-2 text-2xl">
@@ -74,23 +90,25 @@ export function DescriptionSection() {
         </div>
       </Field>
 
-      <Field label="지원금">25만원</Field>
-      <Field label="산업 분야">커머스</Field>
-      <Field label="프로젝트 유형">숏폼·UGC</Field>
+      <Field label="지원금">{fmtWon(project?.subsidy)}</Field>
+      <Field label="산업 분야">{labelOf(INDUSTRY_OPTIONS, project?.companyIndustry)}</Field>
+      <Field label="프로젝트 유형">{labelOf(PROJECT_TYPE_OPTIONS, project?.projectType)}</Field>
 
       <Field label="결과물">
-        {/* 아랫줄(desc)은 프로젝트에 따라 없을 수 있음 */}
         <div className="flex flex-col gap-2">
-          {OUTCOMES.map((o, i) => (
-            <OutcomeCard
-              key={i}
-              platform="플랫폼명"
-              contentType="콘텐츠 유형"
-              count="0개"
-              submission="최종 제출 결과물"
-              info={o.desc ?? undefined}
-            />
-          ))}
+          {outcomes.length === 0 ? (
+            <p>-</p>
+          ) : (
+            outcomes.map((o, i) => (
+              <OutcomeCard
+                key={i}
+                platform={o.platform}
+                contentType={o.contentType}
+                count={`${o.numberOfResult}개`}
+                submission={o.finalResult}
+              />
+            ))
+          )}
         </div>
       </Field>
     </>
@@ -99,24 +117,26 @@ export function DescriptionSection() {
 
 /* ───────── 2. 모집 크루 조건 ───────── */
 
-export function ConditionSection() {
+export function ConditionSection({ project }: SectionProps) {
   return (
     <>
       <SectionTitle>모집 크루 조건</SectionTitle>
-      <Field label="크루 유형">학회</Field>
-      <Field label="참여 인원수">100명</Field>
+      <Field label="크루 유형">{labelOf(CREW_TYPE_OPTIONS, project?.crewType)}</Field>
+      <Field label="참여 인원수">
+        {project?.peopleNumber != null ? `${project.peopleNumber}명` : '-'}
+      </Field>
       <Field label="필수 역량">
-        인스타그램 릴스 기획·촬영·편집 가능, 인터뷰 진행 및 결과 정리 경험
+        <p className="whitespace-pre-wrap">{project?.competency ?? '-'}</p>
       </Field>
       <Field label="우대 조건">
-        F&amp;B 브랜드 콘텐츠 제작 경험, 대학생 대상 SNS 운영 경험, 숏폼 콘텐츠 10건 이상 제작 경험
+        <p className="whitespace-pre-wrap">{project?.preferenceCondition ?? '-'}</p>
       </Field>
       <Field label="인센티브">
-        <p className="text-conx-common-black">20만원</p>
-        <p className="mt-1">
-          우수 결과물 선정 시 별도 브랜드 협업 기회 제공, 조회수 1만 회 이상 달성 시 팀당 추가
-          10만원 지급
-        </p>
+        {project?.incentive ? (
+          <p className="whitespace-pre-wrap">{project.incentiveCondition || '있음'}</p>
+        ) : (
+          <p>없음</p>
+        )}
       </Field>
     </>
   );
@@ -124,17 +144,10 @@ export function ConditionSection() {
 
 /* ───────── 3. 참고 자료 ───────── */
 
-const FILES: { name: string; info: string | null }[] = [
-  { name: '파일명[확장자명, 용량]', info: '입력 완료 정보' },
-  { name: '파일명[확장자명, 용량]', info: null },
-];
-const LINKS: { label: string; url: string; info: string | null }[] = [
-  { label: '브랜드 홈페이지', url: 'https://', info: '입력 완료 정보' },
-  { label: '브랜드 인스타그램 계정', url: 'https://', info: null },
-];
-
-export function ReferenceSection() {
+export function ReferenceSection({ project }: SectionProps) {
   const [previewFile, setPreviewFile] = useState<string | null>(null); // 미리보기 중인 파일명
+  const files = project?.files ?? [];
+  const links = project?.links ?? [];
 
   return (
     <>
@@ -142,22 +155,35 @@ export function ReferenceSection() {
 
       <Field label="파일">
         <div className="flex flex-col gap-2">
-          {FILES.map((f, i) => (
-            <UploadCard
-              key={i}
-              name={f.name}
-              info={f.info ?? undefined}
-              onPreview={() => setPreviewFile(f.name)}
-            />
-          ))}
+          {files.length === 0 ? (
+            <p>-</p>
+          ) : (
+            files.map((f) => (
+              <UploadCard
+                key={f.fileId}
+                name={`${f.fileName} [${f.extension}, ${fmtSize(f.size)}]`}
+                info={f.explanation || undefined}
+                onPreview={() => setPreviewFile(f.fileName)}
+              />
+            ))
+          )}
         </div>
       </Field>
 
       <Field label="링크">
         <div className="flex flex-col gap-2">
-          {LINKS.map((l, i) => (
-            <LinkCard key={i} name={l.label} url={l.url} info={l.info ?? undefined} />
-          ))}
+          {links.length === 0 ? (
+            <p>-</p>
+          ) : (
+            links.map((l, i) => (
+              <LinkCard
+                key={i}
+                name={l.label ?? l.url ?? '링크'}
+                url={l.url ?? ''}
+                info={l.explanation || undefined}
+              />
+            ))
+          )}
         </div>
       </Field>
 
@@ -171,28 +197,38 @@ export function ReferenceSection() {
 
 /* ───────── 4. 담당자 Q&A ───────── */
 
-type QnaListItem = QnaItem & { id: number; defaultOpen?: boolean };
+// writerId: '내 Q&A 보기' 필터용(내 userId와 비교)
+type QnaListItem = QnaItem & { id: number; writerId: number; defaultOpen?: boolean };
 
-const ANSWER = { brand: '[브랜드 이름] 담당자', text: '브랜드 측 답변', date: '2000.00.00' };
-const INITIAL_QNA: QnaListItem[] = [
-  { id: 1, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
-  { id: 2, secret: false, title: '제목이 들어가는 자리입니다.', body: '문의글 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
-  { id: 3, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
-  { id: 4, secret: true, title: '비밀 문의 제목', body: '비밀 문의 본문', status: '답변완료', author: 'yuik***', date: '2000.00.00 00:00', answer: ANSWER }, // prettier-ignore
-];
+// question[] → 목록 아이템. API 질문은 content 하나뿐이라 제목 자리에 넣고, 답변 내용은 목록에 없어 null
+// TODO: 답변 내용(answer)·본문(body) 구조 확정 시 매핑 보강
+function toQnaItems(project: ProjectDetail | null): QnaListItem[] {
+  return (project?.question ?? []).map((q) => ({
+    id: q.questionId,
+    writerId: q.writerId,
+    secret: q.secret,
+    title: q.questionName,
+    body: q.content,
+    status: q.answered ? '답변완료' : '답변 전',
+    author: q.writerName,
+    date: fmtDateTime(q.createdAt),
+    answer: null,
+  }));
+}
 
 // TODO: 실제 에러 문구 전달받으면 교체
 const QNA_TITLE_ERROR = '문의 제목을 입력해주세요';
 const QNA_CONTENT_ERROR = '문의 내용을 입력해주세요';
 
-const CURRENT_USER = 'yuik***'; // TODO: 실제 로그인 유저로 교체 ('내 Q&A 보기' 필터 기준)
 const QNA_PAGE_SIZE = 5; // 페이지당 문의 수 (디자인 확정 시 조정)
 
-export function QnaSection() {
+export function QnaSection({ project }: SectionProps) {
+  const { user } = useAuth();
+  const myUserId = user?.userId; // '내 Q&A 보기' 필터 기준 (writerId와 비교)
   const [excludeSecret, setExcludeSecret] = useState(false);
   const [myOnly, setMyOnly] = useState(false);
   const [page, setPage] = useState(1);
-  const [qnaList, setQnaList] = useState<QnaListItem[]>(INITIAL_QNA);
+  const [qnaList, setQnaList] = useState<QnaListItem[]>(() => toQnaItems(project));
 
   // 문의 등록 폼
   const [writing, setWriting] = useState(false);
@@ -203,10 +239,48 @@ export function QnaSection() {
   const [contentError, setContentError] = useState('');
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [registered, setRegistered] = useState(false); // 등록 완료 토스트
+  const [submitting, setSubmitting] = useState(false);
+
+  // 답변 완료된 질문은 상세 조회로 answerContent 채우기 (목록엔 없음). setState는 async에서만
+  useEffect(() => {
+    if (!project) return;
+    const answered = project.question.filter((q) => q.answered);
+    if (answered.length === 0) return;
+    let active = true;
+    Promise.all(
+      answered.map((q) =>
+        fetch(`/api/projects/${project.projectId}/questions/${q.questionId}`)
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) =>
+            d?.payload?.answerContent
+              ? {
+                  id: q.questionId,
+                  answer: {
+                    brand: `${project.brandName ?? ''} 담당자`.trim(),
+                    text: d.payload.answerContent as string,
+                    date: fmtDateTime(d.payload.answeredAt),
+                  },
+                }
+              : null,
+          )
+          .catch(() => null),
+      ),
+    ).then((results) => {
+      if (!active) return;
+      const answers = new Map(results.filter((r) => r !== null).map((r) => [r.id, r.answer]));
+      if (answers.size === 0) return;
+      setQnaList((prev) =>
+        prev.map((it) => (answers.has(it.id) ? { ...it, answer: answers.get(it.id)! } : it)),
+      );
+    });
+    return () => {
+      active = false;
+    };
+  }, [project]);
 
   // 필터(비밀글 제외 / 내 Q&A) 적용 → 페이지네이션
   const filteredQna = qnaList.filter(
-    (q) => (!excludeSecret || !q.secret) && (!myOnly || q.author === CURRENT_USER),
+    (q) => (!excludeSecret || !q.secret) && (!myOnly || q.writerId === myUserId),
   );
   const totalPages = Math.max(1, Math.ceil(filteredQna.length / QNA_PAGE_SIZE));
   const safePage = Math.min(page, totalPages); // 필터로 페이지 수가 줄어도 빈 페이지 방지
@@ -232,29 +306,50 @@ export function QnaSection() {
     else closeForm();
   }
 
-  // 등록하기: 제목·문의글 필수 검사 후 등록
-  function handleSubmit() {
+  // 등록하기: 제목·문의글 필수 검사 후 POST → 목록에 추가
+  // ⚠️ 백엔드 body는 { content, secret }만 받음(title 누락). title 추가되면 body·매핑에 title 포함
+  async function handleSubmit() {
     const tErr = title.trim() ? '' : QNA_TITLE_ERROR;
     const cErr = content.trim() ? '' : QNA_CONTENT_ERROR;
     setTitleError(tErr);
     setContentError(cErr);
-    if (tErr || cErr) return; // 하나라도 비면 등록 안 함
-    // 등록: 최신순이라 맨 앞에 추가, 등록 직후엔 펼친(open) 상태로 노출
-    const newItem: QnaListItem = {
-      id: Date.now(),
-      secret,
-      title: title.trim(),
-      body: content.trim(),
-      status: '답변 전',
-      author: 'yuik***', // TODO: 실제 로그인 유저
-      date: '2000.00.00 00:00', // TODO: 실제 등록 시각
-      answer: null,
-      defaultOpen: true,
-    };
-    setQnaList((prev) => [newItem, ...prev]);
-    setPage(1); // 최신 글이 있는 첫 페이지로
-    setRegistered(true); // 5초 토스트
-    closeForm();
+    if (tErr || cErr || submitting || !project) return;
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/projects/${project.projectId}/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        // 작성 API는 제목 필드명이 subject (필수)
+        body: JSON.stringify({ subject: title.trim(), content: content.trim(), secret }),
+      });
+      if (!res.ok) {
+        setContentError('문의 등록에 실패했습니다. 잠시 후 다시 시도해주세요.');
+        return;
+      }
+      const q = (await res.json()).payload;
+      // 최신순이라 맨 앞에 추가, 등록 직후엔 펼친 상태로 노출
+      const newItem: QnaListItem = {
+        id: q?.questionId ?? Date.now(),
+        writerId: q?.writerId ?? myUserId ?? -1,
+        secret: q?.secret ?? secret,
+        title: q?.subject ?? title.trim(), // 작성 응답은 subject
+        body: q?.content ?? content.trim(),
+        status: '답변 전',
+        author: q?.writerName ?? '',
+        date: q?.createdAt ? fmtDateTime(q.createdAt) : '',
+        answer: null,
+        defaultOpen: true,
+      };
+      setQnaList((prev) => [newItem, ...prev]);
+      setPage(1);
+      setRegistered(true);
+      closeForm();
+    } catch {
+      setContentError('네트워크 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   // 문의하기 → 질문 목록 자리에 등록 폼 표시
@@ -299,7 +394,7 @@ export function QnaSection() {
           <Button variant="ghost" onClick={handleBack}>
             돌아가기
           </Button>
-          <Button variant="primary" onClick={handleSubmit}>
+          <Button variant="primary" onClick={handleSubmit} disabled={submitting}>
             등록하기
           </Button>
         </div>
