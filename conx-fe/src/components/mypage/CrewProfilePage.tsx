@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DropdownForm } from '@/components/common/DropdownForm';
 import { Pagination } from '@/components/common/Pagination';
@@ -82,6 +82,7 @@ export default function CrewProfilePage() {
   const [urlValue, setUrlValue] = useState('');
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
+  const portfolioSeq = useRef(0); // 포폴 고유 id 시퀀스
   // 대표 프로젝트
   const [picked, setPicked] = useState<string[]>([]);
   const [page, setPage] = useState(1);
@@ -303,7 +304,12 @@ export default function CrewProfilePage() {
         <PortfolioUploadModal
           onClose={() => setShowPortfolioModal(false)}
           onSubmit={(d) => {
-            setPortfolios((prev) => [...prev, { id: `p${prev.length}`, name: d.name }]);
+            // 고유 id(시퀀스) + 모달이 넘긴 썸네일/파일을 목록에 반영
+            // (지금은 로컬 미리보기 URL — 실제 등록 API 붙으면 업로드된 URL로 교체)
+            const id = `p${portfolioSeq.current++}`;
+            const imageLink = d.thumbnailFile ? URL.createObjectURL(d.thumbnailFile) : undefined;
+            const fileLink = d.portfolioFile ? URL.createObjectURL(d.portfolioFile) : undefined;
+            setPortfolios((prev) => [...prev, { id, imageLink, name: d.name, fileLink }]);
             setShowPortfolioModal(false);
           }}
         />
