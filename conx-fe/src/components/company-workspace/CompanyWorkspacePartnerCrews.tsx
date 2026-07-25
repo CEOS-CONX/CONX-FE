@@ -70,7 +70,6 @@ export default function CompanyWorkspacePartnerCrews() {
 
   const resetPage = useCallback(() => setCurrentPage(1), []);
 
-  // 데이터 fetch
   useEffect(() => {
     const controller = new AbortController();
 
@@ -106,7 +105,6 @@ export default function CompanyWorkspacePartnerCrews() {
     return () => controller.abort();
   }, [activeTab, currentPage, debouncedKeyword, categoryFilter, crewTypeFilter, duration]);
 
-  // 탭 카운트: 전체 데이터에서 계산 (필터 없이 한 번 조회)
   useEffect(() => {
     const controller = new AbortController();
 
