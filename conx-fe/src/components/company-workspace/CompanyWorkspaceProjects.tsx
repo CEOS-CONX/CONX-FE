@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import TabNumber from '@/components/workspace/TabNumber';
 import SearchBar from '@/components/common/SearchBar/SearchBar';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
+import type { DateRange } from '@/components/common/DropdownCalendar';
 import Card from '@/components/common/Card/Card';
 import Pagination from '@/components/common/Pagination/Pagination';
 import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/constants/browse';
+import useDebouncedValue from '@/hooks/useDebouncedValue';
 import type { TagType } from '@/components/common/Tag/Tag';
 
 const CARDS_PER_PAGE = 12;
@@ -29,10 +32,10 @@ const STATUS_TAG_MAP: Record<string, { type: TagType; label: string }> = {
 const TABS = [
   { label: '전체', status: null },
   { label: '모집 중', status: 'RECRUITING' },
-  { label: '진행 중', status: 'PROGRESS' },
-  { label: '검수 대기', status: 'INSPECTION' },
-  { label: '정산 대기', status: 'ADJUSTING' },
-  { label: '정산 완료', status: 'DONE' },
+  { label: '진행 중', status: 'IN_PROGRESS' },
+  { label: '검수 대기', status: 'INSPECTION_WAITING' },
+  { label: '정산 대기', status: 'SETTLEMENT_WAITING' },
+  { label: '정산 완료', status: 'SETTLEMENT_DONE' },
 ] as const;
 
 interface CompanyProject {
@@ -50,12 +53,23 @@ interface CompanyProject {
 }
 
 export default function CompanyWorkspaceProjects() {
-  const [activeTab, setActiveTab] = useState(0);
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => {
+    const tab = Number(searchParams.get('tab'));
+    return tab >= 0 && tab < TABS.length ? tab : 0;
+  });
   const [currentPage, setCurrentPage] = useState(1);
   const [projects, setProjects] = useState<CompanyProject[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [tabCounts, setTabCounts] = useState<number[]>(TABS.map(() => 0));
   const [isLoading, setIsLoading] = useState(true);
+
+  const [keyword, setKeyword] = useState('');
+  const debouncedKeyword = useDebouncedValue(keyword);
+  const [category, setCategory] = useState<string | undefined>();
+  const [duration, setDuration] = useState<DateRange | undefined>();
+
+  const resetPage = useCallback(() => setCurrentPage(1), []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -64,6 +78,10 @@ export default function CompanyWorkspaceProjects() {
       const params = new URLSearchParams();
       const filterStatus = TABS[activeTab]?.status;
       if (filterStatus) params.set('status', filterStatus);
+      if (debouncedKeyword) params.set('keyword', debouncedKeyword);
+      if (category) params.set('category', category);
+      if (duration?.start) params.set('startDate', duration.start.toISOString().split('T')[0]);
+      if (duration?.end) params.set('endDate', duration.end.toISOString().split('T')[0]);
       params.set('page', String(currentPage - 1));
       params.set('size', String(CARDS_PER_PAGE));
 
@@ -74,10 +92,7 @@ export default function CompanyWorkspaceProjects() {
         const data = await res.json();
         if (res.ok && data.payload) {
           const content: CompanyProject[] = data.payload.content ?? [];
-          const filtered = filterStatus
-            ? content.filter((p) => p.status === filterStatus)
-            : content;
-          setProjects(filtered);
+          setProjects(content);
           setTotalPages(Math.max(1, data.payload.totalPages ?? 1));
         }
       } catch (e) {
@@ -89,13 +104,13 @@ export default function CompanyWorkspaceProjects() {
 
     fetchData();
     return () => controller.abort();
-  }, [activeTab, currentPage]);
+  }, [activeTab, currentPage, debouncedKeyword, category, duration]);
 
   // 탭 카운트: 대시보드 API에서 가져오기
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch('/api/companies/me/workspace/dashboard', { signal: controller.signal })
+    fetch('/api/companies/me/workspace/dashboard?page=0&size=100', { signal: controller.signal })
       .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
       .then(({ ok, data }) => {
         if (!ok || !data.payload?.projectStatus) return;
@@ -147,15 +162,39 @@ export default function CompanyWorkspaceProjects() {
           <SearchBar
             placeholder="찾고 싶은 프로젝트를 검색해 보세요."
             className="w-114.25 border-transparent!"
+            value={keyword}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              setKeyword(e.target.value);
+              resetPage();
+            }}
           />
           <div className="flex gap-2">
-            <DropdownCompact type="ghost" options={INDUSTRY_OPTIONS} placeholder="산업 분야" />
+            <DropdownCompact
+              type="ghost"
+              options={INDUSTRY_OPTIONS}
+              placeholder="산업 분야"
+              value={category}
+              onChange={(v) => {
+                setCategory(v || undefined);
+                resetPage();
+              }}
+            />
             <DropdownCompact
               type="ghost"
               options={PROJECT_TYPE_OPTIONS}
               placeholder="프로젝트 유형"
             />
-            <DropdownCalendar variant="ghost" mode="range" align="right" placeholder="실행 기간" />
+            <DropdownCalendar
+              variant="ghost"
+              mode="range"
+              align="right"
+              placeholder="실행 기간"
+              value={duration}
+              onChange={(range) => {
+                setDuration(range);
+                resetPage();
+              }}
+            />
           </div>
         </div>
       </div>
