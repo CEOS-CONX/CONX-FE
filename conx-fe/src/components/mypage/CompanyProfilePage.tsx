@@ -49,6 +49,7 @@ export default function CompanyProfilePage() {
   const [urlName, setUrlName] = useState('');
   const [urlValue, setUrlValue] = useState('');
   const [companyNameError, setCompanyNameError] = useState<string>();
+  const [industryError, setIndustryError] = useState<string>();
   const [businessError, setBusinessError] = useState<string>();
   const [websiteError, setWebsiteError] = useState<string>();
   const [showRegister, setShowRegister] = useState(false);
@@ -87,6 +88,10 @@ export default function CompanyProfilePage() {
     const nameInvalid = !companyName.trim();
     setCompanyNameError(nameInvalid ? '기업명을 입력해 주세요' : undefined);
 
+    // 업종: 필수
+    const industryInvalid = !industry;
+    setIndustryError(industryInvalid ? '업종을 선택해 주세요' : undefined);
+
     // 사업자등록번호: 선택 항목. 입력했다면 숫자 10자리여야 함 (미만이면 에러)
     const digits = businessNumber.replace(/\D/g, '');
     const bizInvalid = digits.length > 0 && digits.length < 10;
@@ -96,7 +101,7 @@ export default function CompanyProfilePage() {
     const norm = normalizeUrl(urlValue);
     setWebsiteError(norm.valid ? undefined : '올바른 링크 형식으로 입력해주세요');
 
-    if (nameInvalid || bizInvalid || !norm.valid) return;
+    if (nameInvalid || industryInvalid || bizInvalid || !norm.valid) return;
 
     // 정상 저장: 도메인만 입력했다면 https:// 붙은 값으로 반영
     if (norm.value !== urlValue) setUrlValue(norm.value);
@@ -187,7 +192,15 @@ export default function CompanyProfilePage() {
         <div className="flex justify-between">
           <div className="flex w-[457px] flex-col gap-3">
             <FieldLabel required>업종</FieldLabel>
-            <DropdownForm options={INDUSTRY_OPTIONS} value={industry} onChange={setIndustry} />
+            <DropdownForm
+              options={INDUSTRY_OPTIONS}
+              value={industry}
+              onChange={(v) => {
+                setIndustry(v);
+                setIndustryError(undefined);
+              }}
+              error={industryError}
+            />
           </div>
           <div className="w-[457px]">
             <TextFieldNumber

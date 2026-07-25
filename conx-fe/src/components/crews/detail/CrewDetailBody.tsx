@@ -290,7 +290,7 @@ export default function CrewDetailBody({
             {/* 1. 소개글 */}
             {crew?.crewIntroduction && (
               <section>
-                <p className="text-kor-body-1-medium text-conx-common-black">
+                <p className="text-kor-body-1-medium text-conx-common-black break-words whitespace-pre-wrap">
                   {crew.crewIntroduction}
                 </p>
               </section>
