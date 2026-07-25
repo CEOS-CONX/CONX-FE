@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
@@ -30,17 +30,56 @@ function getTaskUrl(task: WorkspaceTask): string {
 export default function CompanyTaskTableSection({ tasks }: CompanyTaskTableSectionProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.max(1, Math.ceil(tasks.length / ROWS_PER_PAGE));
-  const pagedTasks = tasks.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
-  const isEmpty = tasks.length === 0;
+  const [statusFilter, setStatusFilter] = useState<string | undefined>();
+  const [dateFilter, setDateFilter] = useState<Date | undefined>();
+
+  const filteredTasks = useMemo(() => {
+    let result = tasks;
+    if (statusFilter) {
+      result = result.filter((t) => t.indicatorType === statusFilter);
+    }
+    if (dateFilter) {
+      const y = dateFilter.getFullYear();
+      const m = String(dateFilter.getMonth() + 1).padStart(2, '0');
+      const d = String(dateFilter.getDate()).padStart(2, '0');
+      const dateStr = `${y}.${m}.${d}`;
+      result = result.filter((t) => t.registeredDate === dateStr);
+    }
+    return result;
+  }, [tasks, statusFilter, dateFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTasks.length / ROWS_PER_PAGE));
+  const pagedTasks = filteredTasks.slice(
+    (currentPage - 1) * ROWS_PER_PAGE,
+    currentPage * ROWS_PER_PAGE,
+  );
+  const isEmpty = filteredTasks.length === 0;
 
   return (
     <section className="flex w-full flex-col items-center gap-2.25">
       <div className="flex w-full items-start justify-between">
         <h2 className="text-kor-heading-3-bold text-conx-common-black">지금 필요한 작업</h2>
         <div className="flex items-center gap-2">
-          <DropdownCompact size="sm" options={STATUS_OPTIONS} placeholder="진행 상태" />
-          <DropdownCalendar size="sm" align="right" placeholder="등록일" />
+          <DropdownCompact
+            size="sm"
+            options={STATUS_OPTIONS}
+            placeholder="진행 상태"
+            value={statusFilter}
+            onChange={(v) => {
+              setStatusFilter(v || undefined);
+              setCurrentPage(1);
+            }}
+          />
+          <DropdownCalendar
+            size="sm"
+            align="right"
+            placeholder="등록일"
+            value={dateFilter}
+            onChange={(date) => {
+              setDateFilter(date);
+              setCurrentPage(1);
+            }}
+          />
         </div>
       </div>
 

@@ -54,7 +54,9 @@ export default function ImageCard({
         ) : (
           <span />
         )}
-        <ScrapButton defaultScraped={defaultScraped} onScrapChange={onScrapChange} />
+        {onScrapChange && (
+          <ScrapButton defaultScraped={defaultScraped} onScrapChange={onScrapChange} />
+        )}
       </div>
     </div>
   );

@@ -6,9 +6,14 @@ import type { StatusCardData } from '@/types/workspace';
 interface ProjectStatusSectionProps {
   statusCards: StatusCardData[];
   href?: string;
+  onCardClick?: (index: number) => void;
 }
 
-export default function ProjectStatusSection({ statusCards, href }: ProjectStatusSectionProps) {
+export default function ProjectStatusSection({
+  statusCards,
+  href,
+  onCardClick,
+}: ProjectStatusSectionProps) {
   return (
     <section className="flex w-full flex-col gap-3">
       <div className="flex items-center gap-0.5">
@@ -30,12 +35,13 @@ export default function ProjectStatusSection({ statusCards, href }: ProjectStatu
         )}
       </div>
       <div className="flex w-full justify-between">
-        {statusCards.map((card) => (
+        {statusCards.map((card, i) => (
           <StatusCard
             key={card.tagLabel}
             tagType={card.tagType}
             tagLabel={card.tagLabel}
             count={card.count}
+            onClick={onCardClick ? () => onCardClick(i) : undefined}
           />
         ))}
       </div>

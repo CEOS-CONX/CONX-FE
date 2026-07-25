@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import ProjectStatusSection from './sections/ProjectStatusSection';
 import CompanyRatingSection from './sections/CompanyRatingSection';
 import CumulativeFundingSection from './sections/CumulativeFundingSection';
@@ -21,12 +22,23 @@ function formatAmount(value: number): string {
   return value.toLocaleString('ko-KR');
 }
 
+const STATUS_TAB_INDEX = [1, 2, 3, 4, 5];
+
 export default function WorkspaceDashboard() {
+  const router = useRouter();
   const [statusCards, setStatusCards] = useState<StatusCardData[]>(EMPTY_STATUS_CARDS);
   const [ratings, setRatings] = useState<CompanyRating[]>(EMPTY_RATINGS);
   const [funding, setFunding] = useState(EMPTY_FUNDING);
   const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const handleStatusCardClick = useCallback(
+    (cardIndex: number) => {
+      const tab = STATUS_TAB_INDEX[cardIndex] ?? 0;
+      router.push(`/crew-workspace/project-tasks?tab=${tab}`);
+    },
+    [router],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
@@ -141,7 +153,11 @@ export default function WorkspaceDashboard() {
 
   return (
     <div className="flex flex-col gap-25 pb-64.75">
-      <ProjectStatusSection statusCards={statusCards} />
+      <ProjectStatusSection
+        statusCards={statusCards}
+        href="/crew-workspace/project-tasks"
+        onCardClick={handleStatusCardClick}
+      />
       <div className="flex items-start gap-6">
         <CompanyRatingSection ratings={ratings} />
         <CumulativeFundingSection amount={funding.amount} message={funding.message} />

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
+import Link from 'next/link';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { SegmentedControl } from '@/components/common/SegmentedControl';
@@ -8,6 +9,7 @@ import { TextFieldInput } from '@/components/common/TextFieldInput';
 import { TextFieldMembership } from '@/components/common/TextFieldMembership';
 import { TextLineButton } from '@/components/common/TextLineButton';
 import { Toast } from '@/components/common/Toast';
+import { API_ROUTES } from '@/constants/api';
 import { useTimer } from '@/hooks/useTimer';
 import { formatTime } from '@/utils/format';
 import { validateEmail } from '@/utils/validate';
@@ -40,30 +42,96 @@ export default function FindAccountForm() {
   const [toastMessage, setToastMessage] = useState('');
   const timer = useTimer(TIMER_SECONDS);
 
-  const canSendCode = name.trim() && validateEmail(emailValue);
-  const canVerify = codeSent && code.length === 6 && timer.isRunning;
+  const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  function handleSendCode() {
+  const canSendCode = name.trim() && validateEmail(emailValue) && !isSending;
+  const canVerify = codeSent && code.length === 6 && timer.isRunning && !isVerifying;
+
+  async function handleSendCode() {
     if (!canSendCode) return;
 
-    setCodeSent(true);
-    setCode('');
-    setCodeError('');
-    timer.start();
+    if (activeTab === 'password') {
+      setIsSending(true);
+      try {
+        const res = await fetch(API_ROUTES.AUTH.PASSWORD_RESET_SEND, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim(), email: emailValue }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setEmailError(data.message ?? '인증번호 전송에 실패했습니다.');
+          return;
+        }
+        setCodeSent(true);
+        setCode('');
+        setCodeError('');
+        timer.start();
+      } finally {
+        setIsSending(false);
+      }
+    } else {
+      // 이메일 찾기 — API 미구현
+      setCodeSent(true);
+      setCode('');
+      setCodeError('');
+      timer.start();
+    }
   }
 
-  function handleResendCode() {
+  async function handleResendCode() {
     setCode('');
     setCodeError('');
-    timer.start();
+
+    if (activeTab === 'password') {
+      setIsSending(true);
+      try {
+        const res = await fetch(API_ROUTES.AUTH.PASSWORD_RESET_SEND, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.trim(), email: emailValue }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setCodeError(data.message ?? '인증번호 재전송에 실패했습니다.');
+          return;
+        }
+        timer.start();
+      } finally {
+        setIsSending(false);
+      }
+    } else {
+      timer.start();
+    }
   }
 
-  function handleVerify() {
+  async function handleVerify() {
     if (!canVerify) return;
 
-    // TODO: 인증번호 검증 API 호출 — 실패 시 setCodeError('인증번호가 맞지 않습니다')
-    timer.clear();
-    setToastMessage(TAB_CONFIG[activeTab].toastMessage);
+    if (activeTab === 'password') {
+      setIsVerifying(true);
+      try {
+        const res = await fetch(API_ROUTES.AUTH.PASSWORD_RESET_CONFIRM, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: emailValue, code: Number(code) }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setCodeError(data.message ?? '인증번호가 맞지 않습니다');
+          return;
+        }
+        timer.clear();
+        setToastMessage(TAB_CONFIG[activeTab].toastMessage);
+      } finally {
+        setIsVerifying(false);
+      }
+    } else {
+      // 이메일 찾기 — API 미구현
+      timer.clear();
+      setToastMessage(TAB_CONFIG[activeTab].toastMessage);
+    }
   }
 
   function handleTabChange(tab: Tab) {
@@ -83,7 +151,9 @@ export default function FindAccountForm() {
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-9">
-        <LogoConxTitle className="h-6.25 w-28" />
+        <Link href="/login">
+          <LogoConxTitle className="h-6.25 w-28" />
+        </Link>
         <h1 className="text-kor-title-1-bold text-conx-common-black">계정 찾기</h1>
       </div>
 

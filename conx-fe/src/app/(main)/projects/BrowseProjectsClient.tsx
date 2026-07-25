@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useEffect, useCallback, useRef } from 'react';
+import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
@@ -9,6 +9,8 @@ import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
 import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS, SORT_OPTIONS } from '@/constants/browse';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import useDebouncedValue from '@/hooks/useDebouncedValue';
 
 interface Project {
   projectId: number;
@@ -28,6 +30,7 @@ interface Project {
 interface BrowseProjectsClientProps {
   initialProjects: Project[];
   initialParams: Record<string, string | undefined>;
+  initialIsLastPage: boolean;
 }
 
 function formatDate(dateStr: string): string {
@@ -73,8 +76,10 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
 export default function BrowseProjectsClient({
   initialProjects,
   initialParams,
+  initialIsLastPage,
 }: BrowseProjectsClientProps) {
   const [searchQuery, setSearchQuery] = useState(initialParams.keyword ?? '');
+  const debouncedKeyword = useDebouncedValue(searchQuery);
   const [industry, setIndustry] = useState<string | undefined>(initialParams.category);
   const [projectType, setProjectType] = useState<string | undefined>(initialParams.projectType);
   const [duration, setDuration] = useState<DateRange | undefined>(() => {
@@ -82,49 +87,41 @@ export default function BrowseProjectsClient({
     return { start: new Date(initialParams.startDate), end: new Date(initialParams.endDate) };
   });
   const [sort, setSort] = useState(initialParams.sort ?? 'RECENT');
-  const [projects, setProjects] = useState<Project[]>(initialProjects);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const isInitialMount = useRef(true);
+  const filterParams = useMemo(() => {
+    const p = new URLSearchParams();
+    if (debouncedKeyword) p.set('keyword', debouncedKeyword);
+    if (industry) p.set('category', industry);
+    if (projectType) p.set('projectType', projectType);
+    if (duration?.start) {
+      const s = duration.start;
+      p.set(
+        'startDate',
+        `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+      );
+    }
+    if (duration?.end) {
+      const e = duration.end;
+      p.set(
+        'endDate',
+        `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+      );
+    }
+    if (sort) p.set('sort', sort);
+    return p;
+  }, [debouncedKeyword, industry, projectType, duration, sort]);
+
+  const { items, isLoading, isLoadingMore, hasMore, sentinelRef } = useInfiniteScroll<Project>({
+    endpoint: API_ROUTES.PROJECT.LIST,
+    initialItems: initialProjects,
+    initialIsLastPage,
+    params: filterParams,
+  });
 
   useEffect(() => {
-    // 초기 마운트에서는 서버 데이터를 사용하므로 fetch 스킵
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('keyword', searchQuery);
-    if (industry) params.set('category', industry);
-    if (projectType) params.set('projectType', projectType);
-    if (duration?.start) params.set('startDate', duration.start.toISOString().split('T')[0]);
-    if (duration?.end) params.set('endDate', duration.end.toISOString().split('T')[0]);
-    if (sort) params.set('sort', sort);
-    params.set('page', '0');
-    params.set('size', '12');
-
-    // URL 동기화 — 새로고침/공유 시 필터 상태 보존
-    const url = `${window.location.pathname}?${params}`;
+    const url = `${window.location.pathname}?${filterParams}`;
     window.history.replaceState(null, '', url);
-
-    setIsLoading(true);
-    fetch(`${API_ROUTES.PROJECT.LIST}?${params.toString()}`, { signal: controller.signal })
-      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data.payload?.content) setProjects(data.payload.content);
-      })
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === 'AbortError') return;
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [searchQuery, industry, projectType, duration, sort]);
+  }, [filterParams]);
 
   return (
     <main className="xlarge:max-w-272 large:max-w-230 mx-auto w-full max-w-367 px-6 pt-25 pb-82.5">
@@ -173,8 +170,16 @@ export default function BrowseProjectsClient({
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : projects.map((project) => <ProjectCard key={project.projectId} project={project} />)}
+          : items.map((project) => <ProjectCard key={project.projectId} project={project} />)}
       </div>
+
+      {isLoadingMore && (
+        <div className="flex justify-center py-10">
+          <div className="border-t-conx-primary-200 h-8 w-8 animate-spin rounded-full border-2 border-gray-300" />
+        </div>
+      )}
+
+      {hasMore && <div ref={sentinelRef} className="h-1" />}
     </main>
   );
 }

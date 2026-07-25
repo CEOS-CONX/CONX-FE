@@ -25,19 +25,30 @@ export default async function BrowseCrewsPage({
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   let crews: Crew[] = [];
+  let isLastPage = true;
   try {
     const res = await fetch(`${API_BASE_URL}${BACKEND_ENDPOINTS.CREW.LIST}?${query}`, {
       headers,
       cache: 'no-store',
     });
     const data = await res.json();
-    if (res.ok && data.payload?.content) crews = data.payload.content;
+    if (res.ok && data.payload?.content) {
+      crews = data.payload.content;
+      isLastPage = data.payload.last ?? data.payload.content.length < 12;
+    }
   } catch {
     // 네트워크 오류 시 빈 목록 유지
   }
 
   const paramsKey = JSON.stringify(params);
-  return <BrowseCrewsClient key={paramsKey} initialCrews={crews} initialParams={params} />;
+  return (
+    <BrowseCrewsClient
+      key={paramsKey}
+      initialCrews={crews}
+      initialParams={params}
+      initialIsLastPage={isLastPage}
+    />
+  );
 }
 
 interface Crew {

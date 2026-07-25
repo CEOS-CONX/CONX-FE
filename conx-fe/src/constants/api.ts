@@ -10,6 +10,9 @@ export const API_ROUTES = {
     EMAIL_SEND: '/api/auth/email/send',
     EMAIL_VERIFY: '/api/auth/email/verify',
     DELETE_ACCOUNT: '/api/account/delete',
+    PASSWORD_RESET_SEND: '/api/auth/password/verifications',
+    PASSWORD_RESET_CONFIRM: '/api/auth/password/verifications/confirm',
+    PASSWORD_RESET: '/api/auth/password',
   },
   PROJECT: {
     CREATE: '/api/projects/create',
@@ -41,6 +44,9 @@ export const BACKEND_ENDPOINTS = {
     EMAIL_VERIFY: '/api/v1/auth/email/verify',
     REFRESH: '/api/v1/login/refresh',
     DELETE_ACCOUNT: '/api/v1/account/me',
+    PASSWORD_RESET_SEND: '/api/v1/auth/password/verifications',
+    PASSWORD_RESET_CONFIRM: '/api/v1/auth/password/verifications/confirm',
+    PASSWORD_RESET: '/api/v1/auth/password',
   },
   PROJECT: {
     CREATE: '/api/v1/companies/me/projects',
