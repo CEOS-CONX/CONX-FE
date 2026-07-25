@@ -39,7 +39,10 @@ export default function CompanyTaskTableSection({ tasks }: CompanyTaskTableSecti
       result = result.filter((t) => t.indicatorType === statusFilter);
     }
     if (dateFilter) {
-      const dateStr = dateFilter.toISOString().split('T')[0].replace(/-/g, '.');
+      const y = dateFilter.getFullYear();
+      const m = String(dateFilter.getMonth() + 1).padStart(2, '0');
+      const d = String(dateFilter.getDate()).padStart(2, '0');
+      const dateStr = `${y}.${m}.${d}`;
       result = result.filter((t) => t.registeredDate === dateStr);
     }
     return result;

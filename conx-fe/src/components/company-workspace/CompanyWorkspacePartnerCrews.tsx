@@ -80,8 +80,20 @@ export default function CompanyWorkspacePartnerCrews() {
       if (debouncedKeyword) params.set('keyword', debouncedKeyword);
       if (categoryFilter) params.set('category', categoryFilter);
       if (crewTypeFilter) params.set('crewType', crewTypeFilter);
-      if (duration?.start) params.set('startDate', duration.start.toISOString().split('T')[0]);
-      if (duration?.end) params.set('endDate', duration.end.toISOString().split('T')[0]);
+      if (duration?.start) {
+        const s = duration.start;
+        params.set(
+          'startDate',
+          `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+        );
+      }
+      if (duration?.end) {
+        const e = duration.end;
+        params.set(
+          'endDate',
+          `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+        );
+      }
       params.set('page', String(currentPage - 1));
       params.set('size', String(CARDS_PER_PAGE));
 

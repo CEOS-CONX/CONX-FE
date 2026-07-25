@@ -81,6 +81,7 @@ export function useInfiniteScroll<T>({
     setIsLoadingMore(true);
 
     const controller = new AbortController();
+    abortControllerRef.current = controller;
     const nextPage = pageRef.current + 1;
 
     const query = new URLSearchParams(params);

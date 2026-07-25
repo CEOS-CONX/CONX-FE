@@ -64,8 +64,20 @@ export default function CompanyWorkspaceSettlement() {
     async function fetchData() {
       const params = new URLSearchParams();
       if (statusFilter) params.set('status', statusFilter);
-      if (dateFilter?.start) params.set('startDate', dateFilter.start.toISOString().split('T')[0]);
-      if (dateFilter?.end) params.set('endDate', dateFilter.end.toISOString().split('T')[0]);
+      if (dateFilter?.start) {
+        const s = dateFilter.start;
+        params.set(
+          'startDate',
+          `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+        );
+      }
+      if (dateFilter?.end) {
+        const e = dateFilter.end;
+        params.set(
+          'endDate',
+          `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+        );
+      }
       params.set('page', '0');
       params.set('size', '100');
 
