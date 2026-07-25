@@ -10,6 +10,7 @@ import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
 import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS, SORT_OPTIONS } from '@/constants/browse';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
+import useDebouncedValue from '@/hooks/useDebouncedValue';
 
 interface Project {
   projectId: number;
@@ -78,6 +79,7 @@ export default function BrowseProjectsClient({
   initialIsLastPage,
 }: BrowseProjectsClientProps) {
   const [searchQuery, setSearchQuery] = useState(initialParams.keyword ?? '');
+  const debouncedKeyword = useDebouncedValue(searchQuery);
   const [industry, setIndustry] = useState<string | undefined>(initialParams.category);
   const [projectType, setProjectType] = useState<string | undefined>(initialParams.projectType);
   const [duration, setDuration] = useState<DateRange | undefined>(() => {
@@ -88,14 +90,26 @@ export default function BrowseProjectsClient({
 
   const filterParams = useMemo(() => {
     const p = new URLSearchParams();
-    if (searchQuery) p.set('keyword', searchQuery);
+    if (debouncedKeyword) p.set('keyword', debouncedKeyword);
     if (industry) p.set('category', industry);
     if (projectType) p.set('projectType', projectType);
-    if (duration?.start) p.set('startDate', duration.start.toISOString().split('T')[0]);
-    if (duration?.end) p.set('endDate', duration.end.toISOString().split('T')[0]);
+    if (duration?.start) {
+      const s = duration.start;
+      p.set(
+        'startDate',
+        `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+      );
+    }
+    if (duration?.end) {
+      const e = duration.end;
+      p.set(
+        'endDate',
+        `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+      );
+    }
     if (sort) p.set('sort', sort);
     return p;
-  }, [searchQuery, industry, projectType, duration, sort]);
+  }, [debouncedKeyword, industry, projectType, duration, sort]);
 
   const { items, isLoading, isLoadingMore, hasMore, sentinelRef } = useInfiniteScroll<Project>({
     endpoint: API_ROUTES.PROJECT.LIST,
