@@ -210,16 +210,23 @@ export default function CrewDetailBody({
       // 비보안 컨텍스트 등 — 추후 fallback
     }
   }
-  // 스크랩 — 초기 상태는 서버(bookmarked). 토글 저장 API는 아직 없음(백엔드 대기) → 시각 상태 + 이동만
-  function handleScrap() {
+  // 스크랩(북마크) — 초기 상태는 서버(bookmarked). 낙관적 토글 → PATCH(등록·해제, 기업 전용). 실패 시 롤백
+  async function handleScrap() {
     const next = !scrapped;
     setScrapped(next);
-    if (next) {
-      setToast({
-        message: '크루 프로필을 스크랩했습니다',
-        actionLabel: '스크랩 보기',
-        onAction: () => router.push('/scrap'),
-      });
+    try {
+      const res = await fetch(`/api/companies/me/bookmarked-crews/${crewId}`, { method: 'PATCH' });
+      if (!res.ok) throw new Error();
+      if (next) {
+        setToast({
+          message: '크루 프로필을 스크랩했습니다',
+          actionLabel: '스크랩 보기',
+          onAction: () => router.push('/scrap'),
+        });
+      }
+    } catch {
+      setScrapped(!next); // 실패 시 원상복구
+      setToast({ message: '스크랩 처리에 실패했습니다. 다시 시도해 주세요.' });
     }
   }
 
