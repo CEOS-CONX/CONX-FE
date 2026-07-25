@@ -27,6 +27,7 @@ export default function ProjectCreateForm() {
   const [showBackModal, setShowBackModal] = useState(false);
   const [activeField, setActiveField] = useState<string | undefined>();
   const [hasDraft, setHasDraft] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
 
   // 진입 시 임시저장 존재 여부 확인
   useEffect(() => {
@@ -58,6 +59,7 @@ export default function ProjectCreateForm() {
     try {
       const draftForm = await loadDraft();
       setForm(draftForm);
+      setDraftLoaded(true);
     } catch {
       alert('임시저장 불러오기에 실패했습니다.');
     }
@@ -70,7 +72,7 @@ export default function ProjectCreateForm() {
   async function handleConfirmSubmit() {
     setShowSubmitModal(false);
     try {
-      await createProject(form, hasDraft);
+      await createProject(form);
       router.push('/projects');
     } catch (e) {
       // TODO: 에러 처리 (토스트 등)
@@ -88,7 +90,7 @@ export default function ProjectCreateForm() {
   return (
     <div className="relative">
       <ProjectCreateNavbar
-        hasDraft={hasDraft}
+        hasDraft={hasDraft && !draftLoaded}
         onBack={() => setShowBackModal(true)}
         onSaveDraft={handleSaveDraft}
         onLoadDraft={handleLoadDraft}

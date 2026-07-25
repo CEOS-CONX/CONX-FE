@@ -37,6 +37,8 @@ interface ProjectCommon {
   projectEndDate: string | null;
   submissionDate: string | null;
   endDate: string | null;
+  subsidy: number | null;
+  settlementStatus: string | null;
   criteria: { id: number; finalResult: string; numberOfResult: number; done: boolean }[];
 }
 
@@ -301,7 +303,10 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
         <section className="flex min-w-0 flex-1 flex-col gap-15.5 pt-1.25">
           {isMatched ? (
             <>
-              <SettlementStatusSection status="pending" amount="0" />
+              <SettlementStatusSection
+                status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
+                amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
+              />
               <ResultsTableSection
                 results={results}
                 showUploadButton={false}

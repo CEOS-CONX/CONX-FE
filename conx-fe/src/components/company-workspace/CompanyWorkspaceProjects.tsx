@@ -67,6 +67,7 @@ export default function CompanyWorkspaceProjects() {
   const [keyword, setKeyword] = useState('');
   const debouncedKeyword = useDebouncedValue(keyword);
   const [category, setCategory] = useState<string | undefined>();
+  const [projectType, setProjectType] = useState<string | undefined>();
   const [duration, setDuration] = useState<DateRange | undefined>();
 
   const resetPage = useCallback(() => setCurrentPage(1), []);
@@ -80,6 +81,7 @@ export default function CompanyWorkspaceProjects() {
       if (filterStatus) params.set('status', filterStatus);
       if (debouncedKeyword) params.set('keyword', debouncedKeyword);
       if (category) params.set('category', category);
+      if (projectType) params.set('projectType', projectType);
       if (duration?.start) {
         const s = duration.start;
         params.set(
@@ -116,7 +118,7 @@ export default function CompanyWorkspaceProjects() {
 
     fetchData();
     return () => controller.abort();
-  }, [activeTab, currentPage, debouncedKeyword, category, duration]);
+  }, [activeTab, currentPage, debouncedKeyword, category, projectType, duration]);
 
   // 탭 카운트: 대시보드 API에서 가져오기
   useEffect(() => {
@@ -195,6 +197,11 @@ export default function CompanyWorkspaceProjects() {
               type="ghost"
               options={PROJECT_TYPE_OPTIONS}
               placeholder="프로젝트 유형"
+              value={projectType}
+              onChange={(v) => {
+                setProjectType(v || undefined);
+                resetPage();
+              }}
             />
             <DropdownCalendar
               variant="ghost"
