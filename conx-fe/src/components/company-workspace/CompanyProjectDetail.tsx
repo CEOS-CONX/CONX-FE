@@ -206,7 +206,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     try {
       const res = await fetch(
         `/api/companies/me/projects/${projectId}/applications/${applicationId}/select`,
-        { method: 'PATCH' },
+        { method: 'POST' },
       );
       const data = await res.json();
       if (res.ok) {

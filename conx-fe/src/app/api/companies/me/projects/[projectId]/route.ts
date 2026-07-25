@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function GET(
-  _request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ projectId: string }> },
 ) {
   const { projectId } = await params;
@@ -15,7 +15,11 @@ export async function GET(
     return NextResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
   }
 
-  const backendRes = await fetch(`${API_BASE_URL}/api/v1/companies/me/projects/${projectId}`, {
+  const { searchParams } = request.nextUrl;
+  const queryString = searchParams.toString();
+  const url = `${API_BASE_URL}/api/v1/companies/me/projects/${projectId}${queryString ? `?${queryString}` : ''}`;
+
+  const backendRes = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo, useState, useEffect, useCallback, useRef } from 'react';
+import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
@@ -12,6 +12,7 @@ import {
   RATING_OPTIONS,
   SORT_OPTIONS,
 } from '@/constants/browse';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 
 interface Crew {
   crewId: number;
@@ -28,6 +29,7 @@ interface Crew {
 interface BrowseCrewsClientProps {
   initialCrews: Crew[];
   initialParams: Record<string, string | undefined>;
+  initialIsLastPage: boolean;
 }
 
 const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
@@ -60,53 +62,37 @@ const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
   );
 });
 
-export default function BrowseCrewsClient({ initialCrews, initialParams }: BrowseCrewsClientProps) {
+export default function BrowseCrewsClient({
+  initialCrews,
+  initialParams,
+  initialIsLastPage,
+}: BrowseCrewsClientProps) {
   const [searchQuery, setSearchQuery] = useState(initialParams.keyword ?? '');
   const [field, setField] = useState<string | undefined>(initialParams.category);
   const [crewType, setCrewType] = useState<string | undefined>(initialParams.crewType);
   const [rating, setRating] = useState<string | undefined>(initialParams.rating);
   const [sort, setSort] = useState(initialParams.sort ?? 'RECENT');
-  const [crews, setCrews] = useState<Crew[]>(initialCrews);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const isInitialMount = useRef(true);
+  const filterParams = useMemo(() => {
+    const p = new URLSearchParams();
+    if (searchQuery) p.set('keyword', searchQuery);
+    if (field) p.set('category', field);
+    if (crewType) p.set('crewType', crewType);
+    if (sort) p.set('sort', sort);
+    return p;
+  }, [searchQuery, field, crewType, sort]);
+
+  const { items, isLoading, isLoadingMore, hasMore, sentinelRef } = useInfiniteScroll<Crew>({
+    endpoint: API_ROUTES.CREW.LIST,
+    initialItems: initialCrews,
+    initialIsLastPage,
+    params: filterParams,
+  });
 
   useEffect(() => {
-    // 초기 마운트에서는 서버 데이터를 사용하므로 fetch 스킵
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const params = new URLSearchParams();
-    if (searchQuery) params.set('keyword', searchQuery);
-    if (field) params.set('category', field);
-    if (crewType) params.set('crewType', crewType);
-    if (sort) params.set('sort', sort);
-    params.set('page', '0');
-    params.set('size', '12');
-
-    // URL 동기화 — 새로고침/공유 시 필터 상태 보존
-    const url = `${window.location.pathname}?${params}`;
+    const url = `${window.location.pathname}?${filterParams}`;
     window.history.replaceState(null, '', url);
-
-    setIsLoading(true);
-    fetch(`${API_ROUTES.CREW.LIST}?${params.toString()}`, { signal: controller.signal })
-      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
-      .then(({ ok, data }) => {
-        if (ok && data.payload?.content) setCrews(data.payload.content);
-      })
-      .catch((e) => {
-        if (e instanceof DOMException && e.name === 'AbortError') return;
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [searchQuery, field, crewType, sort]);
+  }, [filterParams]);
 
   return (
     <main className="xlarge:max-w-272 large:max-w-230 mx-auto w-full max-w-367 px-6 pt-25 pb-82.5">
@@ -154,8 +140,16 @@ export default function BrowseCrewsClient({ initialCrews, initialParams }: Brows
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : crews.map((crew) => <CrewCard key={crew.crewId} crew={crew} />)}
+          : items.map((crew) => <CrewCard key={crew.crewId} crew={crew} />)}
       </div>
+
+      {isLoadingMore && (
+        <div className="flex justify-center py-10">
+          <div className="border-t-conx-primary-200 h-8 w-8 animate-spin rounded-full border-2 border-gray-300" />
+        </div>
+      )}
+
+      {hasMore && <div ref={sentinelRef} className="h-1" />}
     </main>
   );
 }

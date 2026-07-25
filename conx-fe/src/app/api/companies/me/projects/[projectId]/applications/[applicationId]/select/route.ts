@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
-export async function PATCH(
+export async function POST(
   _request: Request,
   { params }: { params: Promise<{ projectId: string; applicationId: string }> },
 ) {
@@ -18,7 +18,7 @@ export async function PATCH(
   const backendRes = await fetch(
     `${API_BASE_URL}/api/v1/companies/me/projects/${projectId}/applications/${applicationId}/select`,
     {
-      method: 'PATCH',
+      method: 'POST',
       headers: { Authorization: `Bearer ${accessToken}` },
     },
   );

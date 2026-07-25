@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import CardSummary from '@/components/workspace/CardSummary';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
+import type { DateRange } from '@/components/common/DropdownCalendar';
 import DropdownTag from '@/components/workspace/DropdownTag';
 import TableHeader from '@/components/workspace/TableHeader';
 import TableCell from '@/components/workspace/TableCell';
@@ -20,18 +21,28 @@ const TAG_OPTIONS = [
   { value: 'PAID', label: '지급 완료', tagType: 'purple' as const },
 ];
 
+const SETTLEMENT_STATUS_MAP: Record<string, string> = {
+  ADJUSTING: 'WAITING',
+  ADJUSTED: 'PAID',
+  DONE: 'PAID',
+};
+
 const ROWS_PER_PAGE = 10;
 
-interface Settlement {
-  settlementId: number;
+interface SubsidyStatus {
+  totalSubsidy: number;
+  expectedSubsidy: number;
+  nextExpectedSubsidy: string | null;
+  thisMonthSubsidy: number;
+}
+
+interface Adjustment {
   projectId: number;
-  projectName: string;
   projectStatus: string;
-  crewId: number;
-  crewName: string;
-  amount: number;
-  settlementStatus: string;
-  expectedPaymentDate: string;
+  subsidy: number;
+  projectName: string;
+  brandName: string;
+  adjustedDate: string | null;
 }
 
 function formatAmount(value: number): string {
@@ -42,20 +53,42 @@ export default function CompanyWorkspaceSettlement() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
-  const [settlements, setSettlements] = useState<Settlement[]>([]);
+  const [dateFilter, setDateFilter] = useState<DateRange | undefined>();
+  const [subsidyStatus, setSubsidyStatus] = useState<SubsidyStatus | null>(null);
+  const [adjustments, setAdjustments] = useState<Adjustment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
 
-    async function fetchSettlements() {
+    async function fetchData() {
+      const params = new URLSearchParams();
+      if (statusFilter) params.set('status', statusFilter);
+      if (dateFilter?.start) {
+        const s = dateFilter.start;
+        params.set(
+          'startDate',
+          `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+        );
+      }
+      if (dateFilter?.end) {
+        const e = dateFilter.end;
+        params.set(
+          'endDate',
+          `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+        );
+      }
+      params.set('page', '0');
+      params.set('size', '100');
+
       try {
-        const res = await fetch('/api/companies/me/settlements', {
+        const res = await fetch(`/api/companies/me/adjustment?${params.toString()}`, {
           signal: controller.signal,
         });
         const data = await res.json();
-        if (res.ok && Array.isArray(data.payload)) {
-          setSettlements(data.payload);
+        if (res.ok && data.payload) {
+          setSubsidyStatus(data.payload.subsidyStatus ?? null);
+          setAdjustments(data.payload.adjustmentList ?? []);
         }
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -64,61 +97,47 @@ export default function CompanyWorkspaceSettlement() {
       }
     }
 
-    fetchSettlements();
+    fetchData();
     return () => controller.abort();
-  }, []);
+  }, [statusFilter, dateFilter]);
 
-  // 필터링 + 페이징 — statusFilter, currentPage가 변경될 때만 재계산
   const { pagedRows, totalPages } = useMemo(() => {
-    const filtered = statusFilter
-      ? settlements.filter((row) => row.settlementStatus === statusFilter)
-      : settlements;
-    const pages = Math.max(1, Math.ceil(filtered.length / ROWS_PER_PAGE));
-    const paged = filtered.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+    const pages = Math.max(1, Math.ceil(adjustments.length / ROWS_PER_PAGE));
+    const paged = adjustments.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
     return { pagedRows: paged, totalPages: pages };
-  }, [settlements, statusFilter, currentPage]);
+  }, [adjustments, currentPage]);
 
-  // 요약 카드 계산 — settlements가 변경될 때만 재계산
   const summaryCards = useMemo(() => {
-    const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
-    const pendingAmount = settlements
-      .filter((s) => s.settlementStatus === 'WAITING')
-      .reduce((sum, s) => sum + s.amount, 0);
-    const pendingDates = settlements
-      .filter((s) => s.settlementStatus === 'WAITING' && s.expectedPaymentDate)
-      .map((s) => s.expectedPaymentDate)
-      .sort();
-    const nextPaymentDate = pendingDates[0]?.replace(/-/g, '.') ?? '-';
     const now = new Date();
-    const thisMonthAmount = settlements
-      .filter((s) => {
-        if (!s.expectedPaymentDate) return false;
-        const d = new Date(s.expectedPaymentDate);
-        return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-      })
-      .reduce((sum, s) => sum + s.amount, 0);
-
+    if (!subsidyStatus) {
+      return [
+        { title: '누적 지원금', value: '0', description: '-', width: 'w-114.25' },
+        { title: '지급 예정', value: '0', description: '다음 지급 예정일: -', width: 'w-84.25' },
+        { title: '이번 달 지원금', value: '0', description: '-', width: 'w-84.25' },
+      ];
+    }
+    const nextDate = subsidyStatus.nextExpectedSubsidy?.replace(/-/g, '.') ?? '-';
     return [
       {
         title: '누적 지원금',
-        value: formatAmount(totalAmount),
+        value: formatAmount(subsidyStatus.totalSubsidy),
         description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} 기준`,
         width: 'w-114.25',
       },
       {
         title: '지급 예정',
-        value: formatAmount(pendingAmount),
-        description: `다음 지급 예정일: ${nextPaymentDate}`,
+        value: formatAmount(subsidyStatus.expectedSubsidy),
+        description: `다음 지급 예정일: ${nextDate}`,
         width: 'w-84.25',
       },
       {
         title: '이번 달 지원금',
-        value: formatAmount(thisMonthAmount),
+        value: formatAmount(subsidyStatus.thisMonthSubsidy),
         description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')} 기준`,
         width: 'w-84.25',
       },
     ];
-  }, [settlements]);
+  }, [subsidyStatus]);
 
   if (isLoading) {
     return (
@@ -155,12 +174,23 @@ export default function CompanyWorkspaceSettlement() {
                 size="sm"
                 options={STATUS_OPTIONS}
                 placeholder="정산 상태"
+                value={statusFilter}
                 onChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1);
                 }}
               />
-              <DropdownCalendar size="sm" mode="range" align="right" placeholder="정산일" />
+              <DropdownCalendar
+                size="sm"
+                mode="range"
+                align="right"
+                placeholder="정산일"
+                value={dateFilter}
+                onChange={(range) => {
+                  setDateFilter(range);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </div>
 
@@ -177,32 +207,35 @@ export default function CompanyWorkspaceSettlement() {
                 <TableHeader label="정산 상태" type="first" />
                 <TableHeader label="금액(단위: 원)" type="middle" />
                 <TableHeader label="프로젝트명" type="middle" />
-                <TableHeader label="크루명" type="middle" />
+                <TableHeader label="브랜드명" type="middle" />
                 <TableHeader label="정산일" type="last" />
               </tr>
             </thead>
             <tbody>
-              {pagedRows.map((row) => (
-                <tr
-                  key={row.settlementId}
-                  onClick={() => router.push(`/company-workspace/project-status/${row.projectId}`)}
-                  className="hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 cursor-pointer"
-                >
-                  <TableCell type="dropdownTag">
-                    <DropdownTag
-                      options={TAG_OPTIONS}
-                      defaultValue={row.settlementStatus}
-                      panelClassName="w-21.75"
-                    />
-                  </TableCell>
-                  <TableCell type="text">{formatAmount(row.amount)}</TableCell>
-                  <TableCell type="text">{row.projectName}</TableCell>
-                  <TableCell type="text">{row.crewName}</TableCell>
-                  <TableCell type="date">
-                    {row.expectedPaymentDate?.replace(/-/g, '.') ?? '-'}
-                  </TableCell>
-                </tr>
-              ))}
+              {pagedRows.map((row) => {
+                const settlementStatus = SETTLEMENT_STATUS_MAP[row.projectStatus] ?? 'WAITING';
+                return (
+                  <tr
+                    key={`${row.projectId}-${row.adjustedDate}`}
+                    onClick={() =>
+                      router.push(`/company-workspace/project-status/${row.projectId}`)
+                    }
+                    className="hover:bg-conx-opacity-gray-6 active:bg-conx-opacity-gray-30 cursor-pointer"
+                  >
+                    <TableCell type="dropdownTag">
+                      <DropdownTag
+                        options={TAG_OPTIONS}
+                        defaultValue={settlementStatus}
+                        panelClassName="w-21.75"
+                      />
+                    </TableCell>
+                    <TableCell type="text">{formatAmount(row.subsidy)}</TableCell>
+                    <TableCell type="text">{row.projectName}</TableCell>
+                    <TableCell type="text">{row.brandName}</TableCell>
+                    <TableCell type="date">{row.adjustedDate?.replace(/-/g, '.') ?? '-'}</TableCell>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
