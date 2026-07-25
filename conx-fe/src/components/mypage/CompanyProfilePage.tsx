@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DropdownForm } from '@/components/common/DropdownForm';
 import { Toast } from '@/components/common/Toast';
@@ -10,18 +10,9 @@ import ProfileRegisterModal from '@/components/mypage/ProfileRegisterModal';
 import TextFieldNumber from '@/components/mypage/TextFieldNumber';
 import TextFieldLabeled from '@/components/mypage/TextFieldLabeled';
 import TextFieldUrl from '@/components/mypage/TextFieldUrl';
+import { uploadFile } from '@/components/project-create/utils/projectApi';
+import { INDUSTRY_OPTIONS } from '@/constants/browse';
 import { FieldLabel, SectionTitle } from './profileForm';
-
-const INDUSTRY_OPTIONS = [
-  { value: 'beauty', label: '뷰티' },
-  { value: 'fashion', label: '패션' },
-  { value: 'it', label: 'IT 플랫폼' },
-  { value: 'lifestyle', label: '라이프스타일' },
-  { value: 'education', label: '교육' },
-  { value: 'commerce', label: '커머스' },
-  { value: 'fnb', label: '음료 / F&B' },
-  { value: 'health', label: '헬스 / 웰니스' },
-];
 
 // 도메인만 입력 시 https:// 를 붙여 반환. 명백히 URL 형식이 아니면 valid:false
 // (빈 값은 선택 항목이라 통과)
@@ -44,24 +35,58 @@ function normalizeUrl(raw: string): { value: string; valid: boolean } {
 
 export default function CompanyProfilePage() {
   const router = useRouter();
-  const [profileSrc, setProfileSrc] = useState<string>();
+  const [profileSrc, setProfileSrc] = useState<string>(); // 화면 미리보기(object URL 또는 S3 URL)
+  const [profileImageUrl, setProfileImageUrl] = useState<string>(); // 저장용 업로드된 S3 URL
   const [toast, setToast] = useState<{
     message: string;
     actionLabel?: string;
     onAction?: () => void;
   } | null>(null);
-  const [companyName, setCompanyName] = useState('CEOS 세오스');
+  const [companyName, setCompanyName] = useState('');
   const [industry, setIndustry] = useState('');
   const [businessNumber, setBusinessNumber] = useState('');
   const [intro, setIntro] = useState('');
   const [urlName, setUrlName] = useState('');
   const [urlValue, setUrlValue] = useState('');
+  const [companyNameError, setCompanyNameError] = useState<string>();
   const [businessError, setBusinessError] = useState<string>();
   const [websiteError, setWebsiteError] = useState<string>();
   const [showRegister, setShowRegister] = useState(false);
 
+  // 기존 기업 프로필 조회 → 폼 채우기
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/companies/me/profile');
+        if (!res.ok) return;
+        const data = await res.json();
+        const p = data.payload;
+        if (!p || cancelled) return;
+        setCompanyName(p.companyName ?? '');
+        setIndustry(p.industry ?? '');
+        setBusinessNumber(p.businessRegistrationNumber ?? '');
+        setIntro(p.companyIntroduction ?? '');
+        setUrlValue(p.website ?? '');
+        if (p.profileImage) {
+          setProfileSrc(p.profileImage);
+          setProfileImageUrl(p.profileImage);
+        }
+      } catch {
+        /* 조회 실패 시 빈 폼 유지 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // 프로필 등록 클릭 → 저장 전 검증. 통과하면 확인 팝업, 아니면 인라인 에러
   function handleRegisterClick() {
+    // 기업명: 필수
+    const nameInvalid = !companyName.trim();
+    setCompanyNameError(nameInvalid ? '기업명을 입력해 주세요' : undefined);
+
     // 사업자등록번호: 선택 항목. 입력했다면 숫자 10자리여야 함 (미만이면 에러)
     const digits = businessNumber.replace(/\D/g, '');
     const bizInvalid = digits.length > 0 && digits.length < 10;
@@ -71,27 +96,35 @@ export default function CompanyProfilePage() {
     const norm = normalizeUrl(urlValue);
     setWebsiteError(norm.valid ? undefined : '올바른 링크 형식으로 입력해주세요');
 
-    if (bizInvalid || !norm.valid) return;
+    if (nameInvalid || bizInvalid || !norm.valid) return;
 
     // 정상 저장: 도메인만 입력했다면 https:// 붙은 값으로 반영
     if (norm.value !== urlValue) setUrlValue(norm.value);
     setShowRegister(true);
   }
 
-  // 프로필 등록하기 → (API 연동 예정) 등록 후 토스트
-  function handleRegister() {
-    const payload = {
-      profileImage: profileSrc,
-      companyName,
-      industry,
-      businessNumber,
-      intro,
-      url: { name: urlName, value: urlValue },
-    };
-    // TODO: 실제 등록 API 연동
-    console.log('기업 프로필 등록', payload);
-    setShowRegister(false);
-    setToast({ message: '기업 프로필이 등록되었어요' });
+  // 프로필 등록하기 → PATCH 저장. (urlName·brandName·additionalFileLink·customIndustry는 백엔드 매핑 미정 → 아직 미전송)
+  async function handleRegister() {
+    try {
+      const res = await fetch('/api/companies/me/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          companyName,
+          industry,
+          companyIntroduction: intro,
+          website: urlValue,
+          businessRegistrationNumber: businessNumber.replace(/\D/g, ''), // 화면은 하이픈, 전송은 숫자만
+          profileImage: profileImageUrl,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setShowRegister(false);
+      setToast({ message: '기업 프로필이 등록되었어요' });
+    } catch {
+      setShowRegister(false);
+      setToast({ message: '프로필 저장에 실패했습니다. 다시 시도해 주세요.' });
+    }
   }
 
   // 페이지에서 나가기 → 기업 프로필로 오기 직전 페이지로
@@ -114,15 +147,26 @@ export default function CompanyProfilePage() {
         <SectionTitle>기본 정보</SectionTitle>
         <ProfileImage
           src={profileSrc}
-          onSelect={(f) => setProfileSrc(URL.createObjectURL(f))}
+          onSelect={async (f) => {
+            setProfileSrc(URL.createObjectURL(f)); // 즉시 미리보기
+            try {
+              const { fileUrl } = await uploadFile(f); // presigned 발급 → S3 업로드
+              setProfileImageUrl(fileUrl); // 저장 시 이 URL 사용
+            } catch {
+              setToast({ message: '이미지 업로드에 실패했습니다. 다시 시도해 주세요.' });
+            }
+          }}
           onRemove={() => {
-            const removed = profileSrc;
+            const removedSrc = profileSrc;
+            const removedUrl = profileImageUrl;
             setProfileSrc(undefined);
+            setProfileImageUrl(undefined);
             setToast({
               message: '프로필 이미지가 삭제되었습니다.',
               actionLabel: '되돌리기',
               onAction: () => {
-                setProfileSrc(removed);
+                setProfileSrc(removedSrc);
+                setProfileImageUrl(removedUrl);
                 setToast(null);
               },
             });
@@ -133,7 +177,11 @@ export default function CompanyProfilePage() {
           label="기업명"
           required
           value={companyName}
-          onChange={setCompanyName}
+          onChange={(v) => {
+            setCompanyName(v);
+            setCompanyNameError(undefined);
+          }}
+          error={companyNameError}
         />
         {/* 업종 · 사업자등록번호 */}
         <div className="flex justify-between">
