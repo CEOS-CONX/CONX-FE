@@ -112,6 +112,8 @@ html {
     #ffffff 100%
   );
 
+  --background-image-conx-gradient-logo: linear-gradient(270deg, #05dbfd 0%, #11f99c 100%);
+
   /* Edge fade — 가장자리 요소 페이드용 (가로, 80% white) */
   --background-image-conx-gradient-white-fade-left: linear-gradient(
     90deg,
