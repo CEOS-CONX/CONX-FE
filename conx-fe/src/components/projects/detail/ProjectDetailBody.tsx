@@ -165,7 +165,9 @@ export default function ProjectDetailBody({
             {/* 헤더 (스크롤됨) — 태그 / 제목+아이콘 / 브랜드 */}
             <div className="flex items-center gap-2">
               {project?.isImminent && <Tag type="red" label="마감임박" />}
-              {project && <Tag type="gray" label={`모집 마감 ${project.dayBeforeDeadline}일 전`} />}
+              {project && project.dayBeforeDeadline >= 0 && (
+                <Tag type="gray" label={`모집 마감 ${project.dayBeforeDeadline}일 전`} />
+              )}
             </div>
 
             <div className="mt-4 flex items-start justify-between gap-4">
