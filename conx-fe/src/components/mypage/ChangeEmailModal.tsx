@@ -6,7 +6,6 @@ import IconClose from '@/assets/icons/icon_delete.svg';
 import { Button } from '@/components/common/Button';
 import { TextFieldMembership } from '@/components/common/TextFieldMembership';
 import { TextLineButton } from '@/components/common/TextLineButton';
-import { API_ROUTES } from '@/constants/api';
 import { useDialog } from '@/hooks/useDialog';
 import { useTimer } from '@/hooks/useTimer';
 import { formatTime } from '@/utils/format';
@@ -39,12 +38,12 @@ export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModa
     dialogRef.current?.querySelector<HTMLInputElement>('#change-email-password')?.focus();
   }, [dialogRef]);
 
-  // 새 이메일로 인증번호 발송
+  // 새 이메일로 인증번호 발송 (현재 비밀번호 확인 포함)
   async function sendCode() {
-    const res = await fetch(API_ROUTES.AUTH.EMAIL_SEND, {
+    const res = await fetch('/api/companies/me/account/email/verifications', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ currentPassword: password, newEmail: email }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
@@ -90,18 +89,34 @@ export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModa
     setIsSaving(true);
     setCodeError('');
     try {
-      const res = await fetch(API_ROUTES.AUTH.EMAIL_VERIFY, {
+      // 1) 인증번호 확인 → verificationToken 발급
+      const confirmRes = await fetch('/api/companies/me/account/email/verifications/confirm', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code: Number(code) }),
+        body: JSON.stringify({ newEmail: email, code: Number(code) }),
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setCodeError(data.message ?? '인증번호가 맞지 않습니다');
+      const confirmData = await confirmRes.json().catch(() => ({}));
+      if (!confirmRes.ok) {
+        setCodeError(confirmData.message ?? '인증번호가 맞지 않습니다');
         setIsSaving(false);
         return;
       }
-      // TODO: 실제 이메일 변경 API(현재 비밀번호 검증 포함) 연결 — 확인되면 여기서 호출
+      // 2) 이메일 변경 PATCH (현재 비밀번호 + 새 이메일 + 토큰)
+      const patchRes = await fetch('/api/companies/me/account/email', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: password,
+          newEmail: email,
+          verificationToken: confirmData.payload?.verificationToken,
+        }),
+      });
+      if (!patchRes.ok) {
+        const patchData = await patchRes.json().catch(() => ({}));
+        setCodeError(patchData.message ?? '이메일 변경에 실패했습니다.');
+        setIsSaving(false);
+        return;
+      }
       timer.clear();
       onSuccess(email);
     } catch {

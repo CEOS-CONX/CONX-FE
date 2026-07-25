@@ -51,8 +51,28 @@ export default function ChangePasswordModal({ onClose, onSuccess }: ChangePasswo
     if (!canSave) return;
     setIsSaving(true);
     setCurrentError('');
-    // TODO: 실제 비밀번호 변경 API 연결 (현재 비밀번호 검증 포함) — 엔드포인트 확정되면 여기서 호출
-    onSuccess();
+    try {
+      const res = await fetch('/api/companies/me/account/password', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: current,
+          newPassword: next,
+          newPasswordConfirmation: confirm,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        // 현재 비밀번호 불일치 등 → 현재 비밀번호 필드에 에러 표시
+        setCurrentError(data.message ?? '비밀번호 변경에 실패했습니다.');
+        setIsSaving(false);
+        return;
+      }
+      onSuccess();
+    } catch {
+      setCurrentError('비밀번호 변경에 실패했습니다. 다시 시도해 주세요.');
+      setIsSaving(false);
+    }
   }
 
   return (

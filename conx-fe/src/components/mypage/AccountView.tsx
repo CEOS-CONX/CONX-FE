@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Toast } from '@/components/common/Toast';
 import ChangeEmailModal from '@/components/mypage/ChangeEmailModal';
 import ChangePasswordModal from '@/components/mypage/ChangePasswordModal';
 import DeleteAccountModal from '@/components/mypage/DeleteAccountModal';
@@ -24,6 +25,14 @@ const FIELD_META: Record<EditKey, { title: string; label: string }> = {
   contactEmail: { title: '대표 이메일', label: '대표 이메일' },
 };
 
+// 필드별 백엔드 엔드포인트 세그먼트 + 바디 키 (PATCH /companies/me/account/{path})
+const FIELD_ENDPOINT: Record<EditKey, { path: string; bodyKey: string }> = {
+  name: { path: 'name', bodyKey: 'name' },
+  job: { path: 'job', bodyKey: 'job' },
+  phone: { path: 'representative-phone', bodyKey: 'representativePhone' },
+  contactEmail: { path: 'representative-email', bodyKey: 'representativeEmail' },
+};
+
 // 내 정보(계정/담당자 정보/연락처) — ?as= 미리보기(useSearchParams)를 쓰므로 page.tsx에서 <Suspense>로 감쌈
 export default function AccountView() {
   const router = useRouter();
@@ -33,11 +42,11 @@ export default function AccountView() {
   const [showChangeEmail, setShowChangeEmail] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [editing, setEditing] = useState<EditKey | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const isCompany = useMypageIsCompany();
 
   // 이름·이메일은 회원가입 필수값. 나머지는 optional — 값 없어도 라벨 행은 유지, 값만 생략(ListButton이 처리)
-  // TODO: 실제 프로필 API 연결 (지금은 placeholder)
   const [profile, setProfile] = useState<{
     name: string;
     email: string;
@@ -45,16 +54,59 @@ export default function AccountView() {
     phone?: string;
     contactEmail?: string;
   }>({
-    name: '우유민',
-    email: user?.email ?? '0000000@gmail.com',
-    job: '마케팅 매니저',
-    phone: '010-1234-5678',
+    name: '',
+    email: user?.email ?? '',
   });
 
-  // 편집 저장 — 지금은 로컬 반영만. TODO: 프로필 수정 API 연결
-  function handleSaveField(key: EditKey, value: string) {
-    setProfile((p) => ({ ...p, [key]: value }));
-    setEditing(null);
+  // 기업 계정 정보 조회 → 폼 채우기 (크루 계정 엔드포인트는 아직 없어 기업만)
+  useEffect(() => {
+    if (!isCompany) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/companies/me/account');
+        if (!res.ok) return;
+        const data = await res.json();
+        const a = data.payload;
+        if (!a || cancelled) return;
+        setProfile({
+          name: a.name ?? '',
+          email: a.email ?? '',
+          job: a.job || undefined,
+          phone: a.representativePhone || undefined,
+          contactEmail: a.representativeEmail || undefined,
+        });
+      } catch {
+        /* 조회 실패 시 기존 값 유지 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isCompany]);
+
+  // 편집 저장 — 단일 필드 PATCH. (⚠️ 백엔드가 currentPassword 를 요구하는데 이 화면엔 비번 입력이 없음
+  //  → 지금은 값만 전송 → 백엔드가 막으면 에러 토스트로 노출됨. 비번 UX 확정 후 보완)
+  async function handleSaveField(key: EditKey, value: string) {
+    const meta = FIELD_ENDPOINT[key];
+    try {
+      const res = await fetch(`/api/companies/me/account/${meta.path}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ [meta.bodyKey]: value }),
+      });
+      setEditing(null);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setToast(data.message ?? '수정에 실패했습니다.');
+        return;
+      }
+      setProfile((p) => ({ ...p, [key]: value }));
+      setToast('수정되었습니다.');
+    } catch {
+      setEditing(null);
+      setToast('수정에 실패했습니다. 다시 시도해 주세요.');
+    }
   }
 
   async function handleLogout() {
@@ -162,6 +214,8 @@ export default function AccountView() {
           onSuccess={() => router.push('/')}
         />
       )}
+
+      {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </div>
   );
 }
