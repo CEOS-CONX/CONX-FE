@@ -34,9 +34,11 @@ function formatTime(iso: string): string {
 interface NotificationModalProps {
   open: boolean;
   onClose: () => void;
+  /** 읽음 상태가 바뀔 때 호출 (네브바 unread 뱃지 갱신용) */
+  onRead?: () => void;
 }
 
-export default function NotificationModal({ open, onClose }: NotificationModalProps) {
+export default function NotificationModal({ open, onClose, onRead }: NotificationModalProps) {
   const [filter, setFilter] = useState<FilterValue>('ALL');
   const [items, setItems] = useState<NotificationItem[] | null>(null); // null = 로딩 중
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -63,6 +65,31 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
     };
   }, [open, filter]);
 
+  // 알림 클릭 → 그 알림만 읽음 (모달 열림만으론 읽음 안 됨). 낙관적 반영 후 서버 PATCH
+  async function handleItemClick(n: NotificationItem) {
+    if (!n.isRead) {
+      setItems((prev) => prev?.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)) ?? prev);
+      try {
+        await fetch(`${API_ROUTES.NOTIFICATION.LIST}/${n.id}/read`, { method: 'PATCH' });
+        onRead?.();
+      } catch {
+        /* 실패해도 로컬 읽음 유지 — 다음 조회 때 서버값으로 보정 */
+      }
+    }
+    // TODO: 클릭 시 관련 페이지 이동 — 알림에 대상 id(projectId 등)가 없어 보류 (백엔드에 추가 요청 필요)
+  }
+
+  // 전체 읽음
+  async function handleReadAll() {
+    setItems((prev) => prev?.map((x) => ({ ...x, isRead: true })) ?? prev);
+    try {
+      await fetch(`${API_ROUTES.NOTIFICATION.LIST}/read-all`, { method: 'PATCH' });
+      onRead?.();
+    } catch {
+      /* noop */
+    }
+  }
+
   if (!open) return null;
 
   return (
@@ -79,14 +106,23 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
       <div className="bg-conx-common-white shrink-0">
         <div className="flex items-center justify-between px-5 pt-6 pb-4">
           <h2 className="text-kor-heading-2-bold text-conx-common-black">알림</h2>
-          <button
-            type="button"
-            aria-label="알림 닫기"
-            onClick={onClose}
-            className="hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center justify-center rounded-md p-1"
-          >
-            <IconDelete className="h-5.5 w-5.5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={handleReadAll}
+              className="text-kor-label-1-medium text-conx-gray-450 hover:text-conx-common-black cursor-pointer transition-colors"
+            >
+              전체 읽음
+            </button>
+            <button
+              type="button"
+              aria-label="알림 닫기"
+              onClick={onClose}
+              className="hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center justify-center rounded-md p-1"
+            >
+              <IconDelete className="h-5.5 w-5.5" />
+            </button>
+          </div>
         </div>
         {/* 카테고리 필터: 칩 3개 단순 토글이라 radiogroup 대신 toolbar + 토글 칩 */}
         <div role="toolbar" aria-label="알림 카테고리 필터" className="flex gap-2 px-5 pb-4">
@@ -121,7 +157,7 @@ export default function NotificationModal({ open, onClose }: NotificationModalPr
                 time={formatTime(n.arriveTime)}
                 message={n.message}
                 read={n.isRead}
-                // TODO: 라우트 명세 확정 후 클릭 시 관련 페이지로 이동 + 읽음 처리
+                onClick={() => handleItemClick(n)}
               />
             </li>
           ))}
