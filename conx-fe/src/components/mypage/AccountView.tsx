@@ -45,6 +45,7 @@ export default function AccountView() {
   const [toast, setToast] = useState<string | null>(null);
 
   const isCompany = useMypageIsCompany();
+  const accountBase = isCompany ? 'companies' : 'crews'; // 계정 API 경로 (기업/크루)
 
   // 이름·이메일은 회원가입 필수값. 나머지는 optional — 값 없어도 라벨 행은 유지, 값만 생략(ListButton이 처리)
   const [profile, setProfile] = useState<{
@@ -58,13 +59,12 @@ export default function AccountView() {
     email: user?.email ?? '',
   });
 
-  // 기업 계정 정보 조회 → 폼 채우기 (크루 계정 엔드포인트는 아직 없어 기업만)
+  // 계정 정보 조회 → 폼 채우기 (기업/크루 각 엔드포인트. 크루는 job 없음)
   useEffect(() => {
-    if (!isCompany) return;
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch('/api/companies/me/account');
+        const res = await fetch(`/api/${accountBase}/me/account`);
         if (!res.ok) return;
         const data = await res.json();
         const a = data.payload;
@@ -83,14 +83,13 @@ export default function AccountView() {
     return () => {
       cancelled = true;
     };
-  }, [isCompany]);
+  }, [accountBase]);
 
-  // 편집 저장 — 단일 필드 PATCH. (⚠️ 백엔드가 currentPassword 를 요구하는데 이 화면엔 비번 입력이 없음
-  //  → 지금은 값만 전송 → 백엔드가 막으면 에러 토스트로 노출됨. 비번 UX 확정 후 보완)
+  // 편집 저장 — 단일 필드 PATCH (이름/전화/대표이메일: 백엔드가 currentPassword 요구 제거해서 값만 전송)
   async function handleSaveField(key: EditKey, value: string) {
     const meta = FIELD_ENDPOINT[key];
     try {
-      const res = await fetch(`/api/companies/me/account/${meta.path}`, {
+      const res = await fetch(`/api/${accountBase}/me/account/${meta.path}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ [meta.bodyKey]: value }),
@@ -191,6 +190,7 @@ export default function AccountView() {
       {/* 이메일 변경 팝업 (비밀번호 확인 + 새 이메일 인증) */}
       {showChangeEmail && (
         <ChangeEmailModal
+          accountBase={accountBase}
           onClose={() => setShowChangeEmail(false)}
           onSuccess={(newEmail) => {
             setProfile((p) => ({ ...p, email: newEmail }));
@@ -202,6 +202,7 @@ export default function AccountView() {
       {/* 비밀번호 변경 팝업 (기존 확인 + 새 비밀번호 규칙·일치) */}
       {showChangePassword && (
         <ChangePasswordModal
+          accountBase={accountBase}
           onClose={() => setShowChangePassword(false)}
           onSuccess={() => setShowChangePassword(false)}
         />

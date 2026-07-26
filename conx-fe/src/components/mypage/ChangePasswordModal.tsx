@@ -11,6 +11,8 @@ import { useDialog } from '@/hooks/useDialog';
 import { validatePassword } from '@/utils/validate';
 
 interface ChangePasswordModalProps {
+  /** 계정 API 경로 (기업 'companies' / 크루 'crews') */
+  accountBase: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -18,7 +20,11 @@ interface ChangePasswordModalProps {
 const NEW_PW_MAX = 35; // 입력 카운터 상한 (유효 범위는 8~16, validatePassword로 검증)
 
 // 비밀번호 변경 팝업 — 기존 비밀번호 확인 + 새 비밀번호(규칙 검증) + 재입력 일치
-export default function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({
+  accountBase,
+  onClose,
+  onSuccess,
+}: ChangePasswordModalProps) {
   const router = useRouter();
   const dialogRef = useDialog<HTMLDivElement>(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
@@ -52,7 +58,7 @@ export default function ChangePasswordModal({ onClose, onSuccess }: ChangePasswo
     setIsSaving(true);
     setCurrentError('');
     try {
-      const res = await fetch('/api/companies/me/account/password', {
+      const res = await fetch(`/api/${accountBase}/me/account/password`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

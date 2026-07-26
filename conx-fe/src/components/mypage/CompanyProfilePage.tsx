@@ -69,6 +69,7 @@ export default function CompanyProfilePage() {
         setBusinessNumber(p.businessRegistrationNumber ?? '');
         setIntro(p.companyIntroduction ?? '');
         setUrlValue(p.website ?? '');
+        setUrlName(p.urlName ?? '');
         if (p.profileImage) {
           setProfileSrc(p.profileImage);
           setProfileImageUrl(p.profileImage);
@@ -108,7 +109,7 @@ export default function CompanyProfilePage() {
     setShowRegister(true);
   }
 
-  // 프로필 등록하기 → PATCH 저장. (urlName·brandName·additionalFileLink·customIndustry는 백엔드 매핑 미정 → 아직 미전송)
+  // 프로필 등록하기 → PATCH 저장. (brandName·additionalFileLink·customIndustry는 폼에 없어 미전송 — 기획 결정 대기)
   async function handleRegister() {
     try {
       const res = await fetch('/api/companies/me/profile', {
@@ -119,6 +120,7 @@ export default function CompanyProfilePage() {
           industry,
           companyIntroduction: intro,
           website: urlValue,
+          urlName,
           businessRegistrationNumber: businessNumber.replace(/\D/g, ''), // 화면은 하이픈, 전송은 숫자만
           profileImage: profileImageUrl,
         }),

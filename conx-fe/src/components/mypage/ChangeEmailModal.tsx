@@ -12,6 +12,8 @@ import { formatTime } from '@/utils/format';
 import { validateEmail } from '@/utils/validate';
 
 interface ChangeEmailModalProps {
+  /** 계정 API 경로 (기업 'companies' / 크루 'crews') */
+  accountBase: string;
   onClose: () => void;
   onSuccess: (newEmail: string) => void;
 }
@@ -19,7 +21,11 @@ interface ChangeEmailModalProps {
 const TIMER_SECONDS = 180; // 인증번호 유효시간 3:00
 
 // 이메일 변경 팝업 — ① 비밀번호+새 이메일 → 인증번호 받기 ② 인증번호 입력 → 저장하기
-export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModalProps) {
+export default function ChangeEmailModal({
+  accountBase,
+  onClose,
+  onSuccess,
+}: ChangeEmailModalProps) {
   const router = useRouter();
   const dialogRef = useDialog<HTMLDivElement>(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
   const timer = useTimer(TIMER_SECONDS);
@@ -40,7 +46,7 @@ export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModa
 
   // 새 이메일로 인증번호 발송 (현재 비밀번호 확인 포함)
   async function sendCode() {
-    const res = await fetch('/api/companies/me/account/email/verifications', {
+    const res = await fetch(`/api/${accountBase}/me/account/email/verifications`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentPassword: password, newEmail: email }),
@@ -90,7 +96,7 @@ export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModa
     setCodeError('');
     try {
       // 1) 인증번호 확인 → verificationToken 발급
-      const confirmRes = await fetch('/api/companies/me/account/email/verifications/confirm', {
+      const confirmRes = await fetch(`/api/${accountBase}/me/account/email/verifications/confirm`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newEmail: email, code: Number(code) }),
@@ -102,7 +108,7 @@ export default function ChangeEmailModal({ onClose, onSuccess }: ChangeEmailModa
         return;
       }
       // 2) 이메일 변경 PATCH (현재 비밀번호 + 새 이메일 + 토큰)
-      const patchRes = await fetch('/api/companies/me/account/email', {
+      const patchRes = await fetch(`/api/${accountBase}/me/account/email`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
