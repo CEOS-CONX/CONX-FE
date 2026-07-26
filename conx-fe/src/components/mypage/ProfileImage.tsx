@@ -49,11 +49,9 @@ export default function ProfileImage({
           </span>
         )}
 
-        {/* edit 아이콘 — hover/active 시 노출(z-10으로 오버레이 위) */}
         <IconEdit className="pointer-events-none absolute z-10 h-8 w-8 opacity-0 transition-opacity group-hover/img:opacity-100 [&_path]:stroke-white" />
       </button>
 
-      {/* trash 버튼 — filled일 때만, hover(또는 포커스)로 노출 */}
       {filled && (
         <button
           type="button"
