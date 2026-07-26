@@ -264,7 +264,9 @@ export default function CompanyWorkspacePartnerCrews() {
                           INDUSTRY_LABEL_MAP[crew.interestingIndustry] ?? crew.interestingIndustry
                         }
                         category2={CREW_TYPE_LABEL_MAP[crew.crewType] ?? crew.crewType}
-                        rating={crew.point}
+                        rating={
+                          Number.isFinite(Number(crew.point)) ? Number(crew.point) : undefined
+                        }
                         totalCount={crew.totalSubsidy}
                       />
                     </Link>
