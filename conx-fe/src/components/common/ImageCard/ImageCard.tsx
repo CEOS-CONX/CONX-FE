@@ -25,6 +25,7 @@ export default function ImageCard({
 }: ImageCardProps) {
   const tagList = tags ?? (tag ? [tag] : []);
   const [imgSrc, setImgSrc] = useState(src || FALLBACK_IMAGE);
+  const isExternal = imgSrc.startsWith('http');
 
   return (
     <div className="group xlarge:h-36.5 large:h-30 relative h-50.75 w-full overflow-hidden rounded-md">
@@ -33,6 +34,7 @@ export default function ImageCard({
         src={imgSrc}
         alt={alt}
         fill
+        unoptimized={isExternal}
         className="object-cover transition-transform duration-300 group-hover:scale-120"
         onError={() => setImgSrc(FALLBACK_IMAGE)}
       />
