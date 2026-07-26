@@ -16,7 +16,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-2-bold text-conx-common-black">{children}</h2>;
 }
 
-// 단일 텍스트 필드로 편집 가능한 항목 (이메일/비밀번호는 별도 전용 팝업 — 다음에 제작)
+// 단일 텍스트 필드로 편집 가능한 항목
 type EditKey = 'name' | 'job' | 'phone' | 'contactEmail';
 const FIELD_META: Record<EditKey, { title: string; label: string }> = {
   name: { title: '이름', label: '이름' },
@@ -85,7 +85,7 @@ export default function AccountView() {
     };
   }, [accountBase]);
 
-  // 편집 저장 — 단일 필드 PATCH (이름/전화/대표이메일: 백엔드가 currentPassword 요구 제거해서 값만 전송)
+  // 편집 저장 — 단일 필드 PATCH
   async function handleSaveField(key: EditKey, value: string) {
     const meta = FIELD_ENDPOINT[key];
     try {
@@ -110,7 +110,7 @@ export default function AccountView() {
 
   async function handleLogout() {
     await logout();
-    router.push('/'); // TODO: 로그아웃 후 이동 경로 확정 (홈 / 로그인)
+    router.push('/');
   }
 
   return (

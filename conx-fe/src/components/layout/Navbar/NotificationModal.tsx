@@ -1,9 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import IconDelete from '@/assets/icons/icon_delete.svg';
 import { Chip } from '@/components/common/Chip';
 import { API_ROUTES } from '@/constants/api';
+import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 import MessageCard from './MessageCard';
 
 // 백엔드 filter 값 (카테고리 필터링은 서버에서 처리)
@@ -22,6 +25,33 @@ interface NotificationItem {
   isRead: boolean;
   arriveTime: string; // ISO date-time
   sender: string;
+  // 라우팅용 대상 id (type별로 관련된 것만 채워짐)
+  projectId?: number;
+  questionId?: number;
+  applicationId?: number;
+  submissionId?: number;
+  settlementId?: number;
+}
+
+// 알림 type + id → 이동 경로. 없으면 null (이동 안 함)
+function routeForNotification(n: NotificationItem, isCompany: boolean): string | null {
+  switch (n.type) {
+    case 'RESULT_UPLOADED': // 기업이 업로드된 결과물 확인
+      if (isCompany && n.projectId && n.submissionId) {
+        return `/company-workspace/project-status/${n.projectId}/results/${n.submissionId}`;
+      }
+      break;
+    case 'RESULT_UPLOAD_CLOSE_TO_END': // 크루 제출 마감 임박 → 작업 상세
+    case 'LATE_FOR_SUBMIT_DEADLINE':
+      if (!isCompany && n.projectId) return `/crew-workspace/project-tasks/${n.projectId}`;
+      break;
+    case 'ADJUSTMENT_DONE': // 정산 완료 → 역할별 정산
+      return isCompany ? '/company-workspace/settlement' : '/crew-workspace/settlement';
+    case 'MAIL': // 대상 페이지 없음
+      return null;
+  }
+  // 나머지(모집마감/문의/답변/선정/거절/북마크마감/프로젝트마감) + 위 fallback → 프로젝트 상세(Q&A 포함)
+  return n.projectId ? `/projects/${n.projectId}` : null;
 }
 
 // ISO date-time → "오전 10:58"
@@ -39,6 +69,9 @@ interface NotificationModalProps {
 }
 
 export default function NotificationModal({ open, onClose, onRead }: NotificationModalProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const isCompany = user?.userType === USER_TYPE.COMPANY;
   const [filter, setFilter] = useState<FilterValue>('ALL');
   const [items, setItems] = useState<NotificationItem[] | null>(null); // null = 로딩 중
   const dialogRef = useRef<HTMLDivElement>(null);
@@ -65,18 +98,20 @@ export default function NotificationModal({ open, onClose, onRead }: Notificatio
     };
   }, [open, filter]);
 
-  // 알림 클릭 → 그 알림만 읽음 (모달 열림만으론 읽음 안 됨). 낙관적 반영 후 서버 PATCH
-  async function handleItemClick(n: NotificationItem) {
+  // 알림 클릭 → 그 알림만 읽음 + 관련 페이지로 이동
+  function handleItemClick(n: NotificationItem) {
     if (!n.isRead) {
       setItems((prev) => prev?.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)) ?? prev);
-      try {
-        await fetch(`${API_ROUTES.NOTIFICATION.LIST}/${n.id}/read`, { method: 'PATCH' });
-        onRead?.();
-      } catch {
-        /* 실패해도 로컬 읽음 유지 — 다음 조회 때 서버값으로 보정 */
-      }
+      // 읽음 PATCH는 fire-and-forget (이동과 독립). 실패해도 로컬 읽음 유지 → 다음 조회 때 보정
+      fetch(`${API_ROUTES.NOTIFICATION.LIST}/${n.id}/read`, { method: 'PATCH' })
+        .then(() => onRead?.())
+        .catch(() => {});
     }
-    // TODO: 클릭 시 관련 페이지 이동 — 알림에 대상 id(projectId 등)가 없어 보류 (백엔드에 추가 요청 필요)
+    const path = routeForNotification(n, isCompany);
+    if (path) {
+      onClose();
+      router.push(path);
+    }
   }
 
   // 전체 읽음
