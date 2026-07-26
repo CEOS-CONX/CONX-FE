@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import ProjectStatusSection from '@/components/workspace/sections/ProjectStatusSection';
 import MonthlySpendingSection from './sections/MonthlySpendingSection';
 import CumulativeSpendingSection from './sections/CumulativeSpendingSection';
@@ -59,19 +60,31 @@ function formatAmount(value: number): string {
   return value.toLocaleString('ko-KR');
 }
 
+// 상태 카드 인덱스 → 프로젝트 현황 탭 인덱스 (0=전체 제외, 카드 0=모집중=탭1)
+const STATUS_TAB_INDEX = [1, 2, 3, 4, 5];
+
 export default function CompanyWorkspaceDashboard() {
+  const router = useRouter();
   const [statusCards, setStatusCards] = useState<StatusCardData[]>(EMPTY_COMPANY_STATUS_CARDS);
   const [spendings, setSpendings] = useState<MonthlySpending[]>(EMPTY_MONTHLY_SPENDINGS);
   const [cumulativeSpending, setCumulativeSpending] = useState(EMPTY_COMPANY_SPENDING);
   const [tasks, setTasks] = useState<WorkspaceTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const handleStatusCardClick = useCallback(
+    (cardIndex: number) => {
+      const tab = STATUS_TAB_INDEX[cardIndex] ?? 0;
+      router.push(`/company-workspace/project-status?tab=${tab}`);
+    },
+    [router],
+  );
+
   useEffect(() => {
     const controller = new AbortController();
 
     async function fetchDashboard() {
       try {
-        const res = await fetch('/api/companies/me/workspace/dashboard', {
+        const res = await fetch('/api/companies/me/workspace/dashboard?page=0&size=100', {
           signal: controller.signal,
         });
         const data = await res.json();
@@ -164,7 +177,11 @@ export default function CompanyWorkspaceDashboard() {
 
   return (
     <div className="flex flex-col gap-25 pb-64.75">
-      <ProjectStatusSection statusCards={statusCards} href="/company-workspace/project-status" />
+      <ProjectStatusSection
+        statusCards={statusCards}
+        href="/company-workspace/project-status"
+        onCardClick={handleStatusCardClick}
+      />
       <div className="flex items-start gap-6">
         <MonthlySpendingSection spendings={spendings} />
         <CumulativeSpendingSection

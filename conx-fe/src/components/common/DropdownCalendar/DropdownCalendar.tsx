@@ -31,7 +31,7 @@ interface SingleProps extends BaseProps {
 interface RangeProps extends BaseProps {
   mode: 'range';
   value?: DateRange;
-  onChange?: (range: DateRange) => void;
+  onChange?: (range: DateRange | undefined) => void;
 }
 
 type DropdownCalendarProps = SingleProps | RangeProps;
@@ -114,6 +114,10 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
   const [internalSingle, setInternalSingle] = useState<Date | undefined>(undefined);
   const [internalRange, setInternalRange] = useState<DateRange | undefined>(undefined);
   const [pickingStart, setPickingStart] = useState<Date | null>(null);
+  const pickingStartRef = useRef<Date | null>(null);
+  useEffect(() => {
+    pickingStartRef.current = pickingStart;
+  }, [pickingStart]);
   const [viewMonth, setViewMonth] = useState(() => {
     const seed = isRange
       ? ((props.value as DateRange | undefined)?.start ?? new Date())
@@ -132,6 +136,10 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     if (!isOpen) return;
 
     function close() {
+      if (isRange && pickingStartRef.current) {
+        setInternalRange(undefined);
+        (props as RangeProps).onChange?.(undefined);
+      }
       setIsOpen(false);
       setPickingStart(null);
     }
@@ -155,6 +163,10 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
       const seed = isRange ? (currentRange?.start ?? new Date()) : (currentSingle ?? new Date());
       setViewMonth({ year: seed.getFullYear(), month: seed.getMonth() });
     } else {
+      if (isRange && pickingStart) {
+        setInternalRange(undefined);
+        (props as RangeProps).onChange?.(undefined);
+      }
       setPickingStart(null);
     }
     setIsOpen((prev) => !prev);

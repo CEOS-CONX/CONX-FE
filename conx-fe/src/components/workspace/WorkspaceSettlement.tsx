@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import CardSummary from './CardSummary';
 import DropdownCompact from '@/components/common/DropdownCompact/DropdownCompact';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
+import type { DateRange } from '@/components/common/DropdownCalendar';
 import DropdownTag from './DropdownTag';
 import TableHeader from './TableHeader';
 import TableCell from './TableCell';
@@ -28,12 +29,21 @@ interface CrewSettlement {
   projectName: string;
   brandName: string;
   companyName: string;
+  category: string;
+  projectType: string;
   amount: number;
   settlementStatus: string;
   crewPaymentStatus: string;
   expectedPaymentDate: string | null;
   settlementDate: string | null;
   crewPaymentConfirmedDate: string | null;
+}
+
+interface SettlementSummary {
+  totalPaidAmount: number;
+  waitingAmount: number;
+  monthlyPaidAmount: number;
+  nextExpectedPaymentDate: string | null;
 }
 
 function formatAmount(value: number): string {
@@ -44,16 +54,49 @@ export default function WorkspaceSettlement() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
+  const [dateFilter, setDateFilter] = useState<DateRange | undefined>();
   const [settlements, setSettlements] = useState<CrewSettlement[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [summary, setSummary] = useState<SettlementSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // 요약 카드: summary API
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch('/api/crews/settlements/summary', { signal: controller.signal })
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (ok && data.payload) setSummary(data.payload);
+      })
+      .catch((e) => {
+        if (e instanceof DOMException && e.name === 'AbortError') return;
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  // 정산 목록
   useEffect(() => {
     const controller = new AbortController();
 
     async function fetchSettlements() {
       const params = new URLSearchParams();
       if (statusFilter) params.set('paymentStatus', statusFilter);
+      if (dateFilter?.start) {
+        const s = dateFilter.start;
+        params.set(
+          'settlementStartDate',
+          `${s.getFullYear()}-${String(s.getMonth() + 1).padStart(2, '0')}-${String(s.getDate()).padStart(2, '0')}`,
+        );
+      }
+      if (dateFilter?.end) {
+        const e = dateFilter.end;
+        params.set(
+          'settlementEndDate',
+          `${e.getFullYear()}-${String(e.getMonth() + 1).padStart(2, '0')}-${String(e.getDate()).padStart(2, '0')}`,
+        );
+      }
       params.set('page', String(currentPage - 1));
       params.set('size', String(ROWS_PER_PAGE));
 
@@ -75,48 +118,39 @@ export default function WorkspaceSettlement() {
 
     fetchSettlements();
     return () => controller.abort();
-  }, [statusFilter, currentPage]);
+  }, [statusFilter, dateFilter, currentPage]);
 
-  // 요약 카드 계산 — settlements가 변경될 때만 재계산
   const summaryCards = useMemo(() => {
-    const totalAmount = settlements.reduce((sum, s) => sum + s.amount, 0);
-    const pendingAmount = settlements
-      .filter((s) => s.crewPaymentStatus === 'BEFORE_PAYMENT')
-      .reduce((sum, s) => sum + s.amount, 0);
-    const pendingDates = settlements
-      .filter((s) => s.crewPaymentStatus === 'BEFORE_PAYMENT' && s.expectedPaymentDate)
-      .map((s) => s.expectedPaymentDate!)
-      .sort();
-    const nextPaymentDate = pendingDates[0]?.replace(/-/g, '.') ?? '-';
     const now = new Date();
-    const thisMonthAmount = settlements
-      .filter((s) => {
-        const d = s.settlementDate ? new Date(s.settlementDate) : null;
-        return d && d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-      })
-      .reduce((sum, s) => sum + s.amount, 0);
-
+    if (!summary) {
+      return [
+        { title: '누적 지원금', value: '0', description: '-', width: 'w-114.25' },
+        { title: '지급 예정', value: '0', description: '다음 지급 예정일: -', width: 'w-84.25' },
+        { title: '이번 달 지원금', value: '0', description: '-', width: 'w-84.25' },
+      ];
+    }
+    const nextDate = summary.nextExpectedPaymentDate?.replace(/-/g, '.') ?? '-';
     return [
       {
         title: '누적 지원금',
-        value: formatAmount(totalAmount),
+        value: formatAmount(summary.totalPaidAmount + summary.waitingAmount),
         description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')} 기준`,
         width: 'w-114.25',
       },
       {
         title: '지급 예정',
-        value: formatAmount(pendingAmount),
-        description: `다음 지급 예정일: ${nextPaymentDate}`,
+        value: formatAmount(summary.waitingAmount),
+        description: `다음 지급 예정일: ${nextDate}`,
         width: 'w-84.25',
       },
       {
         title: '이번 달 지원금',
-        value: formatAmount(thisMonthAmount),
+        value: formatAmount(summary.monthlyPaidAmount),
         description: `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')} 기준`,
         width: 'w-84.25',
       },
     ];
-  }, [settlements]);
+  }, [summary]);
 
   if (isLoading) {
     return (
@@ -153,12 +187,23 @@ export default function WorkspaceSettlement() {
                 size="sm"
                 options={STATUS_OPTIONS}
                 placeholder="정산 상태"
+                value={statusFilter}
                 onChange={(value) => {
                   setStatusFilter(value);
                   setCurrentPage(1);
                 }}
               />
-              <DropdownCalendar size="sm" mode="range" align="right" placeholder="정산일" />
+              <DropdownCalendar
+                size="sm"
+                mode="range"
+                align="right"
+                placeholder="정산일"
+                value={dateFilter}
+                onChange={(range) => {
+                  setDateFilter(range);
+                  setCurrentPage(1);
+                }}
+              />
             </div>
           </div>
 

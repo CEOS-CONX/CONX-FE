@@ -12,6 +12,7 @@ import ResultsTableSection from '@/components/workspace/sections/ResultsTableSec
 import Pagination from '@/components/common/Pagination/Pagination';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
+import MatchConfirmedModal from './MatchConfirmedModal';
 import type { ProgressStep, ResultItem, TagIndicatorType } from '@/types/workspace';
 
 const CARDS_PER_PAGE = 6;
@@ -36,6 +37,8 @@ interface ProjectCommon {
   projectEndDate: string | null;
   submissionDate: string | null;
   endDate: string | null;
+  subsidy: number | null;
+  settlementStatus: string | null;
   criteria: { id: number; finalResult: string; numberOfResult: number; done: boolean }[];
 }
 
@@ -128,6 +131,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   const [payload, setPayload] = useState<ProjectDetailPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [matchedCrewImage, setMatchedCrewImage] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -203,15 +207,15 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   }
 
   async function handleSelectCrew(applicationId: number) {
+    const selectedCrew = applications.find((a) => a.applicationId === applicationId);
     try {
       const res = await fetch(
         `/api/companies/me/projects/${projectId}/applications/${applicationId}/select`,
-        { method: 'PATCH' },
+        { method: 'POST' },
       );
       const data = await res.json();
       if (res.ok) {
-        // 선정 성공 → 상세 다시 fetch
-        window.location.reload();
+        setMatchedCrewImage(selectedCrew?.crewImageLink ?? '/images/OG_image.png');
       } else {
         alert(data.message ?? '크루 선정에 실패했습니다.');
       }
@@ -299,7 +303,10 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
         <section className="flex min-w-0 flex-1 flex-col gap-15.5 pt-1.25">
           {isMatched ? (
             <>
-              <SettlementStatusSection status="pending" amount="0" />
+              <SettlementStatusSection
+                status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
+                amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
+              />
               <ResultsTableSection
                 results={results}
                 showUploadButton={false}
@@ -353,6 +360,14 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
           )}
         </section>
       </div>
+
+      {matchedCrewImage && (
+        <MatchConfirmedModal
+          companyImage="/images/OG_image.png"
+          crewImage={matchedCrewImage}
+          onConfirm={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 }

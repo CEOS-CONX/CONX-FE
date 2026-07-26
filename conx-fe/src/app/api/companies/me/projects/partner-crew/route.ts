@@ -13,19 +13,19 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = request.nextUrl;
   const queryString = searchParams.toString();
-  const url = `${API_BASE_URL}/api/v1/companies/me/workspace/dashboard${queryString ? `?${queryString}` : ''}`;
+  const url = `${API_BASE_URL}/api/v1/companies/me/projects/partner-crew${queryString ? `?${queryString}` : ''}`;
 
   const backendRes = await fetch(url, {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
 
   const data = await backendRes.json().catch(() => ({
-    message: '대시보드 조회에 실패했습니다.',
+    message: '파트너 크루 조회에 실패했습니다.',
   }));
 
   if (!backendRes.ok) {
     return NextResponse.json(
-      { message: data.message ?? '대시보드 조회에 실패했습니다.' },
+      { message: data.message ?? '파트너 크루 조회에 실패했습니다.' },
       { status: backendRes.status },
     );
   }

@@ -27,19 +27,30 @@ export default async function BrowseProjectsPage({
   if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
 
   let projects: Project[] = [];
+  let isLastPage = true;
   try {
     const res = await fetch(`${API_BASE_URL}${BACKEND_ENDPOINTS.PROJECT.LIST}?${query}`, {
       headers,
       cache: 'no-store',
     });
     const data = await res.json();
-    if (res.ok && data.payload?.content) projects = data.payload.content;
+    if (res.ok && data.payload?.content) {
+      projects = data.payload.content;
+      isLastPage = data.payload.last ?? data.payload.content.length < 12;
+    }
   } catch {
     // 네트워크 오류 시 빈 목록 유지
   }
 
   const paramsKey = JSON.stringify(params);
-  return <BrowseProjectsClient key={paramsKey} initialProjects={projects} initialParams={params} />;
+  return (
+    <BrowseProjectsClient
+      key={paramsKey}
+      initialProjects={projects}
+      initialParams={params}
+      initialIsLastPage={isLastPage}
+    />
+  );
 }
 
 interface Project {
