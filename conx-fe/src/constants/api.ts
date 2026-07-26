@@ -21,6 +21,9 @@ export const API_ROUTES = {
   CREW: {
     LIST: '/api/crews',
   },
+  NOTIFICATION: {
+    LIST: '/api/notifications',
+  },
   FILE: {
     UPLOAD: '/api/files/upload',
   },
@@ -54,6 +57,9 @@ export const BACKEND_ENDPOINTS = {
   },
   CREW: {
     LIST: '/api/v1/crews',
+  },
+  NOTIFICATION: {
+    LIST: '/api/v1/notifications',
   },
   FILE: {
     UPLOAD: '/api/v1/files/presigned-url',

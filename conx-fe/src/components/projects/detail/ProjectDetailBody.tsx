@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
-import { Button } from '@/components/common/Button';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
@@ -19,6 +18,7 @@ import {
 import ProjectTabs from './ProjectTabs';
 import ProjectThumbnails from './ProjectThumbnails';
 import SubmittedApplication from './SubmittedApplication';
+import type { ProjectDetail } from '@/types/projectDetail';
 
 // 좌우 여백 90px + navbar와 동일한 max-w-400(1600px) 컨테이너
 const CONTAINER = 'mx-auto max-w-400 px-[90px]';
@@ -26,24 +26,31 @@ const ICON_BTN =
   'text-conx-gray-450 hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center justify-center rounded-md p-1.5';
 
 // 탭 = 각 섹션으로 스크롤. 순서대로 한 페이지에 이어 붙임.
-const SECTIONS: { value: string; label: string; Comp: React.ComponentType }[] = [
+const SECTIONS: {
+  value: string;
+  label: string;
+  Comp: React.ComponentType<{ project: ProjectDetail | null }>;
+}[] = [
   { value: 'description', label: '프로젝트 설명', Comp: DescriptionSection },
   { value: 'condition', label: '모집 크루 조건', Comp: ConditionSection },
   { value: 'reference', label: '참고자료', Comp: ReferenceSection },
   { value: 'qna', label: '담당자Q&A', Comp: QnaSection },
 ];
 
-// 썸네일 placeholder — 개수 바꿔서 케이스 확인: 0=간격만 / 1 / 2 / 3+=캐러셀
-const THUMBNAILS = ['썸네일 이미지 1', '썸네일 이미지 2', '썸네일 이미지 3', '썸네일 이미지 4'];
-
-export default function ProjectDetailBody({ projectId }: { projectId: string }) {
+export default function ProjectDetailBody({
+  projectId,
+  project,
+}: {
+  projectId: string;
+  project: ProjectDetail | null;
+}) {
   const router = useRouter();
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
-  const [applied, setApplied] = useState(false); // 지원 완료 상태
+  const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
   const [submittedMotive, setSubmittedMotive] = useState(''); // 제출한 지원 동기
   const [viewingApplication, setViewingApplication] = useState(false); // 지원서 보기
-  const [scrapped, setScrapped] = useState(false);
+  const [scrapped, setScrapped] = useState(project?.isBookmarked ?? false); // 북마크 여부(서버 초기값)
   const [toast, setToast] = useState<{
     message: string;
     actionLabel?: string;
@@ -65,6 +72,29 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
     return () => observer.disconnect();
   }, []);
 
+  // 제출한 지원 동기 복원 — 서버 isApplied=true 로 들어온 경우(새로고침) 지원 현황에서 이 프로젝트의 동기를 가져옴.
+  // (이번 세션에서 방금 제출했으면 submittedMotive 가 이미 있어 skip)
+  // ※ motivation 필드는 백엔드 추가 대기 중 — 오기 전엔 값이 없어 빈 칸, 추가되면 자동으로 채워짐
+  useEffect(() => {
+    if (!applied || submittedMotive) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch('/api/crews/applications');
+        if (!res.ok) return;
+        const data = await res.json();
+        const apps: { projectId: number; motivation?: string }[] = data.payload?.applications ?? [];
+        const mine = apps.find((a) => String(a.projectId) === String(projectId));
+        if (mine?.motivation && !cancelled) setSubmittedMotive(mine.motivation);
+      } catch {
+        /* 조회 실패 시 빈 값 유지 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [applied, submittedMotive, projectId]);
+
   // 탭 클릭 → 해당 섹션으로 스크롤 (섹션의 scroll-mt가 스티키 탭 높이만큼 보정)
   function handleSelect(value: string) {
     setActive(value);
@@ -81,24 +111,51 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
     }
   }
 
-  // 스크랩: 아이콘 채움 토글 + 완료 시 토스트("스크랩 보기" → 스크랩 페이지 이동)
-  // TODO: 실제 스크랩 저장(API)은 나중에 — 지금은 시각 상태 + 이동만
-  function handleScrap() {
+  // 스크랩(북마크): 낙관적 토글 → API(POST 등록 / DELETE 취소). 실패 시 롤백 + 에러 토스트
+  async function handleScrap() {
     const next = !scrapped;
     setScrapped(next);
-    if (next) {
-      setToast({
-        message: '프로젝트를 스크랩했습니다',
-        actionLabel: '스크랩 보기',
-        onAction: () => router.push('/scrap'),
+    try {
+      const res = await fetch(`/api/projects/${projectId}/bookmarks`, {
+        method: next ? 'POST' : 'DELETE',
       });
+      if (!res.ok) throw new Error();
+      if (next) {
+        setToast({
+          message: '프로젝트를 스크랩했습니다',
+          actionLabel: '스크랩 보기',
+          onAction: () => router.push('/scrap'),
+        });
+      }
+    } catch {
+      setScrapped(!next); // 실패 시 원상복구
+      setToast({ message: '스크랩 처리에 실패했습니다. 다시 시도해 주세요.' });
     }
+  }
+
+  // 지원서 제출: 지원 동기를 백엔드로 전송. 성공 시 완료 상태로 전환,
+  // 실패 시 에러 토스트(백엔드 메시지: 이미 지원함/권한 없음 등) 후 throw → 약관 모달이 닫히고 재시도 가능
+  async function handleApplySubmit(motive: string) {
+    const res = await fetch(`/api/projects/${projectId}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ motivation: motive }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setToast({ message: data.message ?? '지원에 실패했습니다. 다시 시도해 주세요.' });
+      throw new Error('apply failed');
+    }
+    setSubmittedMotive(motive);
+    setApplied(true);
+    setApplying(false);
+    setToast({ message: '지원이 완료됐습니다.' });
   }
 
   return (
     <main data-project-id={projectId}>
       {/* 썸네일 — 개수별 분기(없음/1/2/3+ 캐러셀) */}
-      <ProjectThumbnails thumbnails={THUMBNAILS} />
+      <ProjectThumbnails thumbnails={project?.projectImage ?? []} />
 
       {/* 본문 2단 — 왼쪽(헤더→탭→섹션들) / 오른쪽(CTA). 탭과 CTA만 sticky */}
       <div className={`${CONTAINER} pb-40`}>
@@ -106,15 +163,16 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
           {/* 왼쪽 컬럼 */}
           <div className="min-w-0 flex-1">
             {/* 헤더 (스크롤됨) — 태그 / 제목+아이콘 / 브랜드 */}
-            {/* TODO : 마감일 받아와서 태그 동적으로 띄우기 */}
             <div className="flex items-center gap-2">
-              <Tag type="red" label="마감임박" />
-              <Tag type="gray" label="모집 마감 15일 전" />
+              {project?.isImminent && <Tag type="red" label="마감임박" />}
+              {project && project.dayBeforeDeadline >= 0 && (
+                <Tag type="gray" label={`모집 마감 ${project.dayBeforeDeadline}일 전`} />
+              )}
             </div>
 
             <div className="mt-4 flex items-start justify-between gap-4">
               <h1 className="text-kor-display-3-bold text-conx-common-black">
-                프로젝트 제목이 들어갈 자리입니다.
+                {project?.projectName ?? '프로젝트 제목이 들어갈 자리입니다.'}
               </h1>
               <div className="flex shrink-0 items-center gap-3">
                 {/* 공유: hover 시 회색 네모(opacity-gray-6), active는 default와 동일(투명) */}
@@ -143,7 +201,9 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
               </div>
             </div>
 
-            <p className="text-kor-heading-3-bold text-conx-common-black">브랜드명</p>
+            <p className="text-kor-heading-3-bold text-conx-common-black">
+              {project?.brandName ?? '브랜드명'}
+            </p>
 
             {/* 탭 — sticky (top-0, 흰 배경으로 아래로 지나가는 내용 덮음) */}
             <div className="bg-conx-common-white sticky top-0 z-20 mt-8">
@@ -166,7 +226,7 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
                   }}
                   className={`scroll-mt-[80px] ${i > 0 ? 'mt-20' : ''}`}
                 >
-                  <Comp />
+                  <Comp project={project} />
                 </section>
               ))}
             </div>
@@ -190,21 +250,14 @@ export default function ProjectDetailBody({ projectId }: { projectId: string }) 
               </>
             ) : applying ? (
               <ApplyPanel
+                project={project}
                 onBack={() => setApplying(false)}
-                onSubmitted={(motive) => {
-                  setSubmittedMotive(motive);
-                  setApplied(true);
-                  setApplying(false);
-                  setToast({ message: '지원이 완료됐습니다.' });
-                }}
+                onSubmitted={handleApplySubmit}
               />
             ) : (
-              <>
-                <CTAButton variant="secondary" onClick={() => setApplying(true)}>
-                  지원하기
-                </CTAButton>
-                <Button variant="tertiary">Admin</Button>
-              </>
+              <CTAButton variant="secondary" onClick={() => setApplying(true)}>
+                지원하기
+              </CTAButton>
             )}
           </aside>
         </div>

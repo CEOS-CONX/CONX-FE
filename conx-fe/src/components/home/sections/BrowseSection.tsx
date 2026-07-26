@@ -94,32 +94,37 @@ function useCursorAutoScroll(ref: React.RefObject<HTMLDivElement | null>) {
   }, [ref]);
 }
 
-// 일단 5개씩 placeholder. 나중에 API/필터링 결과로 교체.
-const MOCK_PROJECTS = Array.from({ length: 5 }, (_, i) => ({
-  id: i,
-  imageSrc: 'https://placehold.co/337x203/f5f5f5/f5f5f5.png',
-  imageAlt: `프로젝트 이미지 ${i + 1}`,
-  title: '프로젝트 이름',
-  subtitle: '기업명',
-  category1: '카테고리',
-  category2: '프로젝트 유형',
-  startDate: '2000.00.00',
-  endDate: '2000.00.00',
-}));
+// 카드용 데이터 (page.tsx 서버 컴포넌트가 API 결과를 매핑해 내려줌)
+export interface BrowseProjectCard {
+  id: number;
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  subtitle: string;
+  category1: string;
+  category2: string;
+  startDate: string;
+  endDate: string;
+}
 
-const MOCK_CREWS = Array.from({ length: 5 }, (_, i) => ({
-  id: i,
-  imageSrc: 'https://placehold.co/337x203/f5f5f5/f5f5f5.png',
-  imageAlt: `크루 이미지 ${i + 1}`,
-  title: '크루명',
-  subtitle: '캐치프레이즈',
-  category1: '활동 분야',
-  category2: '크루 유형',
-  rating: 0.0,
-  totalCount: 0,
-}));
+export interface BrowseCrewCard {
+  id: number;
+  imageSrc: string;
+  imageAlt: string;
+  title: string;
+  subtitle: string;
+  category1: string;
+  category2: string;
+  rating: number;
+  totalCount: number;
+}
 
-export default function BrowseSection() {
+interface BrowseSectionProps {
+  projects: BrowseProjectCard[];
+  crews: BrowseCrewCard[];
+}
+
+export default function BrowseSection({ projects, crews }: BrowseSectionProps) {
   const projectsRef = useRef<HTMLDivElement>(null);
   const crewsRef = useRef<HTMLDivElement>(null);
 
@@ -145,7 +150,7 @@ export default function BrowseSection() {
             프로젝트
           </h5>
           <div ref={projectsRef} className="scrollbar-hide flex gap-6 overflow-x-auto pl-[90px]">
-            {MOCK_PROJECTS.map((card) => (
+            {projects.map((card) => (
               <Link
                 key={card.id}
                 href={`/projects/${card.id}`}
@@ -177,7 +182,7 @@ export default function BrowseSection() {
             크루
           </h5>
           <div ref={crewsRef} className="scrollbar-hide flex gap-6 overflow-x-auto pl-[90px]">
-            {MOCK_CREWS.map((card) => (
+            {crews.map((card) => (
               <Link
                 key={card.id}
                 href={`/crews/${card.id}`}

@@ -6,12 +6,18 @@ import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
 
 const MAXW = 'mx-auto max-w-400';
 const THUMB_H = 'h-[290px]';
-// 카드 placeholder (실제로는 <img src={t}/> 로 교체)
-const CARD =
-  'text-kor-body-1-medium text-conx-gray-300 flex items-center justify-center bg-conx-gray-50';
+const CARD = 'flex items-center justify-center overflow-hidden bg-conx-gray-50';
 
 interface ProjectThumbnailsProps {
   thumbnails: string[];
+}
+
+// 썸네일 이미지 (url) 렌더
+function Thumb({ src, index }: { src: string; index: number }) {
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={`프로젝트 썸네일 ${index + 1}`} className="h-full w-full object-cover" />
+  );
 }
 
 export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps) {
@@ -26,7 +32,7 @@ export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps
       <section className={`${MAXW} px-[90px] pt-6`}>
         <div className={`bg-conx-gray-50 flex ${THUMB_H} justify-center`}>
           <div className={`${CARD} border-conx-gray-150 h-full w-[480px] border-x`}>
-            {thumbnails[0]}
+            <Thumb src={thumbnails[0]} index={0} />
           </div>
         </div>
       </section>
@@ -40,7 +46,7 @@ export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps
         <div className={`divide-conx-gray-150 flex ${THUMB_H} divide-x`}>
           {thumbnails.map((t, i) => (
             <div key={i} className={`${CARD} h-full flex-1`}>
-              {t}
+              <Thumb src={t} index={i} />
             </div>
           ))}
         </div>
@@ -90,7 +96,7 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
         >
           {thumbnails.map((t, i) => (
             <div key={i} className={`${CARD} h-full w-[480px] shrink-0 snap-start`}>
-              {t}
+              <Thumb src={t} index={i} />
             </div>
           ))}
         </div>

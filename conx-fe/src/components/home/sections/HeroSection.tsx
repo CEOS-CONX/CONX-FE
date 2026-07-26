@@ -3,7 +3,7 @@ import { HomeTextButton } from '@/components/home/HomeTextButton';
 
 export default function HeroSection() {
   return (
-    <section id="hero" className="relative h-screen w-full overflow-hidden">
+    <section id="hero" className="relative isolate h-screen w-full overflow-hidden">
       {/* 데코레이티브 배경 영상 — 스크린리더 무시. TODO: poster 이미지 추가 (자동재생 차단/저전력 환경) */}
       <video
         autoPlay

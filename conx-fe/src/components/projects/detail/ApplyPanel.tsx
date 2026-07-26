@@ -3,16 +3,18 @@
 import { useState } from 'react';
 import IconArrowLeft from '@/assets/icons/icon_arrowLeft_stroke.svg';
 import { CTAButton } from '@/components/common/CTAButton';
+import type { ProjectDetail } from '@/types/projectDetail';
 import ApplyTermsModal from './ApplyTermsModal';
 import CrewProfileCard from './CrewProfileCard';
 
 interface ApplyPanelProps {
+  project: ProjectDetail | null;
   onBack: () => void;
-  onSubmitted: (motive: string) => void;
+  onSubmitted: (motive: string) => void | Promise<void>;
 }
 
 // 지원하기 패널
-export default function ApplyPanel({ onBack, onSubmitted }: ApplyPanelProps) {
+export default function ApplyPanel({ project, onBack, onSubmitted }: ApplyPanelProps) {
   const [motive, setMotive] = useState('');
   const [showTerms, setShowTerms] = useState(false);
   const hasContent = motive.trim().length > 0; // type·filled → 제출 버튼 활성
@@ -70,11 +72,16 @@ export default function ApplyPanel({ onBack, onSubmitted }: ApplyPanelProps) {
       {/* 약관 동의 팝업 — 필수 항목 모두 동의 후 최종 제출 */}
       {showTerms && (
         <ApplyTermsModal
+          project={project}
           onClose={() => setShowTerms(false)}
-          onSubmit={() => {
-            // TODO: 실제 지원서 제출 API 연결. 지금은 입력값을 부모로 올려 완료 상태 처리
-            setShowTerms(false);
-            onSubmitted(motive);
+          onSubmit={async () => {
+            // 성공 시 부모가 완료 처리 → 이 패널 언마운트. 실패 시 약관 모달을 닫아
+            // 에러 토스트(z-50)가 모달(z-100)에 가리지 않게 하고, 지원 폼은 유지(재시도 가능)
+            try {
+              await onSubmitted(motive);
+            } catch {
+              setShowTerms(false);
+            }
           }}
         />
       )}
