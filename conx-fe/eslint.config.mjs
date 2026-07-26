@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     'out/**',
     'build/**',
     'next-env.d.ts',
+    // 정적 자산 (미니파이된 pdf.js 워커 등) — lint 대상 아님
+    'public/**',
   ]),
 ]);
 

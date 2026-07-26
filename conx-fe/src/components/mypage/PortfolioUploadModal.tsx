@@ -10,22 +10,35 @@ import TextFieldUpload from './TextFieldUpload';
 
 export interface PortfolioDraft {
   thumbnailFile?: File;
+  thumbnailUrl?: string; // 새 파일이 없을 때 유지할 기존 썸네일 URL (빈 값이면 삭제)
   name: string;
   portfolioFile?: File;
+  fileLink?: string; // 새 파일이 없을 때 유지할 기존 포트폴리오 파일 URL
 }
 
 interface PortfolioUploadModalProps {
   onClose: () => void;
   onSubmit: (draft: PortfolioDraft) => void;
+  /** 편집 시 기존 값 (없으면 신규 등록) */
+  initial?: { name: string; imageLink?: string; fileLink?: string };
 }
 
-export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUploadModalProps) {
+export default function PortfolioUploadModal({
+  onClose,
+  onSubmit,
+  initial,
+}: PortfolioUploadModalProps) {
   const dialogRef = useDialog<HTMLDivElement>(onClose);
+  const isEdit = !!initial;
   const [thumbFile, setThumbFile] = useState<File | null>(null);
-  const [thumbUrl, setThumbUrl] = useState('');
-  const [name, setName] = useState('');
+  const [thumbUrl, setThumbUrl] = useState(initial?.imageLink ?? '');
+  const [name, setName] = useState(initial?.name ?? '');
   const [pfFile, setPfFile] = useState<File | null>(null);
   const thumbUrlRef = useRef('');
+  // 기존 포트폴리오 파일명(표시용) — URL 마지막 세그먼트
+  const initialFileName = initial?.fileLink
+    ? decodeURIComponent(initial.fileLink.split('/').pop()?.split('?')[0] ?? '')
+    : undefined;
 
   // 썸네일 미리보기 URL — 파일 선택 시점에 생성(effect에서 setState 지양)
   const setThumb = (file: File | null) => {
@@ -43,8 +56,8 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
     [],
   );
 
-  // 제목 + 포폴 파일 필수 (썸네일은 nullable)
-  const canSubmit = name.trim().length > 0 && !!pfFile;
+  // 제목 + 포폴 파일 필수 (썸네일은 nullable). 편집 시엔 기존 파일 유지도 허용
+  const canSubmit = name.trim().length > 0 && (!!pfFile || !!initial?.fileLink);
 
   return (
     <div
@@ -70,7 +83,7 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
 
         {/* 헤더 */}
         <h2 id="portfolio-upload-title" className="text-kor-heading-3-bold text-conx-common-black">
-          포트폴리오 업로드
+          {isEdit ? '포트폴리오 수정' : '포트폴리오 업로드'}
         </h2>
         <p className="text-kor-label-1-medium text-conx-gray-450 mt-1">
           파일을 끌고 오거나 칸을 눌러 첨부해주세요(50mb 이하)
@@ -105,7 +118,7 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
             id="portfolio-file"
             label="포트폴리오 파일"
             accept=".pdf"
-            fileName={pfFile?.name}
+            fileName={pfFile?.name ?? initialFileName}
             onSelect={(f) => setPfFile(f)}
             onRemove={() => setPfFile(null)}
           />
@@ -118,12 +131,14 @@ export default function PortfolioUploadModal({ onClose, onSubmit }: PortfolioUpl
           onClick={() =>
             onSubmit({
               thumbnailFile: thumbFile ?? undefined,
+              thumbnailUrl: thumbFile ? undefined : thumbUrl || undefined,
               name: name.trim(),
               portfolioFile: pfFile ?? undefined,
+              fileLink: pfFile ? undefined : initial?.fileLink,
             })
           }
         >
-          등록하기
+          {isEdit ? '수정하기' : '등록하기'}
         </CTAButton>
       </div>
     </div>

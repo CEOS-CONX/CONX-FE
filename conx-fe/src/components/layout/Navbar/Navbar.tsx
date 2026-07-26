@@ -6,11 +6,13 @@ import { usePathname } from 'next/navigation';
 import NotificationModal from './NotificationModal';
 import IconNotificationStroke from '@/assets/icons/icon_notification_stroke.svg';
 import IconNotificationFill from '@/assets/icons/icon_notification_fill.svg';
+import IconNotificationNew from '@/assets/icons/icon_notification_new.svg';
 import IconScrapStroke from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconScrapFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconProfileStroke from '@/assets/icons/icon_profile_stroke.svg';
 import IconProfileFill from '@/assets/icons/icon_profile_fill.svg';
 import LogoConxHeader from '@/assets/icons/logo_conx_header.svg';
+import { API_ROUTES } from '@/constants/api';
 import { useAuth } from '@/context/AuthContext';
 import { USER_TYPE } from '@/types/auth';
 
@@ -61,8 +63,31 @@ export default memo(function Navbar() {
     [isLoggedIn, workspaceHref],
   );
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [hasUnread, setHasUnread] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const bellButtonRef = useRef<HTMLButtonElement>(null);
+
+  // 안 읽은 알림 여부 조회 (벨 뱃지용) — 읽음 처리되면 다시 갱신
+  const refreshUnread = useCallback(async () => {
+    if (!isLoggedIn) {
+      setHasUnread(false);
+      return;
+    }
+    try {
+      const res = await fetch(`${API_ROUTES.NOTIFICATION.LIST}?filter=ALL`);
+      if (!res.ok) return;
+      const data = await res.json();
+      setHasUnread(
+        Array.isArray(data.payload) && data.payload.some((n: { isRead: boolean }) => !n.isRead),
+      );
+    } catch {
+      /* noop */
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    refreshUnread();
+  }, [refreshUnread]);
 
   // 닫을 때 트리거(벨 버튼)로 포커스 복원 (ARIA APG Modal Dialog 필수 요건)
   const closeNotification = useCallback(() => {
@@ -159,15 +184,26 @@ export default memo(function Navbar() {
                         <div key={name} ref={notificationRef} className="relative">
                           <button
                             ref={bellButtonRef}
-                            aria-label={label}
+                            aria-label={hasUnread ? `${label} (안 읽음 있음)` : label}
                             onClick={() => setNotificationOpen((prev) => !prev)}
                             aria-haspopup="true"
                             aria-expanded={notificationOpen}
                             className="flex cursor-pointer items-center justify-center rounded-md p-1.5 hover:bg-[rgba(29,34,41,0.06)]"
                           >
-                            {content}
+                            {/* 열림→Fill(활성), 닫힘+안읽음→New(뱃지), 그 외→Stroke */}
+                            {notificationOpen ? (
+                              <Fill className="h-6.5 w-6.5" />
+                            ) : hasUnread ? (
+                              <IconNotificationNew className="h-6.5 w-6.5" />
+                            ) : (
+                              <Stroke className="h-6.5 w-6.5" />
+                            )}
                           </button>
-                          <NotificationModal open={notificationOpen} onClose={closeNotification} />
+                          <NotificationModal
+                            open={notificationOpen}
+                            onClose={closeNotification}
+                            onRead={refreshUnread}
+                          />
                         </div>
                       );
                     }

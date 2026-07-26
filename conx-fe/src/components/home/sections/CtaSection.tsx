@@ -4,7 +4,7 @@ import LogoConxTitleWhite from '@/assets/icons/logo_conx_title_white.svg';
 
 export default function CtaSection() {
   return (
-    <section id="cta" className="relative aspect-[3436/1080] w-full overflow-hidden">
+    <section id="cta" className="relative isolate aspect-[3436/1080] w-full overflow-hidden">
       {/* 데코레이티브 배경 영상 — 스크린리더 무시. TODO: poster 이미지 추가 (자동재생 차단/저전력 환경) */}
       <video
         autoPlay

@@ -11,6 +11,8 @@ import { useDialog } from '@/hooks/useDialog';
 import { validatePassword } from '@/utils/validate';
 
 interface ChangePasswordModalProps {
+  /** 계정 API 경로 (기업 'companies' / 크루 'crews') */
+  accountBase: string;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -18,7 +20,11 @@ interface ChangePasswordModalProps {
 const NEW_PW_MAX = 35; // 입력 카운터 상한 (유효 범위는 8~16, validatePassword로 검증)
 
 // 비밀번호 변경 팝업 — 기존 비밀번호 확인 + 새 비밀번호(규칙 검증) + 재입력 일치
-export default function ChangePasswordModal({ onClose, onSuccess }: ChangePasswordModalProps) {
+export default function ChangePasswordModal({
+  accountBase,
+  onClose,
+  onSuccess,
+}: ChangePasswordModalProps) {
   const router = useRouter();
   const dialogRef = useDialog<HTMLDivElement>(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
 
@@ -51,8 +57,28 @@ export default function ChangePasswordModal({ onClose, onSuccess }: ChangePasswo
     if (!canSave) return;
     setIsSaving(true);
     setCurrentError('');
-    // TODO: 실제 비밀번호 변경 API 연결 (현재 비밀번호 검증 포함) — 엔드포인트 확정되면 여기서 호출
-    onSuccess();
+    try {
+      const res = await fetch(`/api/${accountBase}/me/account/password`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          currentPassword: current,
+          newPassword: next,
+          newPasswordConfirmation: confirm,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        // 현재 비밀번호 불일치 등 → 현재 비밀번호 필드에 에러 표시
+        setCurrentError(data.message ?? '비밀번호 변경에 실패했습니다.');
+        setIsSaving(false);
+        return;
+      }
+      onSuccess();
+    } catch {
+      setCurrentError('비밀번호 변경에 실패했습니다. 다시 시도해 주세요.');
+      setIsSaving(false);
+    }
   }
 
   return (
