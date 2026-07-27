@@ -52,7 +52,7 @@ export default function ChartBar({
     <div className="flex w-10 flex-col items-center justify-end" onClick={onClick}>
       {isTooltipVisible && (
         <div className="drop-shadow-conx-drop-gray-15 mb-1 flex flex-col items-center gap-0">
-          <div className="bg-conx-common-white rounded-md px-1.5 py-1">
+          <div className="bg-conx-common-white flex h-6.5 w-7.75 items-center justify-center rounded-md">
             <span className={`text-kor-caption-1-semibold ${tooltipTextColor}`}>
               {score.toFixed(1)}
             </span>
