@@ -8,7 +8,9 @@ import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
 import {
   CREW_TYPE_OPTIONS,
+  CREW_TYPE_LABEL,
   INDUSTRY_OPTIONS,
+  INDUSTRY_LABEL,
   RATING_OPTIONS,
   SORT_OPTIONS,
 } from '@/constants/browse';
@@ -53,8 +55,8 @@ const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
         onScrapChange={handleScrapChange}
         title={crew.crewName ?? '크루명'}
         subtitle={crew.crewIntroduction ?? ''}
-        category1={crew.category ?? ''}
-        category2={crew.crewType ?? ''}
+        category1={INDUSTRY_LABEL[crew.category ?? ''] ?? crew.category ?? ''}
+        category2={CREW_TYPE_LABEL[crew.crewType ?? ''] ?? crew.crewType ?? ''}
         rating={crew.point}
         totalCount={crew.cumulative}
       />

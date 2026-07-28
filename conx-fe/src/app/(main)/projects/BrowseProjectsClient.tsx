@@ -8,7 +8,13 @@ import type { DateRange } from '@/components/common/DropdownCalendar';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
-import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS, SORT_OPTIONS } from '@/constants/browse';
+import {
+  INDUSTRY_OPTIONS,
+  INDUSTRY_LABEL,
+  PROJECT_TYPE_OPTIONS,
+  PROJECT_TYPE_LABEL,
+  SORT_OPTIONS,
+} from '@/constants/browse';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import useDebouncedValue from '@/hooks/useDebouncedValue';
 
@@ -64,8 +70,8 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
         onScrapChange={handleScrapChange}
         title={project.projectName}
         subtitle={project.companyName}
-        category1={project.category}
-        category2={project.projectType}
+        category1={INDUSTRY_LABEL[project.category] ?? project.category}
+        category2={PROJECT_TYPE_LABEL[project.projectType] ?? project.projectType}
         startDate={formatDate(project.projectStartDate)}
         endDate={formatDate(project.projectDeadline)}
       />
