@@ -89,6 +89,10 @@ export default function ProjectCreateForm() {
           }
         }
 
+        if ((key === 'brandName' || key === 'managerName' || key === 'email') && next.useMyInfo) {
+          next.useMyInfo = false;
+        }
+
         if (key === 'projectStartDate' || key === 'projectEndDate' || key === 'recruitDeadline') {
           setScheduleErrorFields((prev) => {
             if (prev.size > 0) {
