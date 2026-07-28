@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import IconArrowRight from '@/assets/icons/icon_arrowRight_stroke.svg';
+import ImageExpenditure from '@/assets/illustrations/image_expenditure.svg';
 
 interface CumulativeFundingSectionProps {
   amount: string;
@@ -34,7 +35,7 @@ export default function CumulativeFundingSection({
             <span className="text-kor-title-3-semibold">원</span>
           </div>
         </div>
-        <div className="bg-conx-gray-100 size-39.75" />
+        <ImageExpenditure className="size-39.75" />
       </div>
     </section>
   );
