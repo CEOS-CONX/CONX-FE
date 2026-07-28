@@ -10,6 +10,7 @@ import SubmissionCriteriaSection from '@/components/workspace/sections/Submissio
 import SettlementStatusSection from '@/components/workspace/sections/SettlementStatusSection';
 import ResultsTableSection from '@/components/workspace/sections/ResultsTableSection';
 import Pagination from '@/components/common/Pagination/Pagination';
+import { resolveProfileImage } from '@/utils/profileImage';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
 import MatchConfirmedModal from './MatchConfirmedModal';
@@ -289,7 +290,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
                 <span className="text-kor-body-1-semibold text-conx-common-black">매칭 크루</span>
               </div>
               <CrewCardSmall
-                profileSrc={common.crewImageLink ?? '/placeholder.png'}
+                profileSrc={resolveProfileImage(common.crewImageLink, common.crewId)}
                 name={common.crewName}
                 subtitle={common.crewType ?? ''}
               />
@@ -330,7 +331,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
                           {row.map((crew) => (
                             <CrewCard
                               key={crew.applicationId}
-                              profileSrc={crew.crewImageLink ?? '/placeholder.png'}
+                              profileSrc={resolveProfileImage(crew.crewImageLink, crew.crewId)}
                               name={crew.crewName ?? '크루명'}
                               subtitle={crew.crewType}
                               tags={crew.keywords}

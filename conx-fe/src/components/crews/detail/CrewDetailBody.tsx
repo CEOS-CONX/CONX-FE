@@ -17,6 +17,7 @@ import UploadCard from '@/components/projects/detail/UploadCard';
 import { ACTIVITY_FIELD_OPTIONS, CREW_TYPE_OPTIONS } from '@/constants/browse';
 import type { CrewDetail, CrewProjectHistory } from '@/types/crewDetail';
 import { triggerDownload } from '@/utils/download';
+import { resolveProfileImage } from '@/utils/profileImage';
 import { formatWorkType } from '../project';
 
 // navbar와 동일한 max-w-400(1600px) + 좌우 90px
@@ -234,12 +235,12 @@ export default function CrewDetailBody({
     <main data-crew-id={crewId} className={`${CONTAINER} pb-40`}>
       {/* ───── 헤더 (공통, 939px 고정) — 최소/전체 상태 모두 동일 ───── */}
       <div className="w-[939px] gap-4 pt-10">
-        {crew?.profileImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={crew.profileImage} alt="" className="h-16 w-16 rounded-md object-cover" />
-        ) : (
-          <div className="bg-conx-gray-100 h-16 w-16 rounded-md" />
-        )}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={resolveProfileImage(crew?.profileImage, crewId)}
+          alt=""
+          className="h-16 w-16 rounded-md object-cover"
+        />
 
         <h1 className="text-kor-title-1-bold text-conx-common-black">{crew?.crewName ?? ''}</h1>
 

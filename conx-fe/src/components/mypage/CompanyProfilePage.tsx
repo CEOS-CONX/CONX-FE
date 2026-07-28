@@ -12,6 +12,7 @@ import TextFieldLabeled from '@/components/mypage/TextFieldLabeled';
 import TextFieldUrl from '@/components/mypage/TextFieldUrl';
 import { uploadFile } from '@/components/project-create/utils/projectApi';
 import { INDUSTRY_OPTIONS } from '@/constants/browse';
+import { useAuth } from '@/context/AuthContext';
 import { FieldLabel, SectionTitle } from './profileForm';
 
 // 도메인만 입력 시 https:// 를 붙여 반환. 명백히 URL 형식이 아니면 valid:false
@@ -35,6 +36,8 @@ function normalizeUrl(raw: string): { value: string; valid: boolean } {
 
 export default function CompanyProfilePage() {
   const router = useRouter();
+  const { user } = useAuth();
+  const [companyId, setCompanyId] = useState<number>(); // 기본 프로필 이미지 seed (백엔드 companyId 추가 대기 — 없으면 userId 폴백)
   const [profileSrc, setProfileSrc] = useState<string>(); // 화면 미리보기(object URL 또는 S3 URL)
   const [profileImageUrl, setProfileImageUrl] = useState<string>(); // 저장용 업로드된 S3 URL
   const [toast, setToast] = useState<{
@@ -64,6 +67,7 @@ export default function CompanyProfilePage() {
         const data = await res.json();
         const p = data.payload;
         if (!p || cancelled) return;
+        setCompanyId(p.companyId);
         setCompanyName(p.companyName ?? '');
         setIndustry(p.industry ?? '');
         setBusinessNumber(p.businessRegistrationNumber ?? '');
@@ -154,6 +158,7 @@ export default function CompanyProfilePage() {
         <SectionTitle>기본 정보</SectionTitle>
         <ProfileImage
           src={profileSrc}
+          seed={companyId ?? user?.userId}
           onSelect={async (f) => {
             setProfileSrc(URL.createObjectURL(f)); // 즉시 미리보기
             try {
