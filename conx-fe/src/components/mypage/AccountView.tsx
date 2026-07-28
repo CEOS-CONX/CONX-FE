@@ -33,6 +33,9 @@ const FIELD_ENDPOINT: Record<EditKey, { path: string; bodyKey: string }> = {
   contactEmail: { path: 'representative-email', bodyKey: 'representativeEmail' },
 };
 
+// 선택(필수 아님) 필드 — 비우면 '' 대신 null 전송해 '값 없음'을 명확히 전달 (name은 필수라 제외)
+const OPTIONAL_KEYS = new Set<EditKey>(['job', 'phone', 'contactEmail']);
+
 // 내 정보(계정/담당자 정보/연락처) — ?as= 미리보기(useSearchParams)를 쓰므로 page.tsx에서 <Suspense>로 감쌈
 export default function AccountView() {
   const router = useRouter();
@@ -88,11 +91,13 @@ export default function AccountView() {
   // 편집 저장 — 단일 필드 PATCH
   async function handleSaveField(key: EditKey, value: string) {
     const meta = FIELD_ENDPOINT[key];
+    // 선택 필드를 비운 경우 빈 문자열 대신 null 전송 (백엔드 blank 검증 회피)
+    const payloadValue = OPTIONAL_KEYS.has(key) && value.trim() === '' ? null : value;
     try {
       const res = await fetch(`/api/${accountBase}/me/account/${meta.path}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [meta.bodyKey]: value }),
+        body: JSON.stringify({ [meta.bodyKey]: payloadValue }),
       });
       setEditing(null);
       if (!res.ok) {
