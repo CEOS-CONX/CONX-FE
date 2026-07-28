@@ -28,6 +28,35 @@ export default function ProjectCreateForm() {
   const [activeField, setActiveField] = useState<string | undefined>();
   const [hasDraft, setHasDraft] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [scheduleError, setScheduleError] = useState('');
+  const [scheduleErrorFields, setScheduleErrorFields] = useState<Set<string>>(new Set());
+
+  const myInfoRef = useRef<{ brandName: string; name: string; email: string } | null>(null);
+
+  useEffect(() => {
+    async function prefetchMyInfo() {
+      try {
+        const [profileRes, accountRes] = await Promise.all([
+          fetch('/api/companies/me/profile'),
+          fetch('/api/companies/me/account'),
+        ]);
+        const [profileData, accountData] = await Promise.all([
+          profileRes.json(),
+          accountRes.json(),
+        ]);
+        if (profileRes.ok && accountRes.ok) {
+          myInfoRef.current = {
+            brandName: profileData.payload?.brandName ?? '',
+            name: accountData.payload?.name ?? '',
+            email: accountData.payload?.email ?? '',
+          };
+        }
+      } catch {
+        /* noop — 체크 시 빈 값으로 처리 */
+      }
+    }
+    prefetchMyInfo();
+  }, []);
 
   // 진입 시 임시저장 존재 여부 확인
   useEffect(() => {
@@ -102,7 +131,12 @@ export default function ProjectCreateForm() {
         onClick={() => setActiveField(undefined)}
       >
         <div className="bg-conx-common-white mx-auto flex w-295 flex-col gap-27.5 rounded-md px-30.25 pt-17 pb-15">
-          <BrandInfoSection form={form} onUpdate={updateField} onFieldFocus={setActiveField} />
+          <BrandInfoSection
+            form={form}
+            onUpdate={updateField}
+            onUseMyInfo={handleUseMyInfo}
+            onFieldFocus={setActiveField}
+          />
           <ProjectDescriptionSection
             form={form}
             onUpdate={updateField}
