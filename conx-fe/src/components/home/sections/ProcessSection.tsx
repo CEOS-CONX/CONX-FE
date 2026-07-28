@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { HomeBookmarkButton } from '@/components/home/HomeBookmarkButton';
 
 type Step = 1 | 2 | 3 | 4;
@@ -192,8 +193,12 @@ export default function ProcessSection() {
                   >
                     {content.company.description}
                   </p>
-                  <div
-                    className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md"
+                  <Image
+                    src={`/images/image_step${step}Company.png`}
+                    alt=""
+                    width={577}
+                    height={430}
+                    className="mt-6 rounded-md object-cover"
                     style={animStyle(imageReveal)}
                   />
                 </div>
@@ -212,8 +217,12 @@ export default function ProcessSection() {
                   >
                     {content.crew.description}
                   </p>
-                  <div
-                    className="bg-conx-gray-100 mt-6 h-[430px] w-[577px] rounded-md"
+                  <Image
+                    src={`/images/image_step${step}Crew.png`}
+                    alt=""
+                    width={577}
+                    height={430}
+                    className="mt-6 rounded-md object-cover"
                     style={animStyle(imageReveal)}
                   />
                 </div>
