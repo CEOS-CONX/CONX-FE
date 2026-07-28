@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import imageCompany from '@/assets/illustrations/image_userTypeCard_company.png';
 import imageCrew from '@/assets/illustrations/image_UserTypeCard_crew.png';
@@ -14,7 +15,9 @@ export default function StepSelectType({ onSelect }: StepSelectTypeProps) {
   return (
     <div className="flex flex-col gap-17">
       <div className="flex flex-col gap-9">
-        <LogoConxTitle className="h-6.25 w-28" />
+        <Link href="/">
+          <LogoConxTitle className="h-6.25 w-28" />
+        </Link>
         <h1 className="text-kor-display-3-bold text-conx-common-black">
           서비스 이용 유형을
           <br />
