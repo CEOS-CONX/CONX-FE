@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import IconClose from '@/assets/icons/icon_delete.svg';
+import IconError from '@/assets/icons/icon_error.svg';
 import { Button } from '@/components/common/Button';
 import { useDialog } from '@/hooks/useDialog';
 
@@ -12,6 +13,8 @@ interface EditFieldModalProps {
   maxLength?: number;
   initialValue?: string;
   confirmLabel?: string;
+  format?: (raw: string) => string; // 입력 중 값 변환 (예: 전화번호 하이픈 자동 삽입)
+  validate?: (value: string) => string | undefined; // 저장 시 형식 검증 — 에러 메시지 반환하면 저장 차단
   onClose: () => void;
   onSubmit: (value: string) => void;
 }
@@ -24,12 +27,16 @@ export default function EditFieldModal({
   maxLength = 35,
   initialValue = '',
   confirmLabel = '저장',
+  format,
+  validate,
   onClose,
   onSubmit,
 }: EditFieldModalProps) {
   const dialogRef = useDialog(onClose); // Esc·스크롤 잠금·포커스 트랩/복귀
   const inputRef = useRef<HTMLInputElement>(null);
-  const [value, setValue] = useState(initialValue);
+  const baseline = format ? format(initialValue) : initialValue; // 포맷 적용된 초기값 (dirty 비교 기준)
+  const [value, setValue] = useState(baseline);
+  const [error, setError] = useState<string>();
 
   // useDialog가 첫 포커서블(X버튼)로 포커스를 옮기므로, 그 뒤에 입력창으로 포커스 이동 + 커서 끝으로
   useEffect(() => {
@@ -40,10 +47,20 @@ export default function EditFieldModal({
   }, []);
 
   // 값이 바뀐 경우에만 저장 가능 (빈 값으로 지우는 것도 '변경'으로 허용)
-  const dirty = value !== initialValue;
+  const dirty = value !== baseline;
+
+  function handleChange(raw: string) {
+    setValue(format ? format(raw) : raw);
+    if (error) setError(undefined); // 입력하면 에러 해제
+  }
 
   function handleSubmit() {
     if (!dirty) return;
+    const err = validate?.(value); // 선택 필드는 빈 값을 통과시키도록 validate 내부에서 처리
+    if (err) {
+      setError(err);
+      return;
+    }
     onSubmit(value);
   }
 
@@ -88,7 +105,9 @@ export default function EditFieldModal({
             >
               {label}
             </label>
-            <span className="text-kor-label-1-medium text-conx-gray-300">
+            <span
+              className={`text-kor-label-1-medium ${error ? 'text-conx-red-500' : 'text-conx-gray-300'}`}
+            >
               {value.length}/{maxLength}
             </span>
           </div>
@@ -97,10 +116,20 @@ export default function EditFieldModal({
             id="edit-field-input"
             maxLength={maxLength}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => handleChange(e.target.value)}
             placeholder={placeholder ?? label}
-            className="text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 border-conx-gray-150 hover:border-conx-gray-300 focus:border-conx-primary-300 [&:not(:placeholder-shown):not(:focus)]:border-conx-gray-400 w-full rounded-md border p-4 outline-none"
+            className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full rounded-md border p-4 outline-none ${
+              error
+                ? 'border-conx-red-500'
+                : 'border-conx-gray-150 hover:border-conx-gray-300 focus:border-conx-primary-300 [&:not(:placeholder-shown):not(:focus)]:border-conx-gray-400'
+            }`}
           />
+          {error && (
+            <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1">
+              <IconError className="h-4 w-4 shrink-0" />
+              {error}
+            </p>
+          )}
         </div>
 
         {/* 저장 */}
