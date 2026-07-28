@@ -1,6 +1,8 @@
 'use client';
 
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
+import imageCompany from '@/assets/illustrations/image_userTypeCard_company.png';
+import imageCrew from '@/assets/illustrations/image_UserTypeCard_crew.png';
 import { ChoiceCard } from '@/components/common/ChoiceCard';
 import { USER_TYPE, type UserType } from '@/types/auth';
 
@@ -24,11 +26,13 @@ export default function StepSelectType({ onSelect }: StepSelectTypeProps) {
         <ChoiceCard
           title="기업"
           description="프로젝트를 등록하고 검증된 집단과 연결하세요"
+          imageSrc={imageCompany}
           onClick={() => onSelect(USER_TYPE.COMPANY)}
         />
         <ChoiceCard
           title="크루"
           description="프로젝트에 참여하고 활동의 가치를 증명하세요"
+          imageSrc={imageCrew}
           onClick={() => onSelect(USER_TYPE.CREW)}
         />
       </div>
