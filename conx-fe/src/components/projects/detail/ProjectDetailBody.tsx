@@ -8,6 +8,8 @@ import IconShare from '@/assets/icons/icon_share.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
+import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 import ApplyPanel from './ApplyPanel';
 import {
   ConditionSection,
@@ -45,6 +47,7 @@ export default function ProjectDetailBody({
   project: ProjectDetail | null;
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
   const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
@@ -113,6 +116,10 @@ export default function ProjectDetailBody({
 
   // 스크랩(북마크): 낙관적 토글 → API(POST 등록 / DELETE 취소). 실패 시 롤백 + 에러 토스트
   async function handleScrap() {
+    if (user?.userType === USER_TYPE.COMPANY) {
+      setToast({ message: '프로젝트 스크랩은 크루만 할 수 있습니다.' });
+      return;
+    }
     const next = !scrapped;
     setScrapped(next);
     try {
@@ -126,9 +133,11 @@ export default function ProjectDetailBody({
           actionLabel: '스크랩 보기',
           onAction: () => router.push('/scrap'),
         });
+      } else {
+        setToast({ message: '스크랩을 취소했습니다' });
       }
     } catch {
-      setScrapped(!next); // 실패 시 원상복구
+      setScrapped(!next);
       setToast({ message: '스크랩 처리에 실패했습니다. 다시 시도해 주세요.' });
     }
   }

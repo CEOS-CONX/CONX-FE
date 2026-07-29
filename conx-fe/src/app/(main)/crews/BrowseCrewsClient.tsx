@@ -3,9 +3,12 @@
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
+import { Toast } from '@/components/common/Toast';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
+import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 import {
   CREW_TYPE_OPTIONS,
   CREW_TYPE_LABEL,
@@ -38,13 +41,30 @@ const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
   <div key={i} className="h-60 animate-pulse rounded-lg bg-gray-100" />
 ));
 
-const CrewCard = memo(function CrewCard({ crew }: { crew: Crew }) {
-  const handleScrapChange = useCallback(async () => {
-    const res = await fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
-      method: 'PATCH',
-    });
-    if (!res.ok) throw new Error('scrap failed');
-  }, [crew.crewId]);
+const CrewCard = memo(function CrewCard({
+  crew,
+  onUnscrap,
+  onForbidden,
+}: {
+  crew: Crew;
+  onUnscrap?: () => void;
+  onForbidden?: () => void;
+}) {
+  const { user } = useAuth();
+  const handleScrapChange = useCallback(
+    async (scraped: boolean) => {
+      if (user?.userType === USER_TYPE.CREW) {
+        onForbidden?.();
+        throw new Error('forbidden');
+      }
+      const res = await fetch(`/api/companies/me/bookmarked-crews/${crew.crewId}`, {
+        method: 'PATCH',
+      });
+      if (!res.ok) throw new Error('scrap failed');
+      if (!scraped) onUnscrap?.();
+    },
+    [crew.crewId, onUnscrap, onForbidden, user?.userType],
+  );
 
   return (
     <Link href={`/crews/${crew.crewId}`}>
@@ -90,6 +110,16 @@ export default function BrowseCrewsClient({
     initialIsLastPage,
     params: filterParams,
   });
+
+  const [toastMessage, setToastMessage] = useState('');
+
+  const handleUnscrap = useCallback(() => {
+    setToastMessage('스크랩을 취소했습니다');
+  }, []);
+
+  const handleForbidden = useCallback(() => {
+    setToastMessage('크루 스크랩은 기업만 할 수 있습니다.');
+  }, []);
 
   useEffect(() => {
     const url = `${window.location.pathname}?${filterParams}`;
@@ -142,7 +172,14 @@ export default function BrowseCrewsClient({
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : items.map((crew) => <CrewCard key={crew.crewId} crew={crew} />)}
+          : items.map((crew) => (
+              <CrewCard
+                key={crew.crewId}
+                crew={crew}
+                onUnscrap={handleUnscrap}
+                onForbidden={handleForbidden}
+              />
+            ))}
       </div>
 
       {isLoadingMore && (
@@ -152,6 +189,8 @@ export default function BrowseCrewsClient({
       )}
 
       {hasMore && <div ref={sentinelRef} className="h-1" />}
+
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />}
     </main>
   );
 }
