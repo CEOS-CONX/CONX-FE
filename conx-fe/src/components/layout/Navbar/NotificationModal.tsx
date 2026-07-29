@@ -54,9 +54,12 @@ function routeForNotification(n: NotificationItem, isCompany: boolean): string |
   return n.projectId ? `/projects/${n.projectId}` : null;
 }
 
-// ISO date-time → "오전 10:58"
+// ISO date-time → "오전 10:58" (KST 표시)
+// 백엔드가 타임존 표기 없이(naive) 보내는 시각은 UTC로 간주해 'Z'를 붙여 파싱 → 로컬(KST)로 변환.
+// (이미 Z나 오프셋이 붙어 있으면 그대로 사용 — 그땐 이중 변환 안 함)
 function formatTime(iso: string): string {
-  const d = new Date(iso);
+  const hasTz = /(Z|[+-]\d{2}:?\d{2})$/.test(iso);
+  const d = new Date(hasTz ? iso : `${iso}Z`);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
