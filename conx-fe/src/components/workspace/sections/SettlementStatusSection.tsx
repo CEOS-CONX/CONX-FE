@@ -13,14 +13,23 @@ interface SettlementStatusSectionProps {
   status: string;
   amount: string;
   settlementDate?: string;
+  readonly?: boolean;
+  onStatusChange?: (value: string) => void;
 }
 
 export default function SettlementStatusSection({
   status,
   amount,
   settlementDate,
+  readonly: isReadonly = false,
+  onStatusChange,
 }: SettlementStatusSectionProps) {
   const [currentStatus, setCurrentStatus] = useState(status);
+
+  function handleChange(value: string) {
+    setCurrentStatus(value);
+    onStatusChange?.(value);
+  }
 
   return (
     <div className="flex flex-col gap-3">
@@ -29,7 +38,8 @@ export default function SettlementStatusSection({
         <DropdownTag
           options={SETTLEMENT_OPTIONS}
           defaultValue={status}
-          onChange={setCurrentStatus}
+          onChange={handleChange}
+          disabled={isReadonly}
         />
         <div className="flex items-end gap-1">
           <span className="font-jakarta text-eng-display-3-bold text-conx-common-black tracking-[-0.02em]">

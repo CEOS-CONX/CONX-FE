@@ -305,6 +305,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
               <SettlementStatusSection
                 status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
                 amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
+                readonly
               />
               <ResultsTableSection
                 results={results}
