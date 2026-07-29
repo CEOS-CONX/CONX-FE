@@ -8,7 +8,7 @@ interface TaskProgressSectionProps {
 
 export default function TaskProgressSection({ steps }: TaskProgressSectionProps) {
   return (
-    <Accordion title="진행 단계" openClassName="mb-7">
+    <Accordion title="진행 단계">
       <div className="flex flex-col p-4">
         {steps.map((step, i) => (
           <Timeline
