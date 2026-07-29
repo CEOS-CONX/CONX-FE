@@ -8,6 +8,7 @@ import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
 import IconStar from '@/assets/icons/icon_star_fill.svg';
+import DetailGate from '@/components/common/DetailGate/DetailGate';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
 import { useAuth } from '@/context/AuthContext';
@@ -177,7 +178,7 @@ export default function CrewDetailBody({
   crew: CrewDetail | null;
 }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoggedIn, isLoading } = useAuth();
   const [scrapped, setScrapped] = useState(crew?.bookmarked ?? false); // 북마크 여부(서버 초기값)
   const [toast, setToast] = useState<{
     message: string;
@@ -204,6 +205,8 @@ export default function CrewDetailBody({
   const portfolios = crew?.portfolios ?? [];
   const projects = crew?.representativeProjects ?? [];
   const hasDetail = crew?.hasPublicDetail ?? false;
+  // 비로그인 + 공개 상세 있는 크루 → 게이트로 덮음 (공개 상세 없으면 아래 '아직 공개된…' 화면)
+  const gated = !isLoading && !isLoggedIn && hasDetail;
 
   // 공유
   async function handleShare() {
@@ -240,192 +243,195 @@ export default function CrewDetailBody({
     }
   }
 
+  // 게이트: 비로그인+공개상세 크루는 main을 고정 높이로 잘라 게이트로 덮음 (하단이 푸터에 맞음)
   return (
-    <main data-crew-id={crewId} className={`${CONTAINER} pb-40`}>
-      {/* ───── 헤더 (공통, 939px 고정) — 최소/전체 상태 모두 동일 ───── */}
-      <div className="w-[939px] gap-4 pt-10">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={resolveProfileImage(crew?.profileImage, crewId)}
-          alt=""
-          className="h-16 w-16 rounded-md object-cover"
-        />
+    <main data-crew-id={crewId} className={`relative ${gated ? 'h-[1775px] overflow-hidden' : ''}`}>
+      <div className={`${CONTAINER} pb-40`}>
+        {/* ───── 헤더 (공통, 939px 고정) — 최소/전체 상태 모두 동일 ───── */}
+        <div className="w-[939px] gap-4 pt-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={resolveProfileImage(crew?.profileImage, crewId)}
+            alt=""
+            className="h-16 w-16 rounded-md object-cover"
+          />
 
-        <h1 className="text-kor-title-1-bold text-conx-common-black">{crew?.crewName ?? ''}</h1>
+          <h1 className="text-kor-title-1-bold text-conx-common-black">{crew?.crewName ?? ''}</h1>
 
-        {/* 메타 + 아이콘 (space-between·center). 메타 텍스트에서 20px 아래에 border */}
-        <div className="border-conx-gray-100 mt-4 flex items-center justify-between gap-4 border-b pb-5">
-          <div className="flex flex-wrap items-start gap-x-10 gap-y-2">
-            {schools.length ? <SchoolMetaItem schools={schools} /> : null}
-            <MetaItem label="크루 유형" value={typeLabel} />
-            <MetaItem label="활동 분야" value={fieldLabel} />
-            {crew?.memberAmount ? (
-              <MetaItem label="인원수" value={`${crew.memberAmount}명`} />
-            ) : null}
-            {crew?.point ? (
-              <MetaItem label="프로젝트 평가" value={<StarRating rating={crew.point} />} />
-            ) : null}
+          {/* 메타 + 아이콘 (space-between·center). 메타 텍스트에서 20px 아래에 border */}
+          <div className="border-conx-gray-100 mt-4 flex items-center justify-between gap-4 border-b pb-5">
+            <div className="flex flex-wrap items-start gap-x-10 gap-y-2">
+              {schools.length ? <SchoolMetaItem schools={schools} /> : null}
+              <MetaItem label="크루 유형" value={typeLabel} />
+              <MetaItem label="활동 분야" value={fieldLabel} />
+              {crew?.memberAmount ? (
+                <MetaItem label="인원수" value={`${crew.memberAmount}명`} />
+              ) : null}
+              {crew?.point ? (
+                <MetaItem label="프로젝트 평가" value={<StarRating rating={crew.point} />} />
+              ) : null}
+            </div>
+            <div className="flex shrink-0 items-center gap-3">
+              <button
+                type="button"
+                aria-label="공유하기"
+                onClick={handleShare}
+                className={`${ICON_BTN} active:bg-transparent`}
+              >
+                <IconShare className="h-6 w-6" />
+              </button>
+              <button
+                type="button"
+                aria-label="스크랩"
+                aria-pressed={scrapped}
+                onClick={handleScrap}
+                className={`${ICON_BTN} active:bg-transparent`}
+              >
+                {scrapped ? (
+                  <IconBookmarkFill className="[&_path]:fill-conx-primary-300 [&_path]:stroke-conx-primary-300 h-6 w-6" />
+                ) : (
+                  <IconBookmark className="[&_path]:stroke-conx-gray-450 h-6 w-6" />
+                )}
+              </button>
+            </div>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
-            <button
-              type="button"
-              aria-label="공유하기"
-              onClick={handleShare}
-              className={`${ICON_BTN} active:bg-transparent`}
-            >
-              <IconShare className="h-6 w-6" />
-            </button>
-            <button
-              type="button"
-              aria-label="스크랩"
-              aria-pressed={scrapped}
-              onClick={handleScrap}
-              className={`${ICON_BTN} active:bg-transparent`}
-            >
-              {scrapped ? (
-                <IconBookmarkFill className="[&_path]:fill-conx-primary-300 [&_path]:stroke-conx-primary-300 h-6 w-6" />
-              ) : (
-                <IconBookmark className="[&_path]:stroke-conx-gray-450 h-6 w-6" />
+        </div>
+
+        {/* ───── 상세 (전체 상태): 왼쪽 선택 입력 섹션 + 오른쪽 대표 프로젝트 이력 ───── */}
+        {hasDetail ? (
+          <div className="flex justify-between">
+            {/* 왼쪽: 선택 입력 섹션 (939px, gap 100px, 값 있는 것만) */}
+            <div className="mt-8 flex w-[939px] flex-col gap-[100px]">
+              {/* 1. 소개글 */}
+              {crew?.crewIntroduction && (
+                <section>
+                  <p className="text-kor-body-1-medium text-conx-common-black break-words whitespace-pre-wrap">
+                    {crew.crewIntroduction}
+                  </p>
+                </section>
               )}
-            </button>
+
+              {/* 2. 핵심 강점 */}
+              {crew?.advantages?.length ? (
+                <section>
+                  <SectionTitle>핵심 강점</SectionTitle>
+                  {/* 939px 컨테이너 안에서 자동 줄바꿈. 개수 무제한 — 가로/세로 gap 동일 12px */}
+                  <div className="mt-4 flex flex-wrap gap-3">
+                    {crew.advantages.map((s, i) => (
+                      <Tag key={i} type="cyan" label={s} />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {/* 3. 전문 분야 */}
+              {crew?.specialties?.length ? (
+                <section>
+                  <SectionTitle>전문 분야</SectionTitle>
+                  {/* 3열 고정(항목당 최대 286px, 939px 컨테이너 기준) — 최대 12개 입력 제한 */}
+                  <ul className="mt-4 grid grid-cols-3 gap-x-10 gap-y-3">
+                    {crew.specialties.slice(0, 12).map((s, i) => (
+                      <li
+                        key={i}
+                        className="text-kor-body-1-medium text-conx-gray-600 flex items-start gap-2.25"
+                      >
+                        <IconRoundedCheckbox className="mt-0.5 h-5 w-5 shrink-0" />
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+
+              {/* 4. 크루 자료 */}
+              {files.length || links.length ? (
+                <section>
+                  <SectionTitle>크루 자료</SectionTitle>
+                  <div className="mt-4 flex flex-col gap-2">
+                    {files.map((f) => (
+                      <UploadCard
+                        key={`file-${f.fileId}`}
+                        name={`${f.fileName} [${f.extension}, ${fmtSize(f.size)}]`}
+                        info={f.description || undefined}
+                        onPreview={() =>
+                          setPreview({
+                            fileName: f.fileName,
+                            url: f.url,
+                            extension: f.extension,
+                            downloadable: true,
+                          })
+                        }
+                        onDownload={() => triggerDownload(f.url, f.fileName)}
+                      />
+                    ))}
+                    {links.map((l) => (
+                      <LinkCard
+                        key={`link-${l.linkId}`}
+                        name={l.name}
+                        url={l.url}
+                        info={l.description || undefined}
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+
+              {/* 5. 포트폴리오 */}
+              {portfolios.length ? (
+                <section>
+                  <SectionTitle>포트폴리오</SectionTitle>
+                  <div className="border-conx-gray-150 mt-3 grid grid-cols-4 gap-x-6 gap-y-10 rounded-md border px-8 py-[33]">
+                    {portfolios.map((p) => (
+                      <PortfolioCard
+                        key={p.id}
+                        caption={p.name}
+                        imageLink={p.imageLink}
+                        onPreview={() =>
+                          setPreview({
+                            fileName: p.name,
+                            url: p.fileLink || p.imageLink,
+                            extension: extFromUrl(p.fileLink || p.imageLink),
+                            downloadable: false,
+                          })
+                        }
+                      />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+            </div>
+
+            {/* 오른쪽: 대표 프로젝트 이력 (최대 3개) */}
+            {projects.length ? (
+              <aside className="w-[337px] shrink-0">
+                <div className="flex items-center justify-between">
+                  <SectionTitle>대표 프로젝트 이력</SectionTitle>
+                  {/* 전체보기 → 대표 프로젝트 페이지. hover/active는 기존 아이콘 버튼과 동일 */}
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/crews/${crewId}/projects`)}
+                    className="text-kor-label-1-medium text-conx-gray-450 hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center gap-0.5 rounded-md px-2 py-1 transition-colors active:bg-transparent"
+                  >
+                    전체보기
+                    <IconArrowRight className="[&_path]:stroke-conx-gray-450 h-4 w-4" />
+                  </button>
+                </div>
+                <div className="mt-4 flex flex-col gap-3">
+                  {projects.slice(0, 3).map((p) => (
+                    <CrewProjectCard key={p.projectId} project={p} />
+                  ))}
+                </div>
+              </aside>
+            ) : null}
           </div>
-        </div>
+        ) : (
+          <div className="flex py-40 pl-94">
+            <span className="text-kor-body-1-semibold text-conx-gray-500">
+              아직 공개된 상세 정보가 없습니다.
+            </span>
+          </div>
+        )}
       </div>
-
-      {/* ───── 상세 (전체 상태): 왼쪽 선택 입력 섹션 + 오른쪽 대표 프로젝트 이력 ───── */}
-      {hasDetail ? (
-        <div className="flex justify-between">
-          {/* 왼쪽: 선택 입력 섹션 (939px, gap 100px, 값 있는 것만) */}
-          <div className="mt-8 flex w-[939px] flex-col gap-[100px]">
-            {/* 1. 소개글 */}
-            {crew?.crewIntroduction && (
-              <section>
-                <p className="text-kor-body-1-medium text-conx-common-black break-words whitespace-pre-wrap">
-                  {crew.crewIntroduction}
-                </p>
-              </section>
-            )}
-
-            {/* 2. 핵심 강점 */}
-            {crew?.advantages?.length ? (
-              <section>
-                <SectionTitle>핵심 강점</SectionTitle>
-                {/* 939px 컨테이너 안에서 자동 줄바꿈. 개수 무제한 — 가로/세로 gap 동일 12px */}
-                <div className="mt-4 flex flex-wrap gap-3">
-                  {crew.advantages.map((s, i) => (
-                    <Tag key={i} type="cyan" label={s} />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {/* 3. 전문 분야 */}
-            {crew?.specialties?.length ? (
-              <section>
-                <SectionTitle>전문 분야</SectionTitle>
-                {/* 3열 고정(항목당 최대 286px, 939px 컨테이너 기준) — 최대 12개 입력 제한 */}
-                <ul className="mt-4 grid grid-cols-3 gap-x-10 gap-y-3">
-                  {crew.specialties.slice(0, 12).map((s, i) => (
-                    <li
-                      key={i}
-                      className="text-kor-body-1-medium text-conx-gray-600 flex items-start gap-2.25"
-                    >
-                      <IconRoundedCheckbox className="mt-0.5 h-5 w-5 shrink-0" />
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
-
-            {/* 4. 크루 자료 */}
-            {files.length || links.length ? (
-              <section>
-                <SectionTitle>크루 자료</SectionTitle>
-                <div className="mt-4 flex flex-col gap-2">
-                  {files.map((f) => (
-                    <UploadCard
-                      key={`file-${f.fileId}`}
-                      name={`${f.fileName} [${f.extension}, ${fmtSize(f.size)}]`}
-                      info={f.description || undefined}
-                      onPreview={() =>
-                        setPreview({
-                          fileName: f.fileName,
-                          url: f.url,
-                          extension: f.extension,
-                          downloadable: true,
-                        })
-                      }
-                      onDownload={() => triggerDownload(f.url, f.fileName)}
-                    />
-                  ))}
-                  {links.map((l) => (
-                    <LinkCard
-                      key={`link-${l.linkId}`}
-                      name={l.name}
-                      url={l.url}
-                      info={l.description || undefined}
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-
-            {/* 5. 포트폴리오 */}
-            {portfolios.length ? (
-              <section>
-                <SectionTitle>포트폴리오</SectionTitle>
-                <div className="border-conx-gray-150 mt-3 grid grid-cols-4 gap-x-6 gap-y-10 rounded-md border px-8 py-[33]">
-                  {portfolios.map((p) => (
-                    <PortfolioCard
-                      key={p.id}
-                      caption={p.name}
-                      imageLink={p.imageLink}
-                      onPreview={() =>
-                        setPreview({
-                          fileName: p.name,
-                          url: p.fileLink || p.imageLink,
-                          extension: extFromUrl(p.fileLink || p.imageLink),
-                          downloadable: false,
-                        })
-                      }
-                    />
-                  ))}
-                </div>
-              </section>
-            ) : null}
-          </div>
-
-          {/* 오른쪽: 대표 프로젝트 이력 (최대 3개) */}
-          {projects.length ? (
-            <aside className="w-[337px] shrink-0">
-              <div className="flex items-center justify-between">
-                <SectionTitle>대표 프로젝트 이력</SectionTitle>
-                {/* 전체보기 → 대표 프로젝트 페이지. hover/active는 기존 아이콘 버튼과 동일 */}
-                <button
-                  type="button"
-                  onClick={() => router.push(`/crews/${crewId}/projects`)}
-                  className="text-kor-label-1-medium text-conx-gray-450 hover:bg-conx-opacity-gray-6 flex cursor-pointer items-center gap-0.5 rounded-md px-2 py-1 transition-colors active:bg-transparent"
-                >
-                  전체보기
-                  <IconArrowRight className="[&_path]:stroke-conx-gray-450 h-4 w-4" />
-                </button>
-              </div>
-              <div className="mt-4 flex flex-col gap-3">
-                {projects.slice(0, 3).map((p) => (
-                  <CrewProjectCard key={p.projectId} project={p} />
-                ))}
-              </div>
-            </aside>
-          ) : null}
-        </div>
-      ) : (
-        <div className="flex py-40 pl-94">
-          <span className="text-kor-body-1-semibold text-conx-gray-500">
-            아직 공개된 상세 정보가 없습니다.
-          </span>
-        </div>
-      )}
 
       {/* 파일/포트폴리오 미리보기 오버레이 (포트폴리오는 다운로드 불가) */}
       {preview && (
@@ -447,6 +453,18 @@ export default function CrewDetailBody({
           duration={5000}
           onClose={() => setToast(null)}
           className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
+        />
+      )}
+      {gated && (
+        <DetailGate
+          title="상세정보는 로그인 후 확인할 수 있어요"
+          subtitle={
+            <>
+              CONX에 로그인하고 제출 기준, 모집 크루 조건 등<br />
+              협업에 필요한 상세 정보를 확인해 보세요.
+            </>
+          }
+          showAuthActions
         />
       )}
     </main>

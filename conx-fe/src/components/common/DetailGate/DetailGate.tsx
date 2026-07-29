@@ -1,33 +1,28 @@
 'use client';
 
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import LogoConxSymbol from '@/assets/icons/logo_conx_symbol.svg';
 import CTAButton from '@/components/common/CTAButton/CTAButton';
 
 interface DetailGateProps {
-  /** 제목 (KOR/Title 1/Bold) — 필수 */
   title: string;
-  /** 부제 (KOR/Heading 3/Semibold). 없으면 미표시 — 기업 제한 버전은 아이콘+타이틀만 쓰려고 옵션 */
   subtitle?: React.ReactNode;
-  /** 회원가입/로그인 액션 표시 여부 (비로그인 버전만 true) */
+  /** 비로그인 버전만 true */
   showAuthActions?: boolean;
 }
 
 // 상세페이지 콘텐츠를 위에서 덮어 가리는 게이트(오버레이).
 //  - 푸터 바로 위에서부터 1075px, 가로 full
-//  - 위 400px: 투명→흰 그라데이션(아래 콘텐츠가 자연스럽게 사라짐) / 나머지: 흰색
 //  - 부모는 relative, 이 컴포넌트가 그 안 최하단 자식이어야 함 (bottom-0 기준 = 부모 하단 = 푸터 바로 위)
 //  - 아이콘 + 타이틀은 항상, 부제·회원가입 액션은 옵션 → 기업 제한 버전에서 아이콘+타이틀만 재사용
 export default function DetailGate({ title, subtitle, showAuthActions }: DetailGateProps) {
   const router = useRouter();
   return (
     <div className="absolute inset-x-0 bottom-0 flex h-[1075px] flex-col">
-      {/* 상단 400px — 투명 → 흰색 그라데이션 */}
       <div className="bg-conx-gradient-white-bottom h-[400px] shrink-0" />
 
-      {/* 나머지 — 흰색 + 콘텐츠(가로 중앙) */}
       <div className="bg-conx-common-white flex flex-1 flex-col items-center px-6 pt-[100px]">
-        <LogoConxSymbol className="h-20 w-20" aria-hidden />
+        <Image src="/images/image_profileDefaultC.png" alt="CONX" width={80} height={80} priority />
 
         <h2 className="text-kor-title-1-bold text-conx-common-black mt-6 text-center">{title}</h2>
 
