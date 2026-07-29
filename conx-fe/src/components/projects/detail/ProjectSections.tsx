@@ -18,6 +18,7 @@ import QnaCard, { type QnaItem } from './QnaCard';
 import UploadCard from './UploadCard';
 import { CREW_TYPE_OPTIONS, INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/constants/browse';
 import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 import type { ProjectDetail, ProjectFile } from '@/types/projectDetail';
 import { triggerDownload } from '@/utils/download';
 
@@ -205,8 +206,13 @@ export function ReferenceSection({ project }: SectionProps) {
 
 /* ───────── 4. 담당자 Q&A ───────── */
 
-// writerId: '내 Q&A 보기' 필터용(내 userId와 비교)
-type QnaListItem = QnaItem & { id: number; writerId: number; defaultOpen?: boolean };
+// writerId·writerRole: '내 Q&A 보기' 필터용 (writerId는 userId가 아니라 역할별 엔티티 id)
+type QnaListItem = QnaItem & {
+  id: number;
+  writerId: number;
+  writerRole: string;
+  defaultOpen?: boolean;
+};
 
 // question[] → 목록 아이템. API 질문은 content 하나뿐이라 제목 자리에 넣고, 답변 내용은 목록에 없어 null
 // TODO: 답변 내용(answer)·본문(body) 구조 확정 시 매핑 보강
@@ -214,6 +220,7 @@ function toQnaItems(project: ProjectDetail | null): QnaListItem[] {
   return (project?.question ?? []).map((q) => ({
     id: q.questionId,
     writerId: q.writerId,
+    writerRole: q.writerRole,
     secret: q.secret,
     title: q.questionName,
     body: q.content,
@@ -232,7 +239,9 @@ const QNA_PAGE_SIZE = 5; // 페이지당 문의 수 (디자인 확정 시 조정
 
 export function QnaSection({ project }: SectionProps) {
   const { user } = useAuth();
-  const myUserId = user?.userId; // '내 Q&A 보기' 필터 기준 (writerId와 비교)
+  // '내 Q&A 보기' 필터: writerId는 userId가 아니라 역할별 엔티티 id(crewId/companyId)라 그걸로 비교
+  const myRole = user?.userType; // 'CREW' | 'COMPANY' — writerRole과 매칭
+  const [myWriterId, setMyWriterId] = useState<number>();
   const [excludeSecret, setExcludeSecret] = useState(false);
   const [myOnly, setMyOnly] = useState(false);
   const [page, setPage] = useState(1);
@@ -286,9 +295,30 @@ export function QnaSection({ project }: SectionProps) {
     };
   }, [project]);
 
+  // 내 엔티티 id(crewId/companyId) 조회 — '내 Q&A 보기' 필터 비교용
+  useEffect(() => {
+    if (!user) return;
+    const isCompany = user.userType === USER_TYPE.COMPANY;
+    let active = true;
+    fetch(isCompany ? '/api/companies/me/profile' : '/api/crews/me')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (active && d?.payload) {
+          const id = isCompany ? d.payload.companyId : d.payload.crewId;
+          if (id != null) setMyWriterId(id);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
   // 필터(비밀글 제외 / 내 Q&A) 적용 → 페이지네이션
   const filteredQna = qnaList.filter(
-    (q) => (!excludeSecret || !q.secret) && (!myOnly || q.writerId === myUserId),
+    (q) =>
+      (!excludeSecret || !q.secret) &&
+      (!myOnly || (q.writerRole === myRole && q.writerId === myWriterId)),
   );
   const totalPages = Math.max(1, Math.ceil(filteredQna.length / QNA_PAGE_SIZE));
   const safePage = Math.min(page, totalPages); // 필터로 페이지 수가 줄어도 빈 페이지 방지
@@ -339,7 +369,8 @@ export function QnaSection({ project }: SectionProps) {
       // 최신순이라 맨 앞에 추가, 등록 직후엔 펼친 상태로 노출
       const newItem: QnaListItem = {
         id: q?.questionId ?? Date.now(),
-        writerId: q?.writerId ?? myUserId ?? -1,
+        writerId: q?.writerId ?? myWriterId ?? -1,
+        writerRole: q?.writerRole ?? myRole ?? 'CREW',
         secret: q?.secret ?? secret,
         title: q?.subject ?? title.trim(), // 작성 응답은 subject
         body: q?.content ?? content.trim(),
