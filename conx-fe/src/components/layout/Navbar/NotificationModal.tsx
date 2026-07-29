@@ -43,20 +43,32 @@ function routeForNotification(n: NotificationItem, isCompany: boolean): string |
       break;
     case 'RESULT_UPLOAD_CLOSE_TO_END': // 크루 제출 마감 임박 → 작업 상세
     case 'LATE_FOR_SUBMIT_DEADLINE':
+    case 'PROJECT_SELECTED': // 크루 선정됨 → 모집상세는 선정 후 빈 화면이라 크루 워크스페이스로
       if (!isCompany && n.projectId) return `/crew-workspace/project-tasks/${n.projectId}`;
+      break;
+    case 'PROJECT_CLOSE_TO_END': // 프로젝트 활동종료일 마감 임박 → 역할별 워크스페이스
+      if (n.projectId) {
+        return isCompany
+          ? `/company-workspace/project-status/${n.projectId}`
+          : `/crew-workspace/project-tasks/${n.projectId}`;
+      }
       break;
     case 'ADJUSTMENT_DONE': // 정산 완료 → 역할별 정산
       return isCompany ? '/company-workspace/settlement' : '/crew-workspace/settlement';
+    case 'PROJECT_REJECTED': // 선정 안 됨 → 이동할 페이지 없음(알림만)
     case 'MAIL': // 대상 페이지 없음
       return null;
   }
-  // 나머지(모집마감/문의/답변/선정/거절/북마크마감/프로젝트마감) + 위 fallback → 프로젝트 상세(Q&A 포함)
+  // 나머지 '모집 중' 프로젝트 관련(모집마감임박·문의등록·답변등록·북마크프로젝트마감) → 공개 프로젝트 상세(Q&A 포함)
   return n.projectId ? `/projects/${n.projectId}` : null;
 }
 
-// ISO date-time → "오전 10:58"
+// ISO date-time → "오전 10:58" (KST 표시)
+// 백엔드가 타임존 표기 없이(naive) 보내는 시각은 UTC로 간주해 'Z'를 붙여 파싱 → 로컬(KST)로 변환.
+// (이미 Z나 오프셋이 붙어 있으면 그대로 사용 — 그땐 이중 변환 안 함)
 function formatTime(iso: string): string {
-  const d = new Date(iso);
+  const hasTz = /(Z|[+-]\d{2}:?\d{2})$/.test(iso);
+  const d = new Date(hasTz ? iso : `${iso}Z`);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit', hour12: true });
 }

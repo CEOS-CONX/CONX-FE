@@ -3,7 +3,7 @@ import { HomeCircle } from '../HomeCircle';
 export default function FeaturesSection() {
   return (
     <section id="features" className="flex flex-col items-center justify-center text-center">
-      <h3 className="text-kor-title-3-bold text-conx-primary-400 pt-[38px] pb-6">가치</h3>
+      <h3 className="text-kor-title-3-bold text-conx-primary-400 pt-[120px] pb-6">가치</h3>
       {/* 기업 */}
       <div className="mb-40 flex flex-col gap-15">
         <h4 className="text-kor-display-3-bold text-black">

@@ -1,5 +1,4 @@
-import Link from 'next/link';
-import { HomeTextButton } from '@/components/home/HomeTextButton';
+import HomeStartButtons from '@/components/home/HomeStartButtons';
 
 export default function HeroSection() {
   return (
@@ -31,12 +30,7 @@ export default function HeroSection() {
           기업과 대학생 크루를 연결합니다
         </h2>
         <div className="flex gap-5 pt-22">
-          <Link href="/signup?type=company">
-            <HomeTextButton variant="black">기업으로 시작하기</HomeTextButton>
-          </Link>
-          <Link href="/signup?type=crew">
-            <HomeTextButton>크루로 시작하기</HomeTextButton>
-          </Link>
+          <HomeStartButtons />
         </div>
       </div>
     </section>

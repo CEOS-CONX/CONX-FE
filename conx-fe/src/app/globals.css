@@ -131,6 +131,7 @@ html {
   --z-index-conx-base: 1;
   --z-index-conx-card-overlay: 10;
   --z-index-conx-dropdown: 20;
+  --z-index-conx-header: 40; /* 스티키 네비바 — 알림 모달 열릴 때 페이지 sticky 콘텐츠(20) 위로 올림, toast(50) 아래 */
   --z-index-conx-toast: 50;
   --z-index-conx-modal-backdrop: 90;
   --z-index-conx-modal: 100;

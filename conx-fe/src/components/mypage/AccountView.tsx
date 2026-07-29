@@ -8,9 +8,11 @@ import ChangePasswordModal from '@/components/mypage/ChangePasswordModal';
 import DeleteAccountModal from '@/components/mypage/DeleteAccountModal';
 import EditFieldModal from '@/components/mypage/EditFieldModal';
 import ListButton from '@/components/mypage/ListButton';
+import { formatByGroups } from '@/components/mypage/TextFieldNumber';
 import { useMypageIsCompany } from '@/components/mypage/useMypageRole';
 import { useAuth } from '@/context/AuthContext';
 import { useAuthStore } from '@/stores/auth';
+import { validateEmail } from '@/utils/validate';
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return <h2 className="text-kor-heading-2-bold text-conx-common-black">{children}</h2>;
@@ -18,11 +20,38 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 // 단일 텍스트 필드로 편집 가능한 항목
 type EditKey = 'name' | 'job' | 'phone' | 'contactEmail';
-const FIELD_META: Record<EditKey, { title: string; label: string }> = {
+const FIELD_META: Record<
+  EditKey,
+  {
+    title: string;
+    label: string;
+    placeholder?: string;
+    maxLength?: number;
+    format?: (raw: string) => string; // 입력 중 변환 (전화번호 하이픈 등)
+    validate?: (value: string) => string | undefined; // 형식 검증 (선택 필드는 빈 값 통과)
+  }
+> = {
   name: { title: '이름', label: '이름' },
   job: { title: '직무', label: '직무' },
-  phone: { title: '대표 전화번호', label: '대표 전화번호' },
-  contactEmail: { title: '대표 이메일', label: '대표 이메일' },
+  phone: {
+    title: '대표 전화번호',
+    label: '대표 전화번호',
+    placeholder: '010-0000-0000',
+    maxLength: 13, // 010-0000-0000
+    format: (v) => formatByGroups(v, [3, 4, 4]),
+    validate: (v) =>
+      !v.trim() || /^\d{3}-\d{4}-\d{4}$/.test(v)
+        ? undefined
+        : '올바른 전화번호 형식으로 입력해 주세요',
+  },
+  contactEmail: {
+    title: '대표 이메일',
+    label: '대표 이메일',
+    placeholder: 'example@email.com',
+    maxLength: 50,
+    validate: (v) =>
+      !v.trim() || validateEmail(v) ? undefined : '올바른 이메일 형식으로 입력해 주세요',
+  },
 };
 
 // 필드별 백엔드 엔드포인트 세그먼트 + 바디 키 (PATCH /companies/me/account/{path})
@@ -32,6 +61,9 @@ const FIELD_ENDPOINT: Record<EditKey, { path: string; bodyKey: string }> = {
   phone: { path: 'representative-phone', bodyKey: 'representativePhone' },
   contactEmail: { path: 'representative-email', bodyKey: 'representativeEmail' },
 };
+
+// 선택(필수 아님) 필드 — 비우면 '' 대신 null 전송해 '값 없음'을 명확히 전달 (name은 필수라 제외)
+const OPTIONAL_KEYS = new Set<EditKey>(['job', 'phone', 'contactEmail']);
 
 // 내 정보(계정/담당자 정보/연락처) — ?as= 미리보기(useSearchParams)를 쓰므로 page.tsx에서 <Suspense>로 감쌈
 export default function AccountView() {
@@ -88,11 +120,13 @@ export default function AccountView() {
   // 편집 저장 — 단일 필드 PATCH
   async function handleSaveField(key: EditKey, value: string) {
     const meta = FIELD_ENDPOINT[key];
+    // 선택 필드를 비운 경우 빈 문자열 대신 null 전송 (백엔드 blank 검증 회피)
+    const payloadValue = OPTIONAL_KEYS.has(key) && value.trim() === '' ? null : value;
     try {
       const res = await fetch(`/api/${accountBase}/me/account/${meta.path}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [meta.bodyKey]: value }),
+        body: JSON.stringify({ [meta.bodyKey]: payloadValue }),
       });
       setEditing(null);
       if (!res.ok) {
@@ -181,6 +215,10 @@ export default function AccountView() {
         <EditFieldModal
           title={FIELD_META[editing].title}
           label={FIELD_META[editing].label}
+          placeholder={FIELD_META[editing].placeholder}
+          maxLength={FIELD_META[editing].maxLength}
+          format={FIELD_META[editing].format}
+          validate={FIELD_META[editing].validate}
           initialValue={profile[editing] ?? ''}
           onClose={() => setEditing(null)}
           onSubmit={(value) => handleSaveField(editing, value)}

@@ -104,8 +104,9 @@ export default function CrewProjectHistory({
 
   // 정렬은 클라이언트에서 (latest = 서버 순서 유지, 평점순 = point 기준)
   const sorted = [...projects].sort((a, b) => {
-    if (sort === 'ratingDesc') return b.point - a.point;
-    if (sort === 'ratingAsc') return a.point - b.point;
+    // point가 null/미평가일 수 있어 0으로 보정 (미보정 시 NaN → 정렬 안 됨)
+    if (sort === 'ratingDesc') return (b.point ?? 0) - (a.point ?? 0);
+    if (sort === 'ratingAsc') return (a.point ?? 0) - (b.point ?? 0);
     return 0;
   });
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
@@ -132,6 +133,7 @@ export default function CrewProjectHistory({
                 options={SORT_OPTIONS}
                 value={sort}
                 onChange={(v) => {
+                  if (!v) return; // 정렬은 해제 불가 (선택된 항목 다시 눌러도 유지)
                   setSort(v);
                   setPage(1); // 정렬 바뀌면 첫 페이지로
                 }}
