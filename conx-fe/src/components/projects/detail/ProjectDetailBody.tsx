@@ -6,6 +6,7 @@ import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
 import { CTAButton } from '@/components/common/CTAButton';
+import DetailGate from '@/components/common/DetailGate/DetailGate';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
 import { useAuth } from '@/context/AuthContext';
@@ -47,7 +48,7 @@ export default function ProjectDetailBody({
   project: ProjectDetail | null;
 }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoggedIn, isLoading } = useAuth();
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
   const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
@@ -162,7 +163,7 @@ export default function ProjectDetailBody({
   }
 
   return (
-    <main data-project-id={projectId}>
+    <main data-project-id={projectId} className="relative">
       {/* 썸네일 — 개수별 분기(없음/1/2/3+ 캐러셀) */}
       <ProjectThumbnails thumbnails={project?.projectImage ?? []} />
 
@@ -281,6 +282,19 @@ export default function ProjectDetailBody({
           duration={5000}
           onClose={() => setToast(null)}
           className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
+        />
+      )}
+      {/* 비로그인 유저 — 상세 콘텐츠를 로그인 게이트로 덮음 */}
+      {!isLoading && !isLoggedIn && (
+        <DetailGate
+          title="상세정보는 로그인 후 확인할 수 있어요"
+          subtitle={
+            <>
+              CONX에 로그인하고 제출 기준, 모집 크루 조건 등<br />
+              협업에 필요한 상세 정보를 확인해 보세요.
+            </>
+          }
+          showAuthActions
         />
       )}
     </main>
