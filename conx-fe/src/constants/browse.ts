@@ -27,7 +27,7 @@ export const PROJECT_TYPE_OPTIONS = [
   { value: 'MARKETING', label: '마케팅 전략/기획' },
   { value: 'UGC', label: '숏폼/UGC' },
   { value: 'SAMPLING', label: '샘플링/오프라인' },
-  { value: 'CAMPAIGN', label: '브랜드 캠페인/프로모션' },
+  { value: 'CAMPAIGN', label: '캠페인/프로모션' },
   { value: 'APPTEST', label: '앱/서비스 테스트' },
   { value: 'COALITION', label: '학생회/동아리 제휴' },
   { value: 'ETC', label: '기타' },
@@ -57,6 +57,18 @@ export const RATING_OPTIONS = [
   { value: '1', label: '1점 이상' },
   { value: '0', label: '0점 이상' },
 ];
+
+export const INDUSTRY_LABEL: Record<string, string> = Object.fromEntries(
+  INDUSTRY_OPTIONS.map(({ value, label }) => [value, label]),
+);
+
+export const PROJECT_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  PROJECT_TYPE_OPTIONS.map(({ value, label }) => [value, label]),
+);
+
+export const CREW_TYPE_LABEL: Record<string, string> = Object.fromEntries(
+  CREW_TYPE_OPTIONS.map(({ value, label }) => [value, label]),
+);
 
 export const SORT_OPTIONS = [
   { value: 'RECENT', label: '최신등록순' },

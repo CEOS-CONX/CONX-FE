@@ -31,6 +31,7 @@ interface ProjectDescriptionSectionProps {
     value: ProjectCreateFormData[K],
   ) => void;
   scheduleError?: string;
+  scheduleErrorFields?: Set<string>;
   onFieldFocus?: (field: string) => void;
 }
 
@@ -38,6 +39,7 @@ export default function ProjectDescriptionSection({
   form,
   onUpdate,
   scheduleError,
+  scheduleErrorFields,
   onFieldFocus,
 }: ProjectDescriptionSectionProps) {
   return (
@@ -153,18 +155,21 @@ export default function ProjectDescriptionSection({
               placeholder="크루 모집 마감일"
               subLabel="모집 마감일"
               value={form.recruitDeadline}
+              error={scheduleErrorFields?.has('recruitDeadline')}
               onChange={(v) => onUpdate('recruitDeadline', v)}
             />
             <DropdownCalendar
               placeholder="프로젝트 시작일"
               subLabel="프로젝트 시작일"
               value={form.projectStartDate}
+              error={scheduleErrorFields?.has('projectStartDate')}
               onChange={(v) => onUpdate('projectStartDate', v)}
             />
             <DropdownCalendar
               placeholder="프로젝트 마감일"
               subLabel="프로젝트 마감일"
               value={form.projectEndDate}
+              error={scheduleErrorFields?.has('projectEndDate')}
               onChange={(v) => onUpdate('projectEndDate', v)}
             />
             <DropdownCalendar

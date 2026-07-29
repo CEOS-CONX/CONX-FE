@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useFunnel } from '@use-funnel/browser';
 import { API_ROUTES } from '@/constants/api';
 import { USER_TYPE, type UserType } from '@/types/auth';
+import { useAuthStore } from '@/stores/auth';
 import SignupCompleteModal from './SignupCompleteModal';
 import StepCompanyProfile, { type CompanyProfileData } from './StepCompanyProfile';
 import StepCrewProfile, { type CrewProfileData } from './StepCrewProfile';
@@ -25,12 +26,14 @@ interface EmailContext {
 interface PasswordContext {
   userType: UserType;
   email: string;
+  password?: string;
   userinfoRegistered?: boolean;
 }
 
 interface ProfileContext {
   userType: UserType;
   email: string;
+  password: string;
   userinfoRegistered: true;
 }
 
@@ -40,6 +43,7 @@ interface SignupFunnelProps {
 
 export default function SignupFunnel({ initialType }: SignupFunnelProps) {
   const router = useRouter();
+  const login = useAuthStore((s) => s.login);
   const [error, setError] = useState('');
   const [completedUserType, setCompletedUserType] = useState<UserType | null>(null);
 
@@ -72,7 +76,7 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
     pushToProfile: (ctx: ProfileContext) => void,
   ) {
     if (context.userinfoRegistered) {
-      pushToProfile({ ...context, userinfoRegistered: true });
+      pushToProfile({ ...context, password: pw, userinfoRegistered: true });
       return;
     }
 
@@ -97,7 +101,7 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
         setError(data.message ?? '회원가입에 실패했습니다.');
         return;
       }
-      pushToProfile({ ...context, userinfoRegistered: true });
+      pushToProfile({ ...context, password: pw, userinfoRegistered: true });
     } catch {
       setError('네트워크 오류가 발생했습니다.');
     }
@@ -124,6 +128,8 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
         setError(result.message ?? '프로필 등록에 실패했습니다.');
         return;
       }
+
+      await login(context.email, context.password);
       setCompletedUserType(context.userType);
     } catch {
       setError('네트워크 오류가 발생했습니다.');
@@ -140,7 +146,7 @@ export default function SignupFunnel({ initialType }: SignupFunnelProps) {
             completedUserType === USER_TYPE.COMPANY ? '/project-create' : '/crew-workspace',
           )
         }
-        onSecondaryAction={() => router.replace('/')}
+        onSecondaryAction={() => router.replace('/mypage')}
         onClose={() => router.replace('/')}
       />
     );

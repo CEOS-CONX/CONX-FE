@@ -19,6 +19,7 @@ interface BaseProps {
   align?: DropdownAlign;
   placeholder?: string;
   subLabel?: string;
+  error?: boolean;
   className?: string;
 }
 
@@ -105,6 +106,7 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     align = 'left',
     placeholder = '날짜 선택',
     subLabel,
+    error = false,
     className,
   } = props;
 
@@ -125,6 +127,10 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     return { year: seed.getFullYear(), month: seed.getMonth() };
   });
   const containerRef = useRef<HTMLDivElement>(null);
+
+  if (!isRange && props.value === undefined && internalSingle !== undefined) {
+    setInternalSingle(undefined);
+  }
 
   const currentSingle = isRange ? undefined : ((props.value as Date | undefined) ?? internalSingle);
   const currentRange = isRange
@@ -206,7 +212,7 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     : isSelected
       ? 'selected'
       : 'closed';
-  const stateClass = TRIGGER_STATE[variant][stateKey];
+  const stateClass = error ? 'border-conx-red-500' : TRIGGER_STATE[variant][stateKey];
   const textClass = isOpen || isSelected ? 'text-conx-gray-600' : 'text-conx-gray-450';
 
   let triggerText: string;

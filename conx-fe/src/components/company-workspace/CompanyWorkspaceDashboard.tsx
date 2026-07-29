@@ -43,6 +43,8 @@ const MONTH_LABELS = [
   '12월',
 ];
 
+const EXCLUDED_TODO_STATUSES = new Set(['DRAFT', 'EXPIRED']);
+
 const TODO_STATUS_MAP: Record<
   string,
   { indicatorType: TagIndicatorType; indicatorLabel: string; taskName: string }
@@ -53,6 +55,11 @@ const TODO_STATUS_MAP: Record<
     indicatorType: 'blue',
     indicatorLabel: '확인 필요',
     taskName: '지원 크루 최종 매칭',
+  },
+  CONTRACT_PENDING: {
+    indicatorType: 'green',
+    indicatorLabel: '계약 대기',
+    taskName: '계약 진행',
   },
 };
 
@@ -133,6 +140,7 @@ export default function CompanyWorkspaceDashboard() {
         if (p.todoProjectsStatus) {
           const allTasks: WorkspaceTask[] = [];
           for (const group of p.todoProjectsStatus) {
+            if (EXCLUDED_TODO_STATUSES.has(group.status)) continue;
             const mapping = TODO_STATUS_MAP[group.status] ?? {
               indicatorType: 'gray',
               indicatorLabel: group.status,

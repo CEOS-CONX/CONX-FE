@@ -8,10 +8,16 @@ interface BrandInfoSectionProps {
     key: K,
     value: ProjectCreateFormData[K],
   ) => void;
+  onUseMyInfo?: (checked: boolean) => void;
   onFieldFocus?: (field: string) => void;
 }
 
-export default function BrandInfoSection({ form, onUpdate, onFieldFocus }: BrandInfoSectionProps) {
+export default function BrandInfoSection({
+  form,
+  onUpdate,
+  onUseMyInfo,
+  onFieldFocus,
+}: BrandInfoSectionProps) {
   return (
     <section className="flex w-full flex-col gap-7">
       <h2 className="text-kor-heading-1-bold text-conx-common-black">브랜드 정보</h2>
@@ -19,7 +25,9 @@ export default function BrandInfoSection({ form, onUpdate, onFieldFocus }: Brand
       <div className="flex flex-col gap-5.5">
         <RadioButton
           checked={form.useMyInfo}
-          onChange={(checked) => onUpdate('useMyInfo', checked)}
+          onChange={(checked) =>
+            onUseMyInfo ? onUseMyInfo(checked) : onUpdate('useMyInfo', checked)
+          }
         >
           내 정보 그대로 넣기
         </RadioButton>

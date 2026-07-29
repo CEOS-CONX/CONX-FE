@@ -3,12 +3,21 @@
 import { memo, useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import { Card } from '@/components/common/Card';
+import { Toast } from '@/components/common/Toast';
 import { DropdownCalendar } from '@/components/common/DropdownCalendar';
 import type { DateRange } from '@/components/common/DropdownCalendar';
 import { DropdownCompact } from '@/components/common/DropdownCompact';
 import { SearchBar } from '@/components/common/SearchBar';
 import { API_ROUTES } from '@/constants/api';
-import { INDUSTRY_OPTIONS, PROJECT_TYPE_OPTIONS, SORT_OPTIONS } from '@/constants/browse';
+import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
+import {
+  INDUSTRY_OPTIONS,
+  INDUSTRY_LABEL,
+  PROJECT_TYPE_OPTIONS,
+  PROJECT_TYPE_LABEL,
+  SORT_OPTIONS,
+} from '@/constants/browse';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import useDebouncedValue from '@/hooks/useDebouncedValue';
 
@@ -43,15 +52,29 @@ const SKELETON_ITEMS = Array.from({ length: 12 }, (_, i) => (
 
 const IMMINENT_TAG = { type: 'red' as const, label: '마감임박' };
 
-const ProjectCard = memo(function ProjectCard({ project }: { project: Project }) {
+const ProjectCard = memo(function ProjectCard({
+  project,
+  onUnscrap,
+  onForbidden,
+}: {
+  project: Project;
+  onUnscrap?: () => void;
+  onForbidden?: () => void;
+}) {
+  const { user } = useAuth();
   const handleScrapChange = useCallback(
     async (scraped: boolean) => {
+      if (user?.userType === USER_TYPE.COMPANY) {
+        onForbidden?.();
+        throw new Error('forbidden');
+      }
       const res = await fetch(`/api/projects/${project.projectId}/bookmarks`, {
         method: scraped ? 'POST' : 'DELETE',
       });
       if (!res.ok) throw new Error('scrap failed');
+      if (!scraped) onUnscrap?.();
     },
-    [project.projectId],
+    [project.projectId, onUnscrap, onForbidden, user?.userType],
   );
 
   return (
@@ -64,8 +87,8 @@ const ProjectCard = memo(function ProjectCard({ project }: { project: Project })
         onScrapChange={handleScrapChange}
         title={project.projectName}
         subtitle={project.companyName}
-        category1={project.category}
-        category2={project.projectType}
+        category1={INDUSTRY_LABEL[project.category] ?? project.category}
+        category2={PROJECT_TYPE_LABEL[project.projectType] ?? project.projectType}
         startDate={formatDate(project.projectStartDate)}
         endDate={formatDate(project.projectDeadline)}
       />
@@ -117,6 +140,16 @@ export default function BrowseProjectsClient({
     initialIsLastPage,
     params: filterParams,
   });
+
+  const [toastMessage, setToastMessage] = useState('');
+
+  const handleUnscrap = useCallback(() => {
+    setToastMessage('스크랩을 취소했습니다');
+  }, []);
+
+  const handleForbidden = useCallback(() => {
+    setToastMessage('프로젝트 스크랩은 크루만 할 수 있습니다.');
+  }, []);
 
   useEffect(() => {
     const url = `${window.location.pathname}?${filterParams}`;
@@ -170,7 +203,14 @@ export default function BrowseProjectsClient({
       <div className="mt-8 grid grid-cols-4 gap-x-6 gap-y-18.5">
         {isLoading
           ? SKELETON_ITEMS
-          : items.map((project) => <ProjectCard key={project.projectId} project={project} />)}
+          : items.map((project) => (
+              <ProjectCard
+                key={project.projectId}
+                project={project}
+                onUnscrap={handleUnscrap}
+                onForbidden={handleForbidden}
+              />
+            ))}
       </div>
 
       {isLoadingMore && (
@@ -180,6 +220,8 @@ export default function BrowseProjectsClient({
       )}
 
       {hasMore && <div ref={sentinelRef} className="h-1" />}
+
+      {toastMessage && <Toast message={toastMessage} onClose={() => setToastMessage('')} />}
     </main>
   );
 }
