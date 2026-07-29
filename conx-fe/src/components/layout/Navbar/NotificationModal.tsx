@@ -43,14 +43,23 @@ function routeForNotification(n: NotificationItem, isCompany: boolean): string |
       break;
     case 'RESULT_UPLOAD_CLOSE_TO_END': // 크루 제출 마감 임박 → 작업 상세
     case 'LATE_FOR_SUBMIT_DEADLINE':
+    case 'PROJECT_SELECTED': // 크루 선정됨 → 모집상세는 선정 후 빈 화면이라 크루 워크스페이스로
       if (!isCompany && n.projectId) return `/crew-workspace/project-tasks/${n.projectId}`;
+      break;
+    case 'PROJECT_CLOSE_TO_END': // 프로젝트 활동종료일 마감 임박 → 역할별 워크스페이스
+      if (n.projectId) {
+        return isCompany
+          ? `/company-workspace/project-status/${n.projectId}`
+          : `/crew-workspace/project-tasks/${n.projectId}`;
+      }
       break;
     case 'ADJUSTMENT_DONE': // 정산 완료 → 역할별 정산
       return isCompany ? '/company-workspace/settlement' : '/crew-workspace/settlement';
+    case 'PROJECT_REJECTED': // 선정 안 됨 → 이동할 페이지 없음(알림만)
     case 'MAIL': // 대상 페이지 없음
       return null;
   }
-  // 나머지(모집마감/문의/답변/선정/거절/북마크마감/프로젝트마감) + 위 fallback → 프로젝트 상세(Q&A 포함)
+  // 나머지 '모집 중' 프로젝트 관련(모집마감임박·문의등록·답변등록·북마크프로젝트마감) → 공개 프로젝트 상세(Q&A 포함)
   return n.projectId ? `/projects/${n.projectId}` : null;
 }
 
