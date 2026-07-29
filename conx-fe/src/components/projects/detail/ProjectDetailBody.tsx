@@ -214,8 +214,8 @@ export default function ProjectDetailBody({
               {project?.brandName ?? '브랜드명'}
             </p>
 
-            {/* 탭 — sticky (top-0, 흰 배경으로 아래로 지나가는 내용 덮음) */}
-            <div className="bg-conx-common-white sticky top-0 z-20 mt-8">
+            {/* 탭 — sticky. 네브바(72px) 아래에 붙게 top-[72px] (top-0이면 스크롤 시 네브바와 겹침) */}
+            <div className="bg-conx-common-white sticky top-[72px] z-20 mt-8">
               <ProjectTabs
                 tabs={SECTIONS}
                 activeValue={active}
@@ -233,7 +233,7 @@ export default function ProjectDetailBody({
                   ref={(el) => {
                     sectionRefs.current[value] = el;
                   }}
-                  className={`scroll-mt-[80px] ${i > 0 ? 'mt-20' : ''}`}
+                  className={`scroll-mt-[172px] ${i > 0 ? 'mt-20' : ''}`}
                 >
                   <Comp project={project} />
                 </section>
@@ -242,7 +242,7 @@ export default function ProjectDetailBody({
           </div>
 
           {/* 오른쪽 CTA — sticky (탭과 함께 top-0에 고정) */}
-          <aside className="sticky top-0 z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
+          <aside className="sticky top-[72px] z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
             {applied ? (
               // 지원 완료: 완료 버튼(비활성) + 지원서 보기 → 읽기전용 지원서
               <>
