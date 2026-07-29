@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import ProjectCreateNavbar from '@/components/project-create/ProjectCreateNavbar';
 import WritingTipButton from '@/components/project-create/WritingTipButton';
@@ -28,6 +28,35 @@ export default function ProjectCreateForm() {
   const [activeField, setActiveField] = useState<string | undefined>();
   const [hasDraft, setHasDraft] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [scheduleError, setScheduleError] = useState('');
+  const [scheduleErrorFields, setScheduleErrorFields] = useState<Set<string>>(new Set());
+
+  const myInfoRef = useRef<{ brandName: string; name: string; email: string } | null>(null);
+
+  useEffect(() => {
+    async function prefetchMyInfo() {
+      try {
+        const [profileRes, accountRes] = await Promise.all([
+          fetch('/api/companies/me/profile'),
+          fetch('/api/companies/me/account'),
+        ]);
+        const [profileData, accountData] = await Promise.all([
+          profileRes.json(),
+          accountRes.json(),
+        ]);
+        if (profileRes.ok && accountRes.ok) {
+          myInfoRef.current = {
+            brandName: profileData.payload?.brandName ?? '',
+            name: accountData.payload?.name ?? '',
+            email: accountData.payload?.email ?? '',
+          };
+        }
+      } catch {
+        /* noop — 체크 시 빈 값으로 처리 */
+      }
+    }
+    prefetchMyInfo();
+  }, []);
 
   // 진입 시 임시저장 존재 여부 확인
   useEffect(() => {
@@ -38,12 +67,62 @@ export default function ProjectCreateForm() {
     check();
   }, []);
 
-  function updateField<K extends keyof ProjectCreateFormData>(
-    key: K,
-    value: ProjectCreateFormData[K],
-  ) {
-    setForm((prev) => ({ ...prev, [key]: value }));
-  }
+  const updateField = useCallback(
+    <K extends keyof ProjectCreateFormData>(key: K, value: ProjectCreateFormData[K]) => {
+      setForm((prev) => {
+        const next = { ...prev, [key]: value };
+
+        if (key === 'projectEndDate' && next.projectStartDate && next.projectEndDate) {
+          if (next.projectEndDate.getTime() < next.projectStartDate.getTime()) {
+            next.projectEndDate = undefined;
+            setScheduleError('프로젝트 마감일은 시작일 이후여야 합니다.');
+            setScheduleErrorFields(new Set(['projectEndDate']));
+            return next;
+          }
+        }
+        if (key === 'projectStartDate' && next.recruitDeadline && next.projectStartDate) {
+          if (next.projectStartDate.getTime() < next.recruitDeadline.getTime()) {
+            next.projectStartDate = undefined;
+            setScheduleError('프로젝트 시작일은 크루 모집 마감일 이후여야 합니다.');
+            setScheduleErrorFields(new Set(['projectStartDate']));
+            return next;
+          }
+        }
+
+        if ((key === 'brandName' || key === 'managerName' || key === 'email') && next.useMyInfo) {
+          next.useMyInfo = false;
+        }
+
+        if (key === 'projectStartDate' || key === 'projectEndDate' || key === 'recruitDeadline') {
+          setScheduleErrorFields((prev) => {
+            if (prev.size > 0) {
+              setScheduleError('');
+              return new Set();
+            }
+            return prev;
+          });
+        }
+
+        return next;
+      });
+    },
+    [],
+  );
+
+  const handleUseMyInfo = useCallback(
+    (checked: boolean) => {
+      updateField('useMyInfo', checked);
+      if (checked && myInfoRef.current) {
+        setForm((prev) => ({
+          ...prev,
+          brandName: myInfoRef.current!.brandName,
+          managerName: myInfoRef.current!.name,
+          email: myInfoRef.current!.email,
+        }));
+      }
+    },
+    [updateField],
+  );
 
   async function handleSaveDraft() {
     try {
@@ -102,10 +181,17 @@ export default function ProjectCreateForm() {
         onClick={() => setActiveField(undefined)}
       >
         <div className="bg-conx-common-white mx-auto flex w-295 flex-col gap-27.5 rounded-md px-30.25 pt-17 pb-15">
-          <BrandInfoSection form={form} onUpdate={updateField} onFieldFocus={setActiveField} />
+          <BrandInfoSection
+            form={form}
+            onUpdate={updateField}
+            onUseMyInfo={handleUseMyInfo}
+            onFieldFocus={setActiveField}
+          />
           <ProjectDescriptionSection
             form={form}
             onUpdate={updateField}
+            scheduleError={scheduleError}
+            scheduleErrorFields={scheduleErrorFields}
             onFieldFocus={setActiveField}
           />
           <CrewRequirementsSection
@@ -131,7 +217,7 @@ export default function ProjectCreateForm() {
         <ProjectSubmitModal
           projectTitle={form.projectName}
           submissionDate={formatSubmissionDate()}
-          outcomeCount={form.outcomes.length}
+          outcomeCount={form.outcomes.reduce((sum, o) => sum + o.count, 0)}
           subsidy={form.subsidy}
           onSubmit={handleConfirmSubmit}
           onClose={() => setShowSubmitModal(false)}

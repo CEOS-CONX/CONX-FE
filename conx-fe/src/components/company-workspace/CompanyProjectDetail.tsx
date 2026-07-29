@@ -70,7 +70,7 @@ interface ProjectDetailPayload {
 
 const PROGRESS_LABELS = ['매칭 완료', '진행 중', '진행 완료', '제출 완료', '정산 완료'];
 
-function buildProgressSteps(common: ProjectCommon): ProgressStep[] {
+function buildProgressSteps(common: ProjectCommon, status: string): ProgressStep[] {
   const dates = [
     common.crewSelectedDate,
     common.projectStartDate,
@@ -89,7 +89,7 @@ function buildProgressSteps(common: ProjectCommon): ProgressStep[] {
     'ADJUSTED',
     'DONE',
   ];
-  const statusIdx = statusOrder.indexOf(common.projectStatus);
+  const statusIdx = statusOrder.indexOf(status);
 
   // 매칭 전이면 모두 notStarted
   if (statusIdx <= 1) {
@@ -100,10 +100,9 @@ function buildProgressSteps(common: ProjectCommon): ProgressStep[] {
     }));
   }
 
-  // 매칭 후: stepIdx 기준으로 completed/inProgress/notStarted
-  const stepMapping = [2, 3, 4, 5, 7]; // PROGRESS, WAITING_RESULT, INSPECTION, ADJUSTING, DONE
+  const stepStart = [1, 2, 3, 5, 7]; // CONTRACT_PENDING, PROGRESS, WAITING_RESULT, ADJUSTING, DONE
   return PROGRESS_LABELS.map((label, i) => {
-    const threshold = stepMapping[i];
+    const threshold = stepStart[i];
     let type: 'completed' | 'inProgress' | 'notStarted';
     if (statusIdx > threshold) type = 'completed';
     else if (statusIdx === threshold) type = 'inProgress';
@@ -179,7 +178,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   const { common, applications = [], inspections = [] } = payload;
   const isMatched = !!common.crewId;
 
-  const progressSteps = buildProgressSteps(common);
+  const progressSteps = buildProgressSteps(common, payload.status);
   const criteriaItems = common.criteria.map((c) => ({
     label: `${c.finalResult} ${c.numberOfResult}건`,
     checked: c.done,
@@ -307,6 +306,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
               <SettlementStatusSection
                 status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
                 amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
+                readonly
               />
               <ResultsTableSection
                 results={results}

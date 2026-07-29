@@ -18,6 +18,7 @@ html {
 @custom-variant large (@media (width < 1200px));
 @custom-variant xlarge (@media (width >= 1200px) and (width < 1600px));
 @custom-variant xxlarge (@media (width >= 1600px));
+@custom-variant mobile (@media (width < 480px));
 
 @theme {
   /* ========== Colors ========== */

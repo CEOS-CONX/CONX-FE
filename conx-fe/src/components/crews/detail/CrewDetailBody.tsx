@@ -10,6 +10,8 @@ import IconShare from '@/assets/icons/icon_share.svg';
 import IconStar from '@/assets/icons/icon_star_fill.svg';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
+import { useAuth } from '@/context/AuthContext';
+import { USER_TYPE } from '@/types/auth';
 // 파일/링크 카드·미리보기는 프로젝트 상세와 동일 → 재사용 (추후 common 승격 고려)
 import FilePreviewModal from '@/components/projects/detail/FilePreviewModal';
 import LinkCard from '@/components/projects/detail/LinkCard';
@@ -175,6 +177,7 @@ export default function CrewDetailBody({
   crew: CrewDetail | null;
 }) {
   const router = useRouter();
+  const { user } = useAuth();
   const [scrapped, setScrapped] = useState(crew?.bookmarked ?? false); // 북마크 여부(서버 초기값)
   const [toast, setToast] = useState<{
     message: string;
@@ -213,6 +216,10 @@ export default function CrewDetailBody({
   }
   // 스크랩(북마크) — 초기 상태는 서버(bookmarked). 낙관적 토글 → PATCH(등록·해제, 기업 전용). 실패 시 롤백
   async function handleScrap() {
+    if (user?.userType === USER_TYPE.CREW) {
+      setToast({ message: '크루 스크랩은 기업만 할 수 있습니다.' });
+      return;
+    }
     const next = !scrapped;
     setScrapped(next);
     try {
@@ -224,9 +231,11 @@ export default function CrewDetailBody({
           actionLabel: '스크랩 보기',
           onAction: () => router.push('/scrap'),
         });
+      } else {
+        setToast({ message: '스크랩을 취소했습니다' });
       }
     } catch {
-      setScrapped(!next); // 실패 시 원상복구
+      setScrapped(!next);
       setToast({ message: '스크랩 처리에 실패했습니다. 다시 시도해 주세요.' });
     }
   }

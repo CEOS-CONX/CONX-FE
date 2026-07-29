@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import IconCompleted from '@/assets/icons/icon_completed.svg';
 import IconArrowRightStroke from '@/assets/icons/icon_arrowRight_stroke.svg';
+import Link from 'next/link';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { RadioButton } from '@/components/common/RadioButton';
@@ -71,11 +72,13 @@ export default function StepPasswordAgreement({ email, onNext }: StepPasswordAgr
   const canSubmit = passwordValid && passwordsMatch && allRequired;
 
   return (
-    <div className="flex flex-col items-center gap-15.5">
+    <div className="flex flex-col items-center gap-15.5 pb-100">
       {/* 헤더 + 폼 필드 */}
       <div className="flex w-full flex-col gap-13">
         <div className="flex flex-col gap-9">
-          <LogoConxTitle className="h-6.25 w-28" />
+          <Link href="/">
+            <LogoConxTitle className="h-6.25 w-28" />
+          </Link>
           <h1 className="text-kor-title-1-bold text-conx-common-black">비밀번호를 입력해주세요</h1>
         </div>
 

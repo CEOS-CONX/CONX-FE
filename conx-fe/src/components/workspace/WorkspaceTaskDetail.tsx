@@ -24,6 +24,9 @@ interface ProjectCommon {
   brandName: string;
   managerName: string;
   managerEmail: string;
+  subsidy: number | null;
+  projectSettlementId: number | null;
+  settlementStatus: string | null;
   crewSelectedDate: string | null;
   projectStartDate: string | null;
   projectEndDate: string | null;
@@ -200,7 +203,31 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
           )}
           {view === 'table' && (
             <>
-              <SettlementStatusSection status="pending" amount="0" />
+              <SettlementStatusSection
+                status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
+                amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
+                onStatusChange={async (value) => {
+                  if (!common.projectSettlementId) return;
+                  const paymentStatus =
+                    value === 'completed' ? 'PAYMENT_CONFIRMED' : 'BEFORE_PAYMENT';
+                  try {
+                    const res = await fetch(
+                      `/api/crews/settlements/${common.projectSettlementId}/payment-status`,
+                      {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentStatus }),
+                      },
+                    );
+                    if (!res.ok) throw new Error();
+                    setToastMessage('정산 상태가 변경되었습니다.');
+                    setShowToast(true);
+                  } catch {
+                    setToastMessage('정산 상태 변경에 실패했습니다.');
+                    setShowToast(true);
+                  }
+                }}
+              />
               <ResultsTableSection
                 results={results}
                 onResultClick={handleResultClick}

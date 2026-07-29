@@ -52,10 +52,7 @@ export default function MatchConfirmedModal({
   }, [onConfirm]);
 
   return (
-    <div
-      className="bg-conx-opacity-gray-30 z-conx-modal-backdrop fixed inset-0 flex justify-center"
-      style={{ paddingTop: 180 }}
-    >
+    <div className="bg-conx-opacity-gray-30 z-conx-modal-backdrop fixed inset-0 flex items-center justify-center">
       <div
         ref={modalRef}
         role="dialog"

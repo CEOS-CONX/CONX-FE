@@ -147,6 +147,12 @@ export default memo(function Navbar() {
                 <Link
                   key={label}
                   href={href}
+                  onClick={(e) => {
+                    if (pathname === href) {
+                      e.preventDefault();
+                      window.location.href = href;
+                    }
+                  }}
                   className={`${NAV_LINK_BASE} ${activeLink === label ? 'text-kor-body-1-bold' : 'text-kor-body-1-semibold'}`}
                 >
                   {label}

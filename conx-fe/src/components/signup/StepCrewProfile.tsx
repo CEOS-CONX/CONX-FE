@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { DropdownForm } from '@/components/common/DropdownForm';
@@ -46,10 +47,12 @@ export default function StepCrewProfile({ onNext }: StepCrewProfileProps) {
   }
 
   return (
-    <div className="flex flex-col items-center gap-15.5">
+    <div className="flex flex-col items-center gap-15.5 pb-100">
       <div className="flex w-full flex-col gap-13">
         <div className="flex flex-col gap-9">
-          <LogoConxTitle className="h-6.25 w-28" />
+          <Link href="/">
+            <LogoConxTitle className="h-6.25 w-28" />
+          </Link>
           <h1 className="text-kor-title-1-bold text-conx-common-black">
             프로필에 등록할 기본정보를
             <br />

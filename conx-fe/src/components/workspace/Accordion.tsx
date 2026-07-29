@@ -10,7 +10,6 @@ interface AccordionProps {
   defaultOpen?: boolean;
   children?: React.ReactNode;
   className?: string;
-  openClassName?: string;
 }
 
 export default function Accordion({
@@ -19,12 +18,11 @@ export default function Accordion({
   defaultOpen = true,
   children,
   className,
-  openClassName,
 }: AccordionProps) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className={`${className ?? ''} ${isOpen && openClassName ? openClassName : ''}`}>
+    <div className={className}>
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
