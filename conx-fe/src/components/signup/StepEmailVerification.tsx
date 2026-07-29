@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import LogoConxTitle from '@/assets/icons/logo_conx_title.svg';
 import { CTAButton } from '@/components/common/CTAButton';
 import { TextFieldMembership } from '@/components/common/TextFieldMembership';
@@ -127,7 +128,9 @@ export default function StepEmailVerification({
     >
       <div className="flex w-full flex-col gap-13">
         <div className="flex flex-col gap-9">
-          <LogoConxTitle className="h-6.25 w-28" />
+          <Link href="/">
+            <LogoConxTitle className="h-6.25 w-28" />
+          </Link>
           <h1 className="text-kor-title-1-bold text-conx-common-black">
             가입에 사용할 이메일을
             <br />

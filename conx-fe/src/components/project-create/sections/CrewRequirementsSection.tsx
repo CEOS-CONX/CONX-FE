@@ -45,7 +45,7 @@ export default function CrewRequirementsSection({
           </div>
           <TextFieldNumeric
             suffix="명"
-            label="참여 인원수"
+            label="최소 참여 인원수"
             required
             emptyError="1명 이상의 인원수를 입력해주세요"
             value={form.memberCount}

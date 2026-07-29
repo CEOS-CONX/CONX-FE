@@ -166,9 +166,21 @@ function OutcomeCard({
                   className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 w-[5.25em] shrink-0 outline-none"
                 />
                 <DividerVertical />
-                <span className="text-kor-body-1-semibold text-conx-gray-300 shrink-0">
-                  {item.count}개
-                </span>
+                <div
+                  className={`text-kor-body-1-semibold flex shrink-0 items-center ${item.count > 0 ? 'text-conx-common-black' : 'text-conx-gray-300'}`}
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    value={item.count || ''}
+                    placeholder="0"
+                    onChange={(e) =>
+                      onUpdate(item.id, 'count', Math.max(0, parseInt(e.target.value, 10) || 0))
+                    }
+                    className="placeholder:text-conx-gray-300 w-[2em] [appearance:textfield] text-right text-inherit outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                  />
+                  <span>개</span>
+                </div>
                 <DividerVertical />
                 <input
                   type="text"
@@ -201,7 +213,9 @@ function OutcomeCard({
                   {item.contentType || '콘텐츠 유형'}
                 </span>
                 <DividerVertical />
-                <span className="text-kor-body-1-semibold text-conx-gray-300 shrink-0 whitespace-nowrap">
+                <span
+                  className={`text-kor-body-1-semibold shrink-0 whitespace-nowrap ${item.count > 0 ? 'text-conx-common-black' : 'text-conx-gray-300'}`}
+                >
                   {item.count}개
                 </span>
                 <DividerVertical />

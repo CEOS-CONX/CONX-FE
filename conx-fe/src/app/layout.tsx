@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import localFont from 'next/font/local';
 import { SITE_URL } from '@/lib/site';
 import { AuthProvider } from '@/context/AuthContext';
+import MobileGate from '@/components/layout/MobileGate/MobileGate';
+import FloatingProjectCTA from '@/components/common/FloatingProjectCTA/FloatingProjectCTA';
 import './globals.css';
 
 // OG 이미지 경로 (public/images/OG_image.png — 1200×630 PNG)
@@ -95,7 +97,15 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${suit.variable} ${plusJakartaSans.variable} h-full antialiased`}>
       <body className="font-suit flex min-h-full flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <div className="mobile:flex hidden min-h-dvh">
+          <MobileGate />
+        </div>
+        <div className="mobile:hidden flex min-h-full flex-1 flex-col">
+          <AuthProvider>
+            {children}
+            <FloatingProjectCTA />
+          </AuthProvider>
+        </div>
       </body>
     </html>
   );
