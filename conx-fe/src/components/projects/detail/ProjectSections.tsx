@@ -418,6 +418,8 @@ export function QnaSection({ project }: SectionProps) {
             id="qna-content"
             label="문의글"
             required
+            multiline
+            rows={2}
             placeholder="내용을 입력해주세요"
             value={content}
             onChange={(e) => {
