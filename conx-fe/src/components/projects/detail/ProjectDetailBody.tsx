@@ -6,6 +6,7 @@ import IconBookmarkFill from '@/assets/icons/icon_scrap_fill_black.svg';
 import IconBookmark from '@/assets/icons/icon_scrap_stroke_black.svg';
 import IconShare from '@/assets/icons/icon_share.svg';
 import { CTAButton } from '@/components/common/CTAButton';
+import DetailGate from '@/components/common/DetailGate/DetailGate';
 import { Tag } from '@/components/common/Tag';
 import { Toast } from '@/components/common/Toast';
 import { useAuth } from '@/context/AuthContext';
@@ -47,7 +48,30 @@ export default function ProjectDetailBody({
   project: ProjectDetail | null;
 }) {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isLoggedIn, isLoading } = useAuth();
+  const isCompany = user?.userType === USER_TYPE.COMPANY;
+  const [myCompanyId, setMyCompanyId] = useState<number>(); // 기업 자사/타사 판정용
+
+  // 기업 로그인 시 내 companyId 조회 → project.companyId와 비교
+  useEffect(() => {
+    if (!isCompany) return;
+    let active = true;
+    fetch('/api/companies/me/profile')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (active && d?.payload?.companyId != null) setMyCompanyId(d.payload.companyId);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [isCompany]);
+
+  // 게이트: 비로그인(로그인 유도) / 기업이 타사 프로젝트 조회(크루만 열람 안내). 크루·자사 프로젝트는 게이트 없음
+  const showLoginGate = !isLoading && !isLoggedIn;
+  const showCompanyGate =
+    isCompany && project != null && myCompanyId != null && project.companyId !== myCompanyId;
+  const gated = showLoginGate || showCompanyGate;
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
   const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
@@ -162,7 +186,11 @@ export default function ProjectDetailBody({
   }
 
   return (
-    <main data-project-id={projectId}>
+    <main
+      data-project-id={projectId}
+      // 게이트 뷰: 게이트 하단이 푸터에 맞도록 main을 고정 높이로 자름 (772 + 1075 − navbar 72 = 1775)
+      className={`relative ${gated ? 'h-[1775px] overflow-hidden' : ''}`}
+    >
       {/* 썸네일 — 개수별 분기(없음/1/2/3+ 캐러셀) */}
       <ProjectThumbnails thumbnails={project?.projectImage ?? []} />
 
@@ -214,8 +242,8 @@ export default function ProjectDetailBody({
               {project?.brandName ?? '브랜드명'}
             </p>
 
-            {/* 탭 — sticky (top-0, 흰 배경으로 아래로 지나가는 내용 덮음) */}
-            <div className="bg-conx-common-white sticky top-0 z-20 mt-8">
+            {/* 탭 — sticky. 네브바(72px) 아래에 붙게 top-[72px] (top-0이면 스크롤 시 네브바와 겹침) */}
+            <div className="bg-conx-common-white sticky top-[72px] z-20 mt-8">
               <ProjectTabs
                 tabs={SECTIONS}
                 activeValue={active}
@@ -233,7 +261,7 @@ export default function ProjectDetailBody({
                   ref={(el) => {
                     sectionRefs.current[value] = el;
                   }}
-                  className={`scroll-mt-[80px] ${i > 0 ? 'mt-20' : ''}`}
+                  className={`scroll-mt-[172px] ${i > 0 ? 'mt-20' : ''}`}
                 >
                   <Comp project={project} />
                 </section>
@@ -242,7 +270,7 @@ export default function ProjectDetailBody({
           </div>
 
           {/* 오른쪽 CTA — sticky (탭과 함께 top-0에 고정) */}
-          <aside className="sticky top-0 z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
+          <aside className="sticky top-[72px] z-20 flex w-[340px] shrink-0 flex-col items-end gap-3 self-start pt-8">
             {applied ? (
               // 지원 완료: 완료 버튼(비활성) + 지원서 보기 → 읽기전용 지원서
               <>
@@ -283,6 +311,23 @@ export default function ProjectDetailBody({
           className="z-conx-toast fixed bottom-15 left-1/2 -translate-x-1/2"
         />
       )}
+      {/* 비로그인 유저 — 상세 콘텐츠를 로그인 게이트로 덮음 */}
+      {gated &&
+        (showLoginGate ? (
+          <DetailGate
+            title="상세정보는 로그인 후 확인할 수 있어요"
+            subtitle={
+              <>
+                CONX에 로그인하고 제출 기준, 모집 크루 조건 등<br />
+                협업에 필요한 상세 정보를 확인해 보세요.
+              </>
+            }
+            showAuthActions
+          />
+        ) : (
+          // 기업이 타사 프로젝트 조회 — 아이콘 + 타이틀만
+          <DetailGate title="상세 프로젝트 내용은 크루만 볼 수 있습니다." />
+        ))}
     </main>
   );
 }

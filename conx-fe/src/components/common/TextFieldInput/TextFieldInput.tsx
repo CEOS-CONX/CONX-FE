@@ -8,6 +8,10 @@ interface TextFieldInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   helperText?: string;
   required?: boolean;
   error?: string;
+  /** 여러 줄 입력(textarea)으로 렌더 */
+  multiline?: boolean;
+  /** multiline일 때 보이는 줄 수 (기본 2) */
+  rows?: number;
 }
 
 // 고정 너비 (늘어나거나 줄어들지 않음)
@@ -26,6 +30,8 @@ export default function TextFieldInput({
   error,
   id,
   className,
+  multiline,
+  rows = 2,
   ...props
 }: TextFieldInputProps) {
   const hasError = !!error;
@@ -57,11 +63,20 @@ export default function TextFieldInput({
         </div>
       )}
 
-      <input
-        id={id}
-        className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full rounded-md border p-4 outline-none ${inputStateClass}`}
-        {...props}
-      />
+      {multiline ? (
+        <textarea
+          id={id}
+          rows={rows}
+          className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full resize-none rounded-md border p-4 outline-none ${inputStateClass}`}
+          {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+        />
+      ) : (
+        <input
+          id={id}
+          className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full rounded-md border p-4 outline-none ${inputStateClass}`}
+          {...props}
+        />
+      )}
 
       {hasError && (
         <p className="text-kor-label-1-medium text-conx-red-500 flex items-center gap-1">

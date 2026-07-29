@@ -129,7 +129,9 @@ export default memo(function Navbar() {
   }, [notificationOpen, closeNotification]);
 
   return (
-    <header className="bg-conx-common-white z-conx-dropdown sticky top-0 w-full">
+    <header
+      className={`bg-conx-common-white sticky top-0 w-full ${notificationOpen ? 'z-conx-header' : 'z-conx-dropdown'}`}
+    >
       <div className="xlarge:px-14 large:px-9 mx-auto max-w-400 min-w-248 px-16.5">
         <nav className="flex items-center gap-15 px-6 py-4">
           {/* Logo */}

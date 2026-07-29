@@ -68,6 +68,7 @@ export default function CrewProfilePage() {
   // 기본 정보
   const [profileSrc, setProfileSrc] = useState<string>(); // 화면 미리보기
   const [profileImageUrl, setProfileImageUrl] = useState<string>(); // 저장용 S3 URL
+  const [crewId, setCrewId] = useState<number>(); // 기본 프로필 이미지 배정용 seed
   const [toast, setToast] = useState<{
     message: string;
     actionLabel?: string;
@@ -119,6 +120,7 @@ export default function CrewProfilePage() {
         const data = await res.json();
         const p = data.payload;
         if (!p || cancelled) return;
+        setCrewId(p.crewId);
         setCrewName(p.crewName ?? '');
         setCrewType(p.crewType ?? '');
         setActivity(p.activityField ?? '');
@@ -335,6 +337,7 @@ export default function CrewProfilePage() {
         <SectionTitle>기본 정보</SectionTitle>
         <ProfileImage
           src={profileSrc}
+          seed={crewId}
           onSelect={async (f) => {
             setProfileSrc(URL.createObjectURL(f)); // 즉시 미리보기
             try {
