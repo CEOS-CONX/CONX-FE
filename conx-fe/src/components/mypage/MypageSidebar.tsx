@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuthStore } from '@/stores/auth';
 import { useMypageIsCompany, useMypagePreviewAs } from './useMypageRole';
 
 const NAV_BASE = 'block cursor-pointer transition-colors px-3 py-2.5';
@@ -13,9 +14,17 @@ const NAV_STATE = {
 // ?as= 미리보기 파라미터를 링크에 유지해 페이지 이동해도 크루/기업 뷰가 풀리지 않게 함
 export default function MypageSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const isCompany = useMypageIsCompany();
   const as = useMypagePreviewAs();
   const suffix = as ? `?as=${as}` : '';
+  const logout = useAuthStore((s) => s.logout);
+
+  // 로그아웃 — 페이지 이동이 아닌 액션. 다른 로그아웃 버튼(AccountView)과 동일 로직
+  async function handleLogout() {
+    await logout();
+    router.push('/');
+  }
 
   const NAV = [
     { path: '/mypage', label: isCompany ? '기업 프로필' : '크루 프로필' },
@@ -40,6 +49,16 @@ export default function MypageSidebar() {
               </li>
             );
           })}
+          {/* 로그아웃 — 페이지 이동이 아닌 액션. 디자인은 다른 항목과 동일(idle) */}
+          <li>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={`${NAV_BASE} text-left ${NAV_STATE.idle}`}
+            >
+              로그아웃
+            </button>
+          </li>
         </ul>
       </nav>
     </aside>
