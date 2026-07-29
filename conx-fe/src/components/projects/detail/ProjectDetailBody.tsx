@@ -72,8 +72,6 @@ export default function ProjectDetailBody({
   const showCompanyGate =
     isCompany && project != null && myCompanyId != null && project.companyId !== myCompanyId;
   const gated = showLoginGate || showCompanyGate;
-  // 썸네일 있으면 콘텐츠가 아래로 밀려 일정 박스가 ~700px, 없으면 ~575px → 기업 게이트 top 위치 조정
-  const hasThumbnail = (project?.projectImage?.length ?? 0) > 0;
   const [active, setActive] = useState('description');
   const [applying, setApplying] = useState(false); // 지원하기 패널 노출
   const [applied, setApplied] = useState(project?.isApplied ?? false); // 지원 완료 상태(서버 초기값)
@@ -327,11 +325,8 @@ export default function ProjectDetailBody({
             showAuthActions
           />
         ) : (
-          // 기업이 타사 프로젝트 조회 — 아이콘 + 타이틀만. 썸네일 없으면 일정 박스(575)로, 있으면 기존(700)
-          <DetailGate
-            title="상세 프로젝트 내용은 크루만 볼 수 있습니다."
-            topOffset={hasThumbnail ? 700 : 575}
-          />
+          // 기업이 타사 프로젝트 조회 — 아이콘 + 타이틀만
+          <DetailGate title="상세 프로젝트 내용은 크루만 볼 수 있습니다." />
         ))}
     </main>
   );

@@ -1,7 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import LogoConxSymbol from '@/assets/icons/logo_conx_symbol.svg';
 import CTAButton from '@/components/common/CTAButton/CTAButton';
 
 interface DetailGateProps {
@@ -22,7 +22,7 @@ export default function DetailGate({ title, subtitle, showAuthActions }: DetailG
       <div className="bg-conx-gradient-white-bottom h-[400px] shrink-0" />
 
       <div className="bg-conx-common-white flex flex-1 flex-col items-center px-6 pt-[100px]">
-        <Image src="/images/image_profileDefaultC.png" alt="CONX" width={80} height={80} priority />
+        <LogoConxSymbol className="h-20 w-20" aria-hidden />
 
         <h2 className="text-kor-title-1-bold text-conx-common-black mt-6 text-center">{title}</h2>
 
