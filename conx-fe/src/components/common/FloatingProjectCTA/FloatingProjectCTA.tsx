@@ -18,7 +18,10 @@ export default function FloatingProjectCTA() {
   }
 
   return (
-    <Link href="/project-create" className="group z-conx-dropdown fixed right-29 bottom-46 size-17">
+    <Link
+      href="/project-create"
+      className="group z-conx-dropdown fixed right-16.5 bottom-25 size-17"
+    >
       <div className="bg-conx-opacity-gray-30 group-active:bg-conx-opacity-gray-50 absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 rounded-md px-2.5 py-1.25 group-hover:block">
         <span className="text-kor-body-1-bold whitespace-nowrap text-white">프로젝트 등록하기</span>
       </div>
