@@ -125,6 +125,9 @@ export default function ProjectDetailBody({
   // 탭 클릭 → 해당 섹션으로 스크롤 (섹션의 scroll-mt가 스티키 탭 높이만큼 보정)
   function handleSelect(value: string) {
     setActive(value);
+    // 게이트 상태에선 하단이 가려져 스크롤이 무의미. 게다가 게이트 뷰의 main은 h-고정+overflow-hidden이라
+    // scrollIntoView가 이 overflow-hidden 조상까지 내부 스크롤시켜 잘린 콘텐츠가 게이트 밑으로 새어 나옴 → 스크롤 금지.
+    if (gated) return;
     sectionRefs.current[value]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
