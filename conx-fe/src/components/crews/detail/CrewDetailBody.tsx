@@ -248,7 +248,8 @@ export default function CrewDetailBody({
     <main data-crew-id={crewId} className={`relative ${gated ? 'h-[1775px] overflow-hidden' : ''}`}>
       <div className={`${CONTAINER} pb-40`}>
         {/* ───── 헤더 (공통, 939px 고정) — 최소/전체 상태 모두 동일 ───── */}
-        <div className="w-[939px] gap-4 pt-10">
+        {/* 로고→크루명→메타 각 16px 간격 (flex-col gap-4로 일괄 관리) */}
+        <div className="flex w-[939px] flex-col gap-4 pt-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={resolveProfileImage(crew?.profileImage, crewId)}
@@ -259,7 +260,7 @@ export default function CrewDetailBody({
           <h1 className="text-kor-title-1-bold text-conx-common-black">{crew?.crewName ?? ''}</h1>
 
           {/* 메타 + 아이콘 (space-between·center). 메타 텍스트에서 20px 아래에 border */}
-          <div className="border-conx-gray-100 mt-4 flex items-center justify-between gap-4 border-b pb-5">
+          <div className="border-conx-gray-100 flex items-center justify-between gap-4 border-b pb-5">
             <div className="flex flex-wrap items-start gap-x-10 gap-y-2">
               {schools.length ? <SchoolMetaItem schools={schools} /> : null}
               <MetaItem label="크루 유형" value={typeLabel} />
