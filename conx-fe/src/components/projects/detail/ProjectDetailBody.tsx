@@ -238,7 +238,7 @@ export default function ProjectDetailBody({
               </div>
             </div>
 
-            <p className="text-kor-heading-3-bold text-conx-common-black">
+            <p className="text-kor-heading-3-bold text-conx-common-black mt-1.5">
               {project?.brandName ?? '브랜드명'}
             </p>
 
