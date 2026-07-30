@@ -248,7 +248,6 @@ export default function CrewDetailBody({
     <main data-crew-id={crewId} className={`relative ${gated ? 'h-[1775px] overflow-hidden' : ''}`}>
       <div className={`${CONTAINER} pb-40`}>
         {/* ───── 헤더 (공통, 939px 고정) — 최소/전체 상태 모두 동일 ───── */}
-        {/* 로고→크루명→메타 각 16px 간격 (flex-col gap-4로 일괄 관리) */}
         <div className="flex w-[939px] flex-col gap-4 pt-10">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
