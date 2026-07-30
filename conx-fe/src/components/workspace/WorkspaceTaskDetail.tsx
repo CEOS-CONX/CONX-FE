@@ -152,6 +152,16 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
     );
   }
 
+  if (common.projectStatus === 'RECRUITING' || common.projectStatus === 'CONTRACT_PENDING') {
+    return (
+      <div className="flex flex-col items-center gap-4 pt-20">
+        <p className="text-kor-heading-3-semibold text-conx-gray-500">
+          계약서 작성 후 열람 가능합니다.
+        </p>
+      </div>
+    );
+  }
+
   const progressSteps = buildProgressSteps(common);
   const criteriaItems = common.criteria.map((c) => ({
     label: `${c.finalResult} ${c.numberOfResult}건`,
