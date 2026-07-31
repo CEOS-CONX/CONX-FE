@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react';
 import IconError from '@/assets/icons/icon_error.svg';
 
 type TextFieldSize = 'sm' | 'md' | 'lg' | 'full';
@@ -12,6 +13,8 @@ interface TextFieldInputProps extends Omit<React.InputHTMLAttributes<HTMLInputEl
   multiline?: boolean;
   /** multiline일 때 보이는 줄 수 (기본 2) */
   rows?: number;
+  /** multiline일 때 내용에 따라 높이 자동 조절 */
+  autoResize?: boolean;
 }
 
 // 고정 너비 (늘어나거나 줄어들지 않음)
@@ -32,8 +35,17 @@ export default function TextFieldInput({
   className,
   multiline,
   rows = 2,
+  autoResize,
   ...props
 }: TextFieldInputProps) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const adjustHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
   const hasError = !!error;
 
   const inputStateClass = hasError
@@ -65,10 +77,15 @@ export default function TextFieldInput({
 
       {multiline ? (
         <textarea
+          ref={textareaRef}
           id={id}
-          rows={rows}
-          className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full resize-none rounded-md border p-4 outline-none ${inputStateClass}`}
+          rows={autoResize ? 1 : rows}
+          className={`text-kor-body-1-medium text-conx-common-black placeholder:text-conx-gray-300 w-full resize-none rounded-md border p-4 outline-none ${autoResize ? 'overflow-hidden' : ''} ${inputStateClass}`}
           {...(props as React.TextareaHTMLAttributes<HTMLTextAreaElement>)}
+          onInput={(e) => {
+            if (autoResize) adjustHeight();
+            (props as React.TextareaHTMLAttributes<HTMLTextAreaElement>).onInput?.(e);
+          }}
         />
       ) : (
         <input

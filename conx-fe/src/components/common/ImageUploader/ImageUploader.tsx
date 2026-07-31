@@ -1,6 +1,21 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  useSortable,
+  horizontalListSortingStrategy,
+  arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import IconImage from '@/assets/icons/icon_image.svg';
 import IconError from '@/assets/icons/icon_error.svg';
 import { IconButton } from '@/components/common/IconButton';
@@ -19,6 +34,119 @@ interface ImageUploaderProps {
 
 const MAX_IMAGES = 5;
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+interface SortableImageCardProps {
+  img: ProjectImage;
+  index: number;
+  isHovered: boolean;
+  isDragTarget: boolean;
+  sizeErrorId: string | null;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onSlotClick: (id: string) => void;
+  onSlotDragOver: (e: React.DragEvent, id: string) => void;
+  onSlotDragLeave: (e: React.DragEvent) => void;
+  onSlotDrop: (e: React.DragEvent, id: string) => void;
+  onDelete: (id: string) => void;
+  onAdd: () => void;
+}
+
+function SortableImageCard({
+  img,
+  index,
+  isHovered,
+  isDragTarget,
+  sizeErrorId,
+  onMouseEnter,
+  onMouseLeave,
+  onSlotClick,
+  onSlotDragOver,
+  onSlotDragLeave,
+  onSlotDrop,
+  onDelete,
+  onAdd,
+}: SortableImageCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: img.id,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  const isEmpty = !img.preview;
+
+  function getSlotLabel(idx: number) {
+    return idx === 0 ? '대표 이미지' : '이미지';
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {isHovered && (
+        <IconButton
+          variant="handle"
+          className="hover:bg-conx-primary-100 active:bg-conx-primary-150 cursor-grab self-start bg-transparent active:cursor-grabbing"
+          aria-label="순서 변경"
+          {...listeners}
+          {...attributes}
+        />
+      )}
+      {isEmpty ? (
+        <button
+          type="button"
+          onClick={() => onSlotClick(img.id)}
+          onDragOver={(e) => onSlotDragOver(e, img.id)}
+          onDragLeave={onSlotDragLeave}
+          onDrop={(e) => onSlotDrop(e, img.id)}
+          className={`flex size-44.5 cursor-pointer flex-col items-center justify-center gap-1.25 overflow-hidden rounded-md bg-white ${
+            sizeErrorId === img.id
+              ? 'border-conx-red-500 border'
+              : isDragTarget
+                ? 'border-conx-primary-300 bg-conx-gray-50 border-2 border-dashed'
+                : isHovered
+                  ? 'border-conx-primary-300 border'
+                  : 'border-conx-gray-150 border'
+          }`}
+        >
+          <IconImage className="size-6" />
+          <span className="text-kor-body-1-medium text-conx-gray-300">{getSlotLabel(index)}</span>
+        </button>
+      ) : (
+        <div
+          className={`bg-conx-gray-50 relative size-44.5 overflow-hidden rounded-md border ${
+            isHovered || isDragTarget ? 'border-conx-primary-300' : 'border-conx-gray-400'
+          }`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={img.preview} alt="프로젝트 이미지" className="size-full object-cover" />
+          {isHovered && (
+            <div className="absolute top-2.75 right-3.25 flex flex-col gap-2">
+              <IconButton
+                variant="trash"
+                onClick={() => onDelete(img.id)}
+                aria-label="이미지 삭제"
+              />
+              <IconButton
+                variant="edit"
+                onClick={() => onSlotClick(img.id)}
+                aria-label="이미지 변경"
+              />
+            </div>
+          )}
+        </div>
+      )}
+      {isHovered && <IconButton variant="plus" onClick={onAdd} aria-label="이미지 추가" />}
+    </div>
+  );
+}
 
 export default function ImageUploader({
   value,
@@ -42,6 +170,8 @@ export default function ImageUploader({
   const hasImages = value.length > 0;
   const isFull = value.length >= MAX_IMAGES;
 
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
   function addEmptySlot() {
     if (isFull) {
       setShowToast(true);
@@ -60,10 +190,8 @@ export default function ImageUploader({
   async function fillSlot(id: string, file: File) {
     const preview = URL.createObjectURL(file);
 
-    // 로컬 미리보기 즉시 표시
     onChange(value.map((img) => (img.id === id ? { ...img, file, preview } : img)));
 
-    // 서버에 즉시 업로드
     try {
       const uploaded = await uploadFile(file);
       onChange(
@@ -77,6 +205,7 @@ export default function ImageUploader({
   }
 
   function handleSlotClick(id: string) {
+    if (sizeErrorId === id) setSizeErrorId(null);
     setTargetSlotId(id);
     inputRef.current?.click();
   }
@@ -187,10 +316,16 @@ export default function ImageUploader({
     onChange(value.filter((img) => img.id !== id));
     setHoveredId(null);
     setDeleteTargetId(null);
+    if (sizeErrorId === id) setSizeErrorId(null);
   }
 
-  function getSlotLabel(index: number) {
-    return index === 0 ? '대표 이미지' : '이미지';
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = value.findIndex((img) => img.id === active.id);
+      const newIndex = value.findIndex((img) => img.id === over.id);
+      onChange(arrayMove(value, oldIndex, newIndex));
+    }
   }
 
   return (
@@ -206,76 +341,37 @@ export default function ImageUploader({
 
       <div className="flex items-center gap-3">
         {hasImages ? (
-          value.map((img, index) => {
-            const isHovered = hoveredId === img.id;
-            const isDragTarget = draggingId === img.id;
-            const isEmpty = !img.preview;
-            return (
-              <div
-                key={img.id}
-                className="flex items-center gap-3"
-                onMouseEnter={() => setHoveredId(img.id)}
-                onMouseLeave={() => setHoveredId(null)}
-              >
-                {isHovered && (
-                  <IconButton variant="handle" className="self-start" aria-label="순서 변경" />
-                )}
-                {isEmpty ? (
-                  <button
-                    type="button"
-                    onClick={() => handleSlotClick(img.id)}
-                    onDragOver={(e) => handleSlotDragOver(e, img.id)}
-                    onDragLeave={handleSlotDragLeave}
-                    onDrop={(e) => handleSlotDrop(e, img.id)}
-                    className={`flex size-44.5 cursor-pointer flex-col items-center justify-center gap-1.25 overflow-hidden rounded-md bg-white ${
-                      sizeErrorId === img.id
-                        ? 'border-conx-red-500 border'
-                        : isDragTarget
-                          ? 'border-conx-primary-300 bg-conx-gray-50 border-2 border-dashed'
-                          : isHovered
-                            ? 'border-conx-primary-300 border'
-                            : 'border-conx-gray-150 border'
-                    }`}
-                  >
-                    <IconImage className="size-6" />
-                    <span className="text-kor-body-1-medium text-conx-gray-300">
-                      {getSlotLabel(index)}
-                    </span>
-                  </button>
-                ) : (
-                  <div
-                    className={`bg-conx-gray-50 relative size-44.5 overflow-hidden rounded-md border ${
-                      isHovered || isDragTarget ? 'border-conx-primary-300' : 'border-conx-gray-400'
-                    }`}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={img.preview}
-                      alt="프로젝트 이미지"
-                      className="size-full object-cover"
-                    />
-                    {isHovered && (
-                      <div className="absolute top-2.75 right-3.25 flex flex-col gap-2">
-                        <IconButton
-                          variant="trash"
-                          onClick={() => setDeleteTargetId(img.id)}
-                          aria-label="이미지 삭제"
-                        />
-                        <IconButton
-                          variant="edit"
-                          onClick={() => handleSlotClick(img.id)}
-                          aria-label="이미지 변경"
-                        />
-                      </div>
-                    )}
-                  </div>
-                )}
-                {isHovered && (
-                  <IconButton variant="plus" onClick={addEmptySlot} aria-label="이미지 추가" />
-                )}
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={value.map((img) => img.id)}
+              strategy={horizontalListSortingStrategy}
+            >
+              <div className="flex items-center gap-3">
+                {value.map((img, index) => (
+                  <SortableImageCard
+                    key={img.id}
+                    img={img}
+                    index={index}
+                    isHovered={hoveredId === img.id}
+                    isDragTarget={draggingId === img.id}
+                    sizeErrorId={sizeErrorId}
+                    onMouseEnter={() => setHoveredId(img.id)}
+                    onMouseLeave={() => setHoveredId(null)}
+                    onSlotClick={handleSlotClick}
+                    onSlotDragOver={handleSlotDragOver}
+                    onSlotDragLeave={handleSlotDragLeave}
+                    onSlotDrop={handleSlotDrop}
+                    onDelete={(id) => setDeleteTargetId(id)}
+                    onAdd={addEmptySlot}
+                  />
+                ))}
               </div>
-            );
-          })
+            </SortableContext>
+          </DndContext>
         ) : (
           <button
             type="button"

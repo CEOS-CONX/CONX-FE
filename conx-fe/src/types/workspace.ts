@@ -41,6 +41,7 @@ export interface ProgressStep {
 }
 
 export interface SubmissionItem {
+  id?: number;
   label: string;
   checked: boolean;
 }
