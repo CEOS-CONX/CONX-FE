@@ -13,6 +13,7 @@ import Pagination from '@/components/common/Pagination/Pagination';
 import { resolveProfileImage } from '@/utils/profileImage';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
+import CrewSelectConfirmModal from './CrewSelectConfirmModal';
 import MatchConfirmedModal from './MatchConfirmedModal';
 import type { ProgressStep, ResultItem, TagIndicatorType } from '@/types/workspace';
 
@@ -133,6 +134,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [matchedCrewImage, setMatchedCrewImage] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Application | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -227,16 +229,22 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     router.push(`${basePath}/results/${result.id}`);
   }
 
-  async function handleSelectCrew(applicationId: number) {
-    const selectedCrew = applications.find((a) => a.applicationId === applicationId);
+  function handleSelectCrew(applicationId: number) {
+    const crew = applications.find((a) => a.applicationId === applicationId);
+    if (crew) setConfirmTarget(crew);
+  }
+
+  async function handleConfirmSelect() {
+    if (!confirmTarget) return;
     try {
       const res = await fetch(
-        `/api/companies/me/projects/${projectId}/applications/${applicationId}/select`,
+        `/api/companies/me/projects/${projectId}/applications/${confirmTarget.applicationId}/select`,
         { method: 'POST' },
       );
       const data = await res.json();
       if (res.ok) {
-        setMatchedCrewImage(selectedCrew?.crewImageLink ?? '/images/OG_image.png');
+        setConfirmTarget(null);
+        setMatchedCrewImage(confirmTarget.crewImageLink ?? '/images/OG_image.png');
       } else {
         alert(data.message ?? '크루 선정에 실패했습니다.');
       }
@@ -382,6 +390,17 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
           )}
         </section>
       </div>
+
+      {confirmTarget && (
+        <CrewSelectConfirmModal
+          profileSrc={resolveProfileImage(confirmTarget.crewImageLink, confirmTarget.crewId)}
+          name={confirmTarget.crewName ?? '크루명'}
+          subtitle={confirmTarget.crewType}
+          tags={confirmTarget.keywords}
+          onConfirm={handleConfirmSelect}
+          onClose={() => setConfirmTarget(null)}
+        />
+      )}
 
       {matchedCrewImage && (
         <MatchConfirmedModal
