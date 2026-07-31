@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 
 const API_BASE_URL = process.env.API_BASE_URL;
 
 export async function PATCH(
-  request: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ settlementId: string }> },
 ) {
   const { settlementId } = await params;
@@ -15,17 +15,13 @@ export async function PATCH(
     return NextResponse.json({ message: '인증이 필요합니다.' }, { status: 401 });
   }
 
-  const body = await request.json();
-
   const backendRes = await fetch(
-    `${API_BASE_URL}/api/v1/crews/settlements/${settlementId}/payment-status`,
+    `${API_BASE_URL}/api/v1/crews/settlements/${settlementId}/complete`,
     {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
-      body: JSON.stringify(body),
     },
   );
 
