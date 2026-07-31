@@ -99,6 +99,8 @@ export default function CrewProfilePage() {
   }>(); // 저장용 파일 메타(업로드 완료)
   const [urlName, setUrlName] = useState('');
   const [urlValue, setUrlValue] = useState('');
+  const [urlDescription, setUrlDescription] = useState(''); // 소개 링크 추가 설명(선택)
+  const [introFileDescription, setIntroFileDescription] = useState(''); // 소개 파일 추가 설명(선택)
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(null);
@@ -138,6 +140,7 @@ export default function CrewProfilePage() {
         if (link) {
           setUrlName(link.name ?? '');
           setUrlValue(link.url ?? '');
+          setUrlDescription(link.description ?? '');
         }
         const file = p.files?.[0];
         if (file) {
@@ -148,6 +151,7 @@ export default function CrewProfilePage() {
             size: file.size ?? 0,
             url: file.url,
           });
+          setIntroFileDescription(file.description ?? '');
         }
         setPortfolios(
           (p.portfolios ?? []).map(
@@ -247,8 +251,8 @@ export default function CrewProfilePage() {
           crewIntroduction: introText,
           advantages: strengths,
           specialties: expertise,
-          links: urlValue ? [{ name: urlName, url: urlValue }] : [],
-          files: introFileData ? [introFileData] : [],
+          links: urlValue ? [{ name: urlName, url: urlValue, description: urlDescription }] : [],
+          files: introFileData ? [{ ...introFileData, description: introFileDescription }] : [],
         }),
       });
       if (!res.ok) throw new Error();
@@ -410,7 +414,7 @@ export default function CrewProfilePage() {
         />
         <TextFieldLabeled
           id="member-count"
-          label="멤버 인원수"
+          label="참여 인원수"
           required
           value={memberCount ? `${memberCount}명` : ''}
           onChange={(v) => {
@@ -468,8 +472,11 @@ export default function CrewProfilePage() {
         <TextFieldUpload
           id="intro-file"
           label="크루 소개 파일"
+          helperText="파일을 끌고 오거나 '파일 첨부'를 눌러 추가해주세요(50mb 이하)"
           fileName={introFile}
           accept=".pdf"
+          description={introFileDescription}
+          onDescriptionChange={setIntroFileDescription}
           onSelect={async (f) => {
             setIntroFile(f.name); // 즉시 파일명 표시
             try {
@@ -498,6 +505,8 @@ export default function CrewProfilePage() {
             url={urlValue}
             onNameChange={setUrlName}
             onUrlChange={setUrlValue}
+            description={urlDescription}
+            onDescriptionChange={setUrlDescription}
           />
         </div>
 
