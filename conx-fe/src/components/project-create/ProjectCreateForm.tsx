@@ -30,6 +30,7 @@ export default function ProjectCreateForm() {
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [scheduleError, setScheduleError] = useState('');
   const [scheduleErrorFields, setScheduleErrorFields] = useState<Set<string>>(new Set());
+  const [tipPanelOpen, setTipPanelOpen] = useState(false);
 
   const myInfoRef = useRef<{ brandName: string; name: string; email: string } | null>(null);
 
@@ -202,7 +203,7 @@ export default function ProjectCreateForm() {
       />
 
       <main
-        className="mx-auto max-w-295 px-4 pt-17.5 pb-32.5"
+        className={`max-w-295 pt-17.5 pb-32.5 ${tipPanelOpen ? 'mr-22.5 ml-82.5' : 'mx-auto px-4'}`}
         onClick={() => setActiveField(undefined)}
       >
         <div className="bg-conx-common-white mx-auto flex w-295 flex-col gap-27.5 rounded-md px-30.25 pt-17 pb-15">
@@ -228,7 +229,7 @@ export default function ProjectCreateForm() {
         </div>
       </main>
 
-      <WritingTipButton activeField={activeField} />
+      <WritingTipButton activeField={activeField} onPanelChange={setTipPanelOpen} />
 
       {showDraftToast && (
         <Toast
