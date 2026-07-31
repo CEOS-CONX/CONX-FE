@@ -90,6 +90,7 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
   const [isLoading, setIsLoading] = useState(true);
   const [view, setView] = useState<RightPanelView>('table');
   const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -117,9 +118,68 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
     return () => controller.abort();
   }, [taskId]);
 
-  function handleResultClick(result: ResultItem) {
-    setSelectedResult(result);
+  async function handleResultClick(result: ResultItem) {
+    if (!common) return;
     setView('detail');
+    setIsDetailLoading(true);
+
+    try {
+      const res = await fetch(`/api/projects/${common.projectId}/submissions/${result.id}`);
+      const data = await res.json();
+      if (res.ok && data.payload) {
+        const { submission, feedBack } = data.payload;
+        const detailed: ResultItem = {
+          ...result,
+          content: submission?.content,
+          files: submission?.files?.map(
+            (f: { fileName: string; extension: string; size: number; explanation: string }) => ({
+              name: `${f.fileName}${f.extension ? `.${f.extension}` : ''}`,
+              size: f.size ? `${(f.size / 1024 / 1024).toFixed(1)}MB` : undefined,
+              description: f.explanation || undefined,
+            }),
+          ),
+          links: submission?.additionalLinks?.map(
+            (l: { linkName: string; link: string; explanation: string }) => ({
+              label: l.linkName || l.link,
+              url: l.link,
+              description: l.explanation || undefined,
+            }),
+          ),
+          feedback: feedBack
+            ? {
+                date: '',
+                content: feedBack.content,
+                files: feedBack.files?.map(
+                  (f: {
+                    fileName: string;
+                    extension: string;
+                    size: number;
+                    explanation: string;
+                  }) => ({
+                    name: `${f.fileName}${f.extension ? `.${f.extension}` : ''}`,
+                    size: f.size ? `${(f.size / 1024 / 1024).toFixed(1)}MB` : undefined,
+                    description: f.explanation || undefined,
+                  }),
+                ),
+                links: feedBack.links?.map(
+                  (l: { linkName: string; link: string; explanation: string }) => ({
+                    label: l.linkName || l.link,
+                    url: l.link,
+                    description: l.explanation || undefined,
+                  }),
+                ),
+              }
+            : undefined,
+        };
+        setSelectedResult(detailed);
+      } else {
+        setSelectedResult(result);
+      }
+    } catch {
+      setSelectedResult(result);
+    } finally {
+      setIsDetailLoading(false);
+    }
   }
 
   function handleBackToTable() {
@@ -201,9 +261,14 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
         </aside>
 
         <section className="flex min-w-0 flex-1 flex-col gap-20 pt-2">
-          {view === 'detail' && selectedResult && (
-            <ResultDetailSection result={selectedResult} onBack={handleBackToTable} />
-          )}
+          {view === 'detail' &&
+            (isDetailLoading ? (
+              <div className="flex flex-col gap-4">
+                <div className="h-60 animate-pulse rounded-lg bg-gray-100" />
+              </div>
+            ) : selectedResult ? (
+              <ResultDetailSection result={selectedResult} onBack={handleBackToTable} />
+            ) : null)}
           {view === 'upload' && (
             <ResultUploadSection
               projectId={taskId}
@@ -216,18 +281,12 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
               <SettlementStatusSection
                 status={common.settlementStatus === 'PAID' ? 'completed' : 'pending'}
                 amount={common.subsidy != null ? common.subsidy.toLocaleString() : '0'}
-                onStatusChange={async (value) => {
+                onStatusChange={async () => {
                   if (!common.projectSettlementId) return;
-                  const paymentStatus =
-                    value === 'completed' ? 'PAYMENT_CONFIRMED' : 'BEFORE_PAYMENT';
                   try {
                     const res = await fetch(
-                      `/api/crews/settlements/${common.projectSettlementId}/payment-status`,
-                      {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentStatus }),
-                      },
+                      `/api/crews/settlements/${common.projectSettlementId}/complete`,
+                      { method: 'PATCH' },
                     );
                     if (!res.ok) throw new Error();
                     setToastMessage('정산 상태가 변경되었습니다.');
