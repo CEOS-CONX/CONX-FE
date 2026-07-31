@@ -1,19 +1,14 @@
 import HomeStartButtons from '@/components/home/HomeStartButtons';
+import BackgroundVideo from '@/components/home/BackgroundVideo';
 
 export default function HeroSection() {
   return (
     <section id="hero" className="relative isolate h-screen w-full overflow-hidden">
-      {/* 데코레이티브 배경 영상 — 스크린리더 무시. TODO: poster 이미지 추가 (자동재생 차단/저전력 환경) */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
-        aria-hidden="true"
+      {/* 데코레이티브 배경 영상 — Safari 자동재생 대응(클라이언트 컴포넌트) */}
+      <BackgroundVideo
+        src="/videos/LandingVideo_1.mp4"
         className="absolute inset-0 h-full w-full object-cover"
-      >
-        <source src="/videos/LandingVideo_1.mp4" type="video/mp4" />
-      </video>
+      />
 
       {/* 위 그라데이션 */}
       <div className="bg-conx-gradient-white-top pointer-events-none absolute inset-x-0 top-0 z-10 h-30" />

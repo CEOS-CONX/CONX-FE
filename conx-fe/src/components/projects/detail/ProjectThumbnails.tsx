@@ -15,8 +15,8 @@ interface ProjectThumbnailsProps {
 // 썸네일 이미지 (url) 렌더
 function Thumb({ src, index }: { src: string; index: number }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={`프로젝트 썸네일 ${index + 1}`} className="h-full w-full object-cover" />
+    // 높이(290px)만 고정, 너비는 이미지 비율대로 → 잘림 없음
+    <img src={src} alt={`프로젝트 썸네일 ${index + 1}`} className="h-full w-auto" />
   );
 }
 
@@ -31,7 +31,7 @@ export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps
     return (
       <section className={`${MAXW} px-[90px] pt-6`}>
         <div className={`bg-conx-gray-50 flex ${THUMB_H} justify-center`}>
-          <div className={`${CARD} border-conx-gray-150 h-full w-[480px] border-x`}>
+          <div className={`${CARD} border-conx-gray-150 h-full w-auto border-x`}>
             <Thumb src={thumbnails[0]} index={0} />
           </div>
         </div>
@@ -43,9 +43,9 @@ export default function ProjectThumbnails({ thumbnails }: ProjectThumbnailsProps
   if (count === 2) {
     return (
       <section className={`${MAXW} px-[228px] pt-6`}>
-        <div className={`divide-conx-gray-150 flex ${THUMB_H} divide-x`}>
+        <div className={`divide-conx-gray-150 flex ${THUMB_H} justify-center divide-x`}>
           {thumbnails.map((t, i) => (
-            <div key={i} className={`${CARD} h-full flex-1`}>
+            <div key={i} className={`${CARD} h-full w-auto`}>
               <Thumb src={t} index={i} />
             </div>
           ))}
@@ -85,7 +85,7 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
     el.scrollBy({ left: dir * step, behavior: 'smooth' });
   }
 
-  // 캐러셀 폭 1420(= max-w-400 − px-90). 이미지 고정 480 → 3번째가 잘려 보임
+  // 캐러셀 — 각 이미지 높이 290 고정, 너비는 비율대로(가변). 폭 넘치면 가로 스크롤
   return (
     <section className={`${MAXW} px-[90px] pt-6`}>
       <div className="relative">
@@ -95,7 +95,7 @@ function ThumbnailCarousel({ thumbnails }: { thumbnails: string[] }) {
           className={`scrollbar-hide flex ${THUMB_H} snap-x snap-mandatory gap-1 overflow-x-auto`}
         >
           {thumbnails.map((t, i) => (
-            <div key={i} className={`${CARD} h-full w-[480px] shrink-0 snap-start`}>
+            <div key={i} className={`${CARD} h-full w-auto shrink-0 snap-start`}>
               <Thumb src={t} index={i} />
             </div>
           ))}

@@ -60,7 +60,9 @@ export interface ProjectDetail {
   incentive: boolean;
   incentiveCondition: string;
   files: ProjectFile[];
-  links: { label?: string; url?: string; explanation?: string }[];
+  // 상세 조회 응답의 링크는 payload.links (등록 요청의 additionalLinks와 필드명 다름).
+  // 아이템: linkName(표시 문구) / link(href) / explanation(설명)
+  links: { linkName?: string; link?: string; explanation?: string }[];
   views: number;
   question: ProjectQuestion[];
 }

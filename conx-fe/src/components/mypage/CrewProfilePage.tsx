@@ -99,6 +99,8 @@ export default function CrewProfilePage() {
   }>(); // 저장용 파일 메타(업로드 완료)
   const [urlName, setUrlName] = useState('');
   const [urlValue, setUrlValue] = useState('');
+  const [urlDescription, setUrlDescription] = useState(''); // 소개 링크 추가 설명(선택)
+  const [introFileDescription, setIntroFileDescription] = useState(''); // 소개 파일 추가 설명(선택)
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [showPortfolioModal, setShowPortfolioModal] = useState(false);
   const [editingPortfolio, setEditingPortfolio] = useState<Portfolio | null>(null);
@@ -138,6 +140,7 @@ export default function CrewProfilePage() {
         if (link) {
           setUrlName(link.name ?? '');
           setUrlValue(link.url ?? '');
+          setUrlDescription(link.description ?? '');
         }
         const file = p.files?.[0];
         if (file) {
@@ -148,6 +151,7 @@ export default function CrewProfilePage() {
             size: file.size ?? 0,
             url: file.url,
           });
+          setIntroFileDescription(file.description ?? '');
         }
         setPortfolios(
           (p.portfolios ?? []).map(
@@ -247,8 +251,8 @@ export default function CrewProfilePage() {
           crewIntroduction: introText,
           advantages: strengths,
           specialties: expertise,
-          links: urlValue ? [{ name: urlName, url: urlValue }] : [],
-          files: introFileData ? [introFileData] : [],
+          links: urlValue ? [{ name: urlName, url: urlValue, description: urlDescription }] : [],
+          files: introFileData ? [{ ...introFileData, description: introFileDescription }] : [],
         }),
       });
       if (!res.ok) throw new Error();
@@ -410,7 +414,7 @@ export default function CrewProfilePage() {
         />
         <TextFieldLabeled
           id="member-count"
-          label="멤버 인원수"
+          label="참여 인원수"
           required
           value={memberCount ? `${memberCount}명` : ''}
           onChange={(v) => {
@@ -428,7 +432,7 @@ export default function CrewProfilePage() {
         <TextFieldLabeled
           id="catchphrase"
           label="캐치프라이즈"
-          helperText="서비스 특성이 드러나는 짧고 자유로운 한 문장을 30자 이내로 써주세요"
+          helperText="크루의 특징이 드러나는 짧은 소개 문구를 최대 30자로 작성해주세요"
           value={catchphrase}
           onChange={setCatchphrase}
           maxLength={30}
@@ -445,7 +449,7 @@ export default function CrewProfilePage() {
         <TagSelectField
           id="strengths"
           label="핵심 강점"
-          helperText="선택하거나 직접 입력해 태그로 자유롭게 표현하세요"
+          helperText="크루만의 차별화된 협업 방식과 강점을 키워드로 표현해보세요"
           value={strengths}
           onChange={setStrengths}
           options={STRENGTH_OPTIONS}
@@ -453,7 +457,7 @@ export default function CrewProfilePage() {
         <TextFieldTagInput
           id="expertise"
           label="전문 분야"
-          helperText="크루가 전문성을 가졌다고 생각하는 분야를 태그로 표현하세요"
+          helperText="크루가 전문적으로 수행할 수 있는 분야를 최대 9개까지 등록해주세요"
           value={expertise}
           onChange={setExpertise}
           placeholder="내용을 입력해 태그로 추가하세요"
@@ -468,8 +472,11 @@ export default function CrewProfilePage() {
         <TextFieldUpload
           id="intro-file"
           label="크루 소개 파일"
+          helperText="파일을 끌고 오거나 '파일 첨부'를 눌러 추가해주세요(50mb 이하)"
           fileName={introFile}
           accept=".pdf"
+          description={introFileDescription}
+          onDescriptionChange={setIntroFileDescription}
           onSelect={async (f) => {
             setIntroFile(f.name); // 즉시 파일명 표시
             try {
@@ -498,6 +505,8 @@ export default function CrewProfilePage() {
             url={urlValue}
             onNameChange={setUrlName}
             onUrlChange={setUrlValue}
+            description={urlDescription}
+            onDescriptionChange={setUrlDescription}
           />
         </div>
 
