@@ -14,7 +14,9 @@ import { resolveProfileImage } from '@/utils/profileImage';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
 import CrewSelectConfirmModal from './CrewSelectConfirmModal';
+import CrewReviewModal from './CrewReviewModal';
 import MatchConfirmedModal from './MatchConfirmedModal';
+import Toast from '@/components/common/Toast/Toast';
 import type { ProgressStep, ResultItem, TagIndicatorType } from '@/types/workspace';
 
 const CARDS_PER_PAGE = 6;
@@ -42,6 +44,7 @@ interface ProjectCommon {
   subsidy: number | null;
   settlementStatus: string | null;
   criteria: { id: number; finalResult: string; numberOfResult: number; done: boolean }[];
+  isPointed: boolean;
 }
 
 interface Application {
@@ -135,6 +138,8 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
   const [currentPage, setCurrentPage] = useState(1);
   const [matchedCrewImage, setMatchedCrewImage] = useState<string | null>(null);
   const [confirmTarget, setConfirmTarget] = useState<Application | null>(null);
+  const [showReview, setShowReview] = useState(false);
+  const [showReviewToast, setShowReviewToast] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -147,6 +152,9 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
         const data = await res.json();
         if (res.ok && data.payload) {
           setPayload(data.payload);
+          if (data.payload.common.projectStatus === 'DONE' && !data.payload.common.isPointed) {
+            setShowReview(true);
+          }
         } else {
           const msg = data.message ?? '';
           if (msg.includes('계약서')) {
@@ -399,6 +407,38 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
           tags={confirmTarget.keywords}
           onConfirm={handleConfirmSelect}
           onClose={() => setConfirmTarget(null)}
+        />
+      )}
+
+      {showReview && (
+        <CrewReviewModal
+          onSubmit={async (ratings) => {
+            try {
+              const res = await fetch(`/api/companies/me/projects/${projectId}/evaluate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ratings),
+              });
+              if (res.ok) {
+                setShowReview(false);
+                setShowReviewToast(true);
+              } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.message ?? '평가 제출에 실패했습니다.');
+              }
+            } catch {
+              alert('네트워크 오류가 발생했습니다.');
+            }
+          }}
+        />
+      )}
+
+      {showReviewToast && (
+        <Toast
+          message="프로젝트가 정상적으로 완료되었습니다."
+          duration={5000}
+          onClose={() => setShowReviewToast(false)}
+          className="z-conx-toast fixed bottom-10 left-1/2 -translate-x-1/2"
         />
       )}
 
