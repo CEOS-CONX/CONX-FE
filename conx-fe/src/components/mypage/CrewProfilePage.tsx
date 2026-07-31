@@ -428,7 +428,7 @@ export default function CrewProfilePage() {
         <TextFieldLabeled
           id="catchphrase"
           label="캐치프라이즈"
-          helperText="서비스 특성이 드러나는 짧고 자유로운 한 문장을 30자 이내로 써주세요"
+          helperText="크루의 특징이 드러나는 짧은 소개 문구를 최대 30자로 작성해주세요"
           value={catchphrase}
           onChange={setCatchphrase}
           maxLength={30}
@@ -445,7 +445,7 @@ export default function CrewProfilePage() {
         <TagSelectField
           id="strengths"
           label="핵심 강점"
-          helperText="선택하거나 직접 입력해 태그로 자유롭게 표현하세요"
+          helperText="크루만의 차별화된 협업 방식과 강점을 키워드로 표현해보세요"
           value={strengths}
           onChange={setStrengths}
           options={STRENGTH_OPTIONS}
@@ -453,7 +453,7 @@ export default function CrewProfilePage() {
         <TextFieldTagInput
           id="expertise"
           label="전문 분야"
-          helperText="크루가 전문성을 가졌다고 생각하는 분야를 태그로 표현하세요"
+          helperText="크루가 전문적으로 수행할 수 있는 분야를 최대 9개까지 등록해주세요"
           value={expertise}
           onChange={setExpertise}
           placeholder="내용을 입력해 태그로 추가하세요"
