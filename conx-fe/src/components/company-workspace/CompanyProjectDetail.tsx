@@ -193,10 +193,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     );
   }
 
-  if (
-    payload.common.projectStatus === 'RECRUITING' ||
-    payload.common.projectStatus === 'CONTRACT_PENDING'
-  ) {
+  if (payload.common.projectStatus === 'CONTRACT_PENDING') {
     return (
       <div className="flex flex-col items-center gap-4 pt-20">
         <p className="text-kor-heading-3-semibold text-conx-gray-500">
