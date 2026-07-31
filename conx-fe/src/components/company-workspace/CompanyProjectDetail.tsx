@@ -211,9 +211,44 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
 
   const progressSteps = buildProgressSteps(common, payload.status);
   const criteriaItems = common.criteria.map((c) => ({
+    id: c.id,
     label: `${c.finalResult} ${c.numberOfResult}건`,
     checked: c.done,
   }));
+
+  async function handleCriteriaToggle(index: number) {
+    const item = common.criteria[index];
+    if (!item) return;
+
+    const prev = item.done;
+    setPayload((p) => {
+      if (!p) return p;
+      const newCriteria = [...p.common.criteria];
+      newCriteria[index] = { ...newCriteria[index], done: !prev };
+      return { ...p, common: { ...p.common, criteria: newCriteria } };
+    });
+
+    try {
+      const res = await fetch(`/api/companies/me/projects/${projectId}/criteria/${item.id}/check`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        setPayload((p) => {
+          if (!p) return p;
+          const newCriteria = [...p.common.criteria];
+          newCriteria[index] = { ...newCriteria[index], done: prev };
+          return { ...p, common: { ...p.common, criteria: newCriteria } };
+        });
+      }
+    } catch {
+      setPayload((p) => {
+        if (!p) return p;
+        const newCriteria = [...p.common.criteria];
+        newCriteria[index] = { ...newCriteria[index], done: prev };
+        return { ...p, common: { ...p.common, criteria: newCriteria } };
+      });
+    }
+  }
 
   // 검수 목록 → ResultItem 변환
   const results: ResultItem[] = inspections
@@ -333,7 +368,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
             </div>
           )}
           <TaskProgressSection steps={progressSteps} />
-          <SubmissionCriteriaSection items={criteriaItems} />
+          <SubmissionCriteriaSection items={criteriaItems} onToggle={handleCriteriaToggle} />
         </aside>
 
         {/* 우측 콘텐츠 */}
