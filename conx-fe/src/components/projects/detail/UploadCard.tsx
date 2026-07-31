@@ -34,11 +34,14 @@ export default function UploadCard({ name, info, onPreview, onDownload }: Upload
         subtext ? 'px-4 pt-2 pb-4' : 'px-4 py-[26px]'
       }`}
     >
-      <div className="flex w-full items-center justify-between">
-        <span className="text-kor-body-1-semibold text-conx-gray-550 flex items-center gap-2">
+      <div className="flex w-full items-center justify-between gap-4">
+        <span className="text-kor-body-1-semibold text-conx-gray-550 flex min-w-0 items-center gap-2">
           {/* icon_file: stroke #121212 박혀 있어 회색으로 덮어씀 */}
           <IconFile className="[&_path]:stroke-conx-gray-450 h-6 w-5 shrink-0" />
-          {name}
+          {/* 파일명 최대 660px, 넘치면 말줄임(…) — 길어도 미리보기/다운로드 버튼이 안 밀리게 */}
+          <span className="max-w-[660px] truncate" title={name}>
+            {name}
+          </span>
         </span>
         <span className="flex shrink-0 items-center gap-3">
           <ActionButton label="미리보기" onClick={onPreview} />

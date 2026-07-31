@@ -188,7 +188,7 @@ export default function ProcessSection() {
                     {content.company.title}
                   </h6>
                   <p
-                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 max-w-[578px]"
+                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 max-w-[578px] break-keep"
                     style={animStyle(descReveal)}
                   >
                     {content.company.description}
@@ -212,7 +212,7 @@ export default function ProcessSection() {
                     {content.crew.title}
                   </h6>
                   <p
-                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 max-w-[578px]"
+                    className="text-kor-heading-3-semibold text-conx-gray-550 mt-3 max-w-[578px] break-keep"
                     style={animStyle(descReveal)}
                   >
                     {content.crew.description}

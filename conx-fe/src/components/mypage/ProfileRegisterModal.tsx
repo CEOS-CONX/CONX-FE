@@ -33,14 +33,17 @@ export default function ProfileRegisterModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
-        className="z-conx-modal flex w-[340px] flex-col gap-8 rounded-xl bg-white px-6 pt-8 pb-6"
+        className="z-conx-modal flex w-[493px] flex-col gap-[47px] rounded-xl bg-white px-5 pt-10 pb-5"
       >
-        <div className="flex flex-col items-center gap-2 text-center">
+        <div className="flex flex-col items-center gap-3 text-center">
           <h2 id={titleId} className="text-kor-title-2-bold text-conx-common-black">
             작성 중인 내용을 등록할까요?
           </h2>
-          <p className="text-kor-body-1-medium text-conx-gray-450">
-            등록하지 않고 나가면 현재까지 작성한 내용은 복구할 수 없습니다.
+          <p className="text-kor-heading-3-semibold text-conx-gray-450">
+            {/* 493px 폭에선 자연 줄바꿈이 "…없습니 / 다."로 깨져 디자인대로 지점 고정 */}
+            등록하지 않고 나가면 현재까지 작성한 내용은
+            <br />
+            복구할 수 없습니다.
           </p>
         </div>
 

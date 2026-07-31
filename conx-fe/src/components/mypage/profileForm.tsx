@@ -17,9 +17,11 @@ export function FieldLabel({
 }) {
   return (
     <div className="flex flex-col gap-0.5">
-      <label htmlFor={htmlFor} className="text-kor-label-1-medium text-conx-gray-350">
+      <label htmlFor={htmlFor} className="text-kor-body-1-semibold text-conx-common-black">
         {children}
-        {required && <span className="text-conx-red-500 ml-0.5">*</span>}
+        {required && (
+          <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+        )}
       </label>
       {helperText && <p className="text-kor-label-1-medium text-conx-gray-450">{helperText}</p>}
     </div>

@@ -44,9 +44,11 @@ export default function TextFieldLabeled({
       {/* 레이블(+필수) + 카운터, 아래 도움말 */}
       <div className="flex flex-col gap-0.5">
         <div className="flex items-center justify-between">
-          <label htmlFor={id} className="text-kor-label-1-medium text-conx-gray-350">
+          <label htmlFor={id} className="text-kor-body-1-semibold text-conx-common-black">
             {label}
-            {required && <span className="text-conx-red-500 ml-0.5">*</span>}
+            {required && (
+              <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+            )}
           </label>
           {maxLength != null && (
             <span

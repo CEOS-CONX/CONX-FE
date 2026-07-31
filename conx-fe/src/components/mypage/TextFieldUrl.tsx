@@ -9,6 +9,9 @@ interface TextFieldUrlProps {
   url: string;
   onNameChange: (value: string) => void;
   onUrlChange: (value: string) => void;
+  /** 추가 설명(선택) */
+  description?: string;
+  onDescriptionChange?: (value: string) => void;
   error?: string;
   id?: string;
 }
@@ -19,6 +22,8 @@ export default function TextFieldUrl({
   url,
   onNameChange,
   onUrlChange,
+  description,
+  onDescriptionChange,
   error,
   id,
 }: TextFieldUrlProps) {
@@ -34,7 +39,7 @@ export default function TextFieldUrl({
 
   return (
     <div className="flex flex-col gap-3">
-      <label htmlFor={id} className="text-kor-label-1-medium text-conx-gray-350">
+      <label htmlFor={id} className="text-kor-body-1-semibold text-conx-common-black">
         {label}
       </label>
 
@@ -58,6 +63,15 @@ export default function TextFieldUrl({
           placeholder="https://"
           className={inputClass}
         />
+        {/* 추가 설명 (선택) — onDescriptionChange를 넘긴 경우만 노출 (기업 웹사이트 등은 미사용) */}
+        {onDescriptionChange && (
+          <input
+            value={description ?? ''}
+            onChange={(e) => onDescriptionChange(e.target.value)}
+            placeholder="추가 설명이 필요하다면 적어주세요."
+            className={inputClass}
+          />
+        )}
       </div>
 
       {hasError && (

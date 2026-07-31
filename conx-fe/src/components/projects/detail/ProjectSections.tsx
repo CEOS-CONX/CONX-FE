@@ -181,8 +181,8 @@ export function ReferenceSection({ project }: SectionProps) {
             links.map((l, i) => (
               <LinkCard
                 key={i}
-                name={l.label ?? l.url ?? '링크'}
-                url={l.url ?? ''}
+                name={l.linkName ?? l.link ?? '링크'}
+                url={l.link ?? ''}
                 info={l.explanation || undefined}
               />
             ))
