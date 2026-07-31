@@ -162,18 +162,13 @@ function LinkCard({
                 />
               </div>
               <div className="flex flex-col gap-3 pl-6.5">
-                <div className="flex items-start">
-                  <span className="font-jakarta text-eng-body-1-medium text-conx-gray-300 shrink-0">
-                    https://
-                  </span>
-                  <input
-                    type="text"
-                    placeholder=""
-                    value={item.url}
-                    onChange={(e) => onUpdate(item.id, 'url', e.target.value)}
-                    className="text-eng-body-1-medium font-jakarta text-conx-common-black flex-1 outline-none"
-                  />
-                </div>
+                <input
+                  type="text"
+                  placeholder="https://"
+                  value={item.url}
+                  onChange={(e) => onUpdate(item.id, 'url', e.target.value)}
+                  className="text-eng-body-1-medium font-jakarta text-conx-common-black placeholder:text-conx-gray-300 flex-1 outline-none"
+                />
                 <input
                   type="text"
                   placeholder="추가 설명이 필요하다면 적어주세요."

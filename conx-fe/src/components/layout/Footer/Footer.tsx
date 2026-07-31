@@ -21,7 +21,7 @@ export default function Footer() {
             {/* Instagram */}
             <a
               aria-label="인스타그램"
-              href="https://www.instagram.com"
+              href="https://www.instagram.com/conx.connect?igsh=MWlibzRpcGJwNWt1MA=="
               target="_blank"
               rel="noopener noreferrer"
               className="flex h-12 w-12 items-center justify-center"

@@ -13,7 +13,10 @@ import Pagination from '@/components/common/Pagination/Pagination';
 import { resolveProfileImage } from '@/utils/profileImage';
 import CrewCard from './CrewCard';
 import CrewCardSmall from './CrewCardSmall';
+import CrewSelectConfirmModal from './CrewSelectConfirmModal';
+import CrewReviewModal from './CrewReviewModal';
 import MatchConfirmedModal from './MatchConfirmedModal';
+import Toast from '@/components/common/Toast/Toast';
 import type { ProgressStep, ResultItem, TagIndicatorType } from '@/types/workspace';
 
 const CARDS_PER_PAGE = 6;
@@ -41,6 +44,7 @@ interface ProjectCommon {
   subsidy: number | null;
   settlementStatus: string | null;
   criteria: { id: number; finalResult: string; numberOfResult: number; done: boolean }[];
+  isPointed: boolean;
 }
 
 interface Application {
@@ -130,8 +134,12 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
 
   const [payload, setPayload] = useState<ProjectDetailPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [matchedCrewImage, setMatchedCrewImage] = useState<string | null>(null);
+  const [confirmTarget, setConfirmTarget] = useState<Application | null>(null);
+  const [showReview, setShowReview] = useState(false);
+  const [showReviewToast, setShowReviewToast] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -144,6 +152,16 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
         const data = await res.json();
         if (res.ok && data.payload) {
           setPayload(data.payload);
+          if (data.payload.common.projectStatus === 'DONE' && !data.payload.common.isPointed) {
+            setShowReview(true);
+          }
+        } else {
+          const msg = data.message ?? '';
+          if (msg.includes('계약서')) {
+            setErrorMessage('계약서 작성 후 열람 가능합니다.');
+          } else {
+            setErrorMessage(msg || '프로젝트를 찾을 수 없습니다.');
+          }
         }
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -169,7 +187,20 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     return (
       <div className="flex flex-col items-center gap-4 pt-20">
         <p className="text-kor-heading-3-semibold text-conx-gray-500">
-          프로젝트를 찾을 수 없습니다.
+          {errorMessage ?? '프로젝트를 찾을 수 없습니다.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (
+    payload.common.projectStatus === 'RECRUITING' ||
+    payload.common.projectStatus === 'CONTRACT_PENDING'
+  ) {
+    return (
+      <div className="flex flex-col items-center gap-4 pt-20">
+        <p className="text-kor-heading-3-semibold text-conx-gray-500">
+          계약서 작성 후 열람 가능합니다.
         </p>
       </div>
     );
@@ -180,9 +211,44 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
 
   const progressSteps = buildProgressSteps(common, payload.status);
   const criteriaItems = common.criteria.map((c) => ({
+    id: c.id,
     label: `${c.finalResult} ${c.numberOfResult}건`,
     checked: c.done,
   }));
+
+  async function handleCriteriaToggle(index: number) {
+    const item = common.criteria[index];
+    if (!item) return;
+
+    const prev = item.done;
+    setPayload((p) => {
+      if (!p) return p;
+      const newCriteria = [...p.common.criteria];
+      newCriteria[index] = { ...newCriteria[index], done: !prev };
+      return { ...p, common: { ...p.common, criteria: newCriteria } };
+    });
+
+    try {
+      const res = await fetch(`/api/companies/me/projects/${projectId}/criteria/${item.id}/check`, {
+        method: 'POST',
+      });
+      if (!res.ok) {
+        setPayload((p) => {
+          if (!p) return p;
+          const newCriteria = [...p.common.criteria];
+          newCriteria[index] = { ...newCriteria[index], done: prev };
+          return { ...p, common: { ...p.common, criteria: newCriteria } };
+        });
+      }
+    } catch {
+      setPayload((p) => {
+        if (!p) return p;
+        const newCriteria = [...p.common.criteria];
+        newCriteria[index] = { ...newCriteria[index], done: prev };
+        return { ...p, common: { ...p.common, criteria: newCriteria } };
+      });
+    }
+  }
 
   // 검수 목록 → ResultItem 변환
   const results: ResultItem[] = inspections
@@ -206,16 +272,22 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     router.push(`${basePath}/results/${result.id}`);
   }
 
-  async function handleSelectCrew(applicationId: number) {
-    const selectedCrew = applications.find((a) => a.applicationId === applicationId);
+  function handleSelectCrew(applicationId: number) {
+    const crew = applications.find((a) => a.applicationId === applicationId);
+    if (crew) setConfirmTarget(crew);
+  }
+
+  async function handleConfirmSelect() {
+    if (!confirmTarget) return;
     try {
       const res = await fetch(
-        `/api/companies/me/projects/${projectId}/applications/${applicationId}/select`,
+        `/api/companies/me/projects/${projectId}/applications/${confirmTarget.applicationId}/select`,
         { method: 'POST' },
       );
       const data = await res.json();
       if (res.ok) {
-        setMatchedCrewImage(selectedCrew?.crewImageLink ?? '/images/OG_image.png');
+        setConfirmTarget(null);
+        setMatchedCrewImage(confirmTarget.crewImageLink ?? '/images/OG_image.png');
       } else {
         alert(data.message ?? '크루 선정에 실패했습니다.');
       }
@@ -296,7 +368,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
             </div>
           )}
           <TaskProgressSection steps={progressSteps} />
-          <SubmissionCriteriaSection items={criteriaItems} />
+          <SubmissionCriteriaSection items={criteriaItems} onToggle={handleCriteriaToggle} />
         </aside>
 
         {/* 우측 콘텐츠 */}
@@ -361,6 +433,49 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
           )}
         </section>
       </div>
+
+      {confirmTarget && (
+        <CrewSelectConfirmModal
+          profileSrc={resolveProfileImage(confirmTarget.crewImageLink, confirmTarget.crewId)}
+          name={confirmTarget.crewName ?? '크루명'}
+          subtitle={confirmTarget.crewType}
+          tags={confirmTarget.keywords}
+          onConfirm={handleConfirmSelect}
+          onClose={() => setConfirmTarget(null)}
+        />
+      )}
+
+      {showReview && (
+        <CrewReviewModal
+          onSubmit={async (ratings) => {
+            try {
+              const res = await fetch(`/api/companies/me/projects/${projectId}/evaluate`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(ratings),
+              });
+              if (res.ok) {
+                setShowReview(false);
+                setShowReviewToast(true);
+              } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.message ?? '평가 제출에 실패했습니다.');
+              }
+            } catch {
+              alert('네트워크 오류가 발생했습니다.');
+            }
+          }}
+        />
+      )}
+
+      {showReviewToast && (
+        <Toast
+          message="프로젝트가 정상적으로 완료되었습니다."
+          duration={5000}
+          onClose={() => setShowReviewToast(false)}
+          className="z-conx-toast fixed bottom-10 left-1/2 -translate-x-1/2"
+        />
+      )}
 
       {matchedCrewImage && (
         <MatchConfirmedModal

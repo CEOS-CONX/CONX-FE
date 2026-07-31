@@ -105,8 +105,7 @@ export default function DropdownCompact({
   return (
     <div
       ref={containerRef}
-      // width 104~300px 사이에서만 가능
-      className={`relative inline-block max-w-75 min-w-26 ${className ?? ''}`}
+      className={`relative inline-block max-w-75 min-w-33.5 ${className ?? ''}`}
     >
       <button
         type="button"
