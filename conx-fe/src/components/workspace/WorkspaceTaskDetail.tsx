@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TaskDetailHeader from './sections/TaskDetailHeader';
 import TaskProgressSection from './sections/TaskProgressSection';
 import SubmissionCriteriaSection from './sections/SubmissionCriteriaSection';
@@ -91,6 +91,7 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
   const [view, setView] = useState<RightPanelView>('table');
   const [selectedResult, setSelectedResult] = useState<ResultItem | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const detailRequestId = useRef(0);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -123,8 +124,11 @@ export default function WorkspaceTaskDetail({ taskId }: WorkspaceTaskDetailProps
     setView('detail');
     setIsDetailLoading(true);
 
+    const requestId = ++detailRequestId.current;
+
     try {
       const res = await fetch(`/api/projects/${common.projectId}/submissions/${result.id}`);
+      if (requestId !== detailRequestId.current) return;
       const data = await res.json();
       if (res.ok && data.payload) {
         const { submission, feedBack } = data.payload;
