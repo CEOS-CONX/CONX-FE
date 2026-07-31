@@ -242,7 +242,11 @@ export default function WorkspaceProjects() {
                   return (
                     <Link
                       key={project.applicationId}
-                      href={`/crew-workspace/project-tasks/${project.projectId}`}
+                      href={
+                        project.status === 'APPLIED'
+                          ? `/projects/${project.projectId}`
+                          : `/crew-workspace/project-tasks/${project.projectId}`
+                      }
                       className="w-84.25"
                     >
                       <Card
