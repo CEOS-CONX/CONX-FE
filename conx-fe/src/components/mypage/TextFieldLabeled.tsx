@@ -46,7 +46,9 @@ export default function TextFieldLabeled({
         <div className="flex items-center justify-between">
           <label htmlFor={id} className="text-kor-label-1-medium text-conx-gray-350">
             {label}
-            {required && <span className="text-conx-red-500 ml-0.5">*</span>}
+            {required && (
+              <span className="bg-conx-red-500 ml-0.5 inline-block h-1 w-1 rounded-full align-top" />
+            )}
           </label>
           {maxLength != null && (
             <span
