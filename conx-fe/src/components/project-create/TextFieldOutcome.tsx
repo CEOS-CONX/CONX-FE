@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   DndContext,
   closestCenter,
@@ -37,6 +37,43 @@ function createEmptyOutcome(): OutcomeItem {
     finalSubmission: '',
     description: '',
   };
+}
+
+function AutoWidthInput({
+  value,
+  placeholder,
+  className,
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement>) {
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+  const [width, setWidth] = useState<number | undefined>();
+
+  useEffect(() => {
+    if (mirrorRef.current) {
+      setWidth(mirrorRef.current.scrollWidth);
+    }
+  }, [value, placeholder]);
+
+  const displayText = (value as string) || placeholder || '';
+
+  return (
+    <span className="relative inline-flex items-center">
+      <span
+        ref={mirrorRef}
+        className={`pointer-events-none invisible absolute top-0 left-0 whitespace-pre ${className ?? ''}`}
+        aria-hidden
+      >
+        {displayText}
+      </span>
+      <input
+        value={value}
+        placeholder={placeholder}
+        className={className}
+        style={{ width: width ? `${width + 2}px` : undefined }}
+        {...props}
+      />
+    </span>
+  );
 }
 
 function DividerVertical() {
@@ -149,27 +186,27 @@ function OutcomeCard({
           {isFocused ? (
             <>
               <div className="flex items-center gap-2">
-                <input
+                <AutoWidthInput
                   type="text"
                   placeholder="플랫폼명"
                   autoFocus
                   value={item.platform}
                   onChange={(e) => onUpdate(item.id, 'platform', e.target.value)}
-                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 w-[4em] shrink-0 outline-none"
+                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 outline-none"
                 />
                 <DividerVertical />
-                <input
+                <AutoWidthInput
                   type="text"
                   placeholder="콘텐츠 유형"
                   value={item.contentType}
                   onChange={(e) => onUpdate(item.id, 'contentType', e.target.value)}
-                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 w-[5.25em] shrink-0 outline-none"
+                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 outline-none"
                 />
                 <DividerVertical />
                 <div
                   className={`text-kor-body-1-semibold flex shrink-0 items-center ${item.count > 0 ? 'text-conx-common-black' : 'text-conx-gray-300'}`}
                 >
-                  <input
+                  <AutoWidthInput
                     type="number"
                     min={0}
                     value={item.count || ''}
@@ -177,17 +214,17 @@ function OutcomeCard({
                     onChange={(e) =>
                       onUpdate(item.id, 'count', Math.max(0, parseInt(e.target.value, 10) || 0))
                     }
-                    className="placeholder:text-conx-gray-300 w-[2em] [appearance:textfield] text-right text-inherit outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                    className="placeholder:text-conx-gray-300 [appearance:textfield] text-right text-inherit outline-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <span>개</span>
                 </div>
                 <DividerVertical />
-                <input
+                <AutoWidthInput
                   type="text"
                   placeholder="최종 제출물"
                   value={item.finalSubmission}
                   onChange={(e) => onUpdate(item.id, 'finalSubmission', e.target.value)}
-                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 w-[5.25em] shrink-0 outline-none"
+                  className="text-kor-body-1-semibold text-conx-common-black placeholder:text-conx-gray-300 outline-none"
                 />
               </div>
               <input

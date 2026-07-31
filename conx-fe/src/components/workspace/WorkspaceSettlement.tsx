@@ -247,12 +247,8 @@ export default function WorkspaceSettlement() {
                         );
                         try {
                           const res = await fetch(
-                            `/api/crews/settlements/${row.settlementId}/payment-status`,
-                            {
-                              method: 'PATCH',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({ paymentStatus: value }),
-                            },
+                            `/api/crews/settlements/${row.settlementId}/complete`,
+                            { method: 'PATCH' },
                           );
                           if (!res.ok) {
                             const data = await res.json().catch(() => ({}));

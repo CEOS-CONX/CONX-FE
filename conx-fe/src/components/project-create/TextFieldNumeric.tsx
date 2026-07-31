@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import IconError from '@/assets/icons/icon_error.svg';
 
 interface TextFieldNumericProps {
@@ -32,6 +32,9 @@ export default function TextFieldNumeric({
   const [touched, setTouched] = useState(false);
   const [internalError, setInternalError] = useState<string | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const mirrorRef = useRef<HTMLSpanElement>(null);
+  const [inputWidth, setInputWidth] = useState<number | undefined>();
 
   const isFilled = value > 0;
   const validationError = touched && !isFilled && emptyError ? emptyError : null;
@@ -39,6 +42,13 @@ export default function TextFieldNumeric({
   const hasError = !!error;
 
   const displayValue = hasError && !isFilled ? '0' : isFilled ? formatWithCommas(value) : '';
+  const displayText = displayValue || '0';
+
+  useEffect(() => {
+    if (mirrorRef.current) {
+      setInputWidth(mirrorRef.current.scrollWidth);
+    }
+  }, [displayValue]);
 
   const borderClass = hasError
     ? 'border-conx-red-500'
@@ -68,6 +78,10 @@ export default function TextFieldNumeric({
     setTouched(true);
   }
 
+  function handleContainerClick() {
+    inputRef.current?.focus();
+  }
+
   return (
     <div className={`flex w-114.25 shrink-0 flex-col gap-3 ${className ?? ''}`}>
       {label && (
@@ -80,24 +94,37 @@ export default function TextFieldNumeric({
       )}
 
       <div
-        className={`flex items-center overflow-hidden rounded-md border bg-white p-4 ${borderClass}`}
+        className={`flex cursor-text items-center overflow-hidden rounded-md border bg-white p-4 ${borderClass}`}
+        onClick={handleContainerClick}
       >
-        <input
-          type="text"
-          inputMode="numeric"
-          placeholder="0"
-          value={displayValue}
-          onChange={handleChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={handleBlur}
-          className={`text-kor-body-1-medium w-0 min-w-0 shrink outline-none ${
-            hasError || isFilled
-              ? 'text-conx-common-black'
-              : 'text-conx-common-black placeholder:text-conx-gray-300'
-          }`}
-          style={{ width: `${Math.max(1, (displayValue || '0').length)}ch` }}
-        />
-        <span className="text-kor-body-1-medium text-conx-gray-550 shrink-0">{suffix}</span>
+        <div className="relative flex flex-1 items-center">
+          <span
+            ref={mirrorRef}
+            className="text-kor-body-1-medium pointer-events-none invisible absolute top-0 left-0 whitespace-pre"
+            aria-hidden
+          >
+            {displayText}
+          </span>
+          <input
+            ref={inputRef}
+            type="text"
+            inputMode="numeric"
+            placeholder="0"
+            value={displayValue}
+            onChange={handleChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={handleBlur}
+            className={`text-kor-body-1-medium outline-none ${
+              hasError || isFilled
+                ? 'text-conx-common-black'
+                : 'text-conx-common-black placeholder:text-conx-gray-300'
+            }`}
+            style={{ width: inputWidth ? `${inputWidth + 2}px` : '1ch' }}
+          />
+          <span className="text-kor-body-1-medium text-conx-gray-550 shrink-0 pl-0.5">
+            {suffix}
+          </span>
+        </div>
       </div>
 
       {hasError && (

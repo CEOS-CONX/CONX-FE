@@ -14,14 +14,21 @@ export default function Tag({
   type,
   label,
   compact,
+  size = 'md',
 }: {
   type: TagType;
   label: string;
   compact?: boolean;
+  size?: 'sm' | 'md';
 }) {
+  const sizeClass =
+    size === 'sm'
+      ? 'text-kor-caption-1-medium px-1.5 py-0.5'
+      : `text-kor-label-1-semibold py-1 ${compact ? 'px-1.25' : 'px-1.5'}`;
+
   return (
     <span
-      className={`text-kor-label-1-semibold inline-flex items-center justify-center rounded-md py-1 ${compact ? 'px-1.25' : 'px-1.5'} ${TAG_STYLES[type]}`}
+      className={`inline-flex items-center justify-center rounded-md ${sizeClass} ${TAG_STYLES[type]}`}
     >
       {label}
     </span>

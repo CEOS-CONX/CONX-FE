@@ -46,7 +46,7 @@ interface Submission {
   uploadDate: string;
   content: string;
   files: SubmissionFile[];
-  additionalLinks: string[];
+  additionalLinks: { linkName: string; link: string; explanation: string }[];
 }
 
 interface FeedBack {
@@ -170,8 +170,9 @@ export default function CompanyResultDetail({ projectId, resultId }: CompanyResu
       description: f.explanation || undefined,
     })),
     links: submission.additionalLinks.map((link) => ({
-      label: link,
-      url: link,
+      label: link.linkName,
+      url: link.link,
+      description: link.explanation || undefined,
     })),
   };
 

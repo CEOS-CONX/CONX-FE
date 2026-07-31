@@ -89,6 +89,8 @@ export default function ProjectDescriptionSection({
             size="full"
             label="소개"
             required
+            multiline
+            autoResize
             placeholder="내용을 입력해주세요"
             value={form.introduction}
             onChange={(e) => onUpdate('introduction', e.target.value)}

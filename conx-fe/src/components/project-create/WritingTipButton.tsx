@@ -1,17 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import IconWritingTip from '@/assets/icons/icon_writingTip.svg';
 import { Tooltip } from '@/components/common/Tooltip';
 import WritingTipPanel from '@/components/project-create/WritingTipPanel';
 
 interface WritingTipButtonProps {
   activeField?: string;
+  onPanelChange?: (open: boolean) => void;
 }
 
-export default function WritingTipButton({ activeField }: WritingTipButtonProps) {
+export default function WritingTipButton({ activeField, onPanelChange }: WritingTipButtonProps) {
   const [showTooltip, setShowTooltip] = useState(true);
   const [showPanel, setShowPanel] = useState(false);
+
+  useEffect(() => {
+    onPanelChange?.(showPanel);
+  }, [showPanel, onPanelChange]);
 
   if (showPanel) {
     return <WritingTipPanel activeField={activeField} onClose={() => setShowPanel(false)} />;
