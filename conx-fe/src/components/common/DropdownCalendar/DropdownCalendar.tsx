@@ -5,6 +5,7 @@ import IconArrowDownStroke from '@/assets/icons/icon_arrowDown_stroke.svg';
 import IconArrowUpFill from '@/assets/icons/icon_arrowUp_fill.svg';
 import IconArrowLeftFill from '@/assets/icons/icon_arrowLeft_fill.svg';
 import IconArrowRightFill from '@/assets/icons/icon_arrowRight_fill.svg';
+import Button from '@/components/common/Button/Button';
 
 export type DateRange = { start: Date; end: Date };
 
@@ -26,7 +27,7 @@ interface BaseProps {
 interface SingleProps extends BaseProps {
   mode?: 'single';
   value?: Date;
-  onChange?: (date: Date) => void;
+  onChange?: (date: Date | undefined) => void;
 }
 
 interface RangeProps extends BaseProps {
@@ -113,13 +114,11 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
   const isRange = props.mode === 'range';
 
   const [isOpen, setIsOpen] = useState(false);
-  const [internalSingle, setInternalSingle] = useState<Date | undefined>(undefined);
-  const [internalRange, setInternalRange] = useState<DateRange | undefined>(undefined);
+
+  const [tempSingle, setTempSingle] = useState<Date | undefined>(undefined);
+  const [tempRange, setTempRange] = useState<DateRange | undefined>(undefined);
   const [pickingStart, setPickingStart] = useState<Date | null>(null);
-  const pickingStartRef = useRef<Date | null>(null);
-  useEffect(() => {
-    pickingStartRef.current = pickingStart;
-  }, [pickingStart]);
+
   const [viewMonth, setViewMonth] = useState(() => {
     const seed = isRange
       ? ((props.value as DateRange | undefined)?.start ?? new Date())
@@ -128,32 +127,20 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
   });
   const containerRef = useRef<HTMLDivElement>(null);
 
-  if (!isRange && props.value === undefined && internalSingle !== undefined) {
-    setInternalSingle(undefined);
-  }
-
-  const currentSingle = isRange ? undefined : ((props.value as Date | undefined) ?? internalSingle);
-  const currentRange = isRange
-    ? ((props.value as DateRange | undefined) ?? internalRange)
-    : undefined;
+  const currentSingle = isRange ? undefined : (props.value as Date | undefined);
+  const currentRange = isRange ? (props.value as DateRange | undefined) : undefined;
   const isSelected = isRange ? !!currentRange : !!currentSingle;
 
   useEffect(() => {
     if (!isOpen) return;
 
-    function close() {
-      if (isRange && pickingStartRef.current) {
-        setInternalRange(undefined);
-        (props as RangeProps).onChange?.(undefined);
-      }
-      setIsOpen(false);
-      setPickingStart(null);
-    }
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) close();
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        handleCancel();
+      }
     }
     function handleEscape(e: KeyboardEvent) {
-      if (e.key === 'Escape') close();
+      if (e.key === 'Escape') handleCancel();
     }
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -164,18 +151,49 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     };
   }, [isOpen]);
 
-  function handleTriggerClick() {
-    if (!isOpen) {
-      const seed = isRange ? (currentRange?.start ?? new Date()) : (currentSingle ?? new Date());
-      setViewMonth({ year: seed.getFullYear(), month: seed.getMonth() });
+  function openPanel() {
+    const seed = isRange ? (currentRange?.start ?? new Date()) : (currentSingle ?? new Date());
+    setViewMonth({ year: seed.getFullYear(), month: seed.getMonth() });
+    setTempSingle(currentSingle);
+    setTempRange(currentRange);
+    setPickingStart(null);
+    setIsOpen(true);
+  }
+
+  function handleCancel() {
+    setTempSingle(undefined);
+    setTempRange(undefined);
+    setPickingStart(null);
+    setIsOpen(false);
+  }
+
+  function handleConfirm() {
+    if (isRange) {
+      (props as RangeProps).onChange?.(tempRange);
     } else {
-      if (isRange && pickingStart) {
-        setInternalRange(undefined);
-        (props as RangeProps).onChange?.(undefined);
-      }
-      setPickingStart(null);
+      (props as SingleProps).onChange?.(tempSingle);
     }
-    setIsOpen((prev) => !prev);
+    setIsOpen(false);
+  }
+
+  function handleReset() {
+    if (isRange) {
+      setTempRange(undefined);
+      (props as RangeProps).onChange?.(undefined);
+    } else {
+      setTempSingle(undefined);
+      (props as SingleProps).onChange?.(undefined);
+    }
+    setPickingStart(null);
+    setIsOpen(false);
+  }
+
+  function handleTriggerClick() {
+    if (isOpen) {
+      handleCancel();
+    } else {
+      openPanel();
+    }
   }
 
   function handleDateClick(date: Date) {
@@ -183,19 +201,14 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
       if (pickingStart) {
         const [s, e] =
           date.getTime() < pickingStart.getTime() ? [date, pickingStart] : [pickingStart, date];
-        const newRange: DateRange = { start: s, end: e };
+        setTempRange({ start: s, end: e });
         setPickingStart(null);
-        setInternalRange(newRange);
-        (props as RangeProps).onChange?.(newRange);
-        setIsOpen(false);
       } else {
         setPickingStart(date);
-        setInternalRange(undefined);
+        setTempRange(undefined);
       }
     } else {
-      setInternalSingle(date);
-      (props as SingleProps).onChange?.(date);
-      setIsOpen(false);
+      setTempSingle(date);
     }
   }
 
@@ -224,10 +237,8 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
     triggerText = currentSingle ? formatDate(currentSingle) : placeholder;
   }
 
-  const visualStart = isRange
-    ? (pickingStart ?? currentRange?.start ?? null)
-    : (currentSingle ?? null);
-  const visualEnd = isRange ? (pickingStart ? null : (currentRange?.end ?? null)) : null;
+  const visualStart = isRange ? (pickingStart ?? tempRange?.start ?? null) : (tempSingle ?? null);
+  const visualEnd = isRange ? (pickingStart ? null : (tempRange?.end ?? null)) : null;
 
   return (
     <div
@@ -258,90 +269,107 @@ export default function DropdownCalendar(props: DropdownCalendarProps) {
         <div
           role="dialog"
           aria-label="날짜 선택"
-          className={`drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full mt-2 w-90 rounded-md p-4 ${align === 'right' ? 'right-0' : 'left-0'}`}
+          className={`drop-shadow-conx-drop-gray-15 bg-conx-common-white z-conx-dropdown absolute top-full mt-2 flex w-80 flex-col gap-4 rounded-md p-2.5 ${align === 'right' ? 'right-0' : 'left-0'}`}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => shiftMonth(-1)}
-              aria-label="이전 달"
-              className="hover:bg-conx-gray-100 cursor-pointer rounded p-1"
-            >
-              <IconArrowLeftFill className="h-5 w-5" />
-            </button>
-            <span className="text-kor-heading-3-semibold text-conx-common-black">
-              {viewMonth.year}년 {viewMonth.month + 1}월
-            </span>
-            <button
-              type="button"
-              onClick={() => shiftMonth(1)}
-              aria-label="다음 달"
-              className="hover:bg-conx-gray-100 cursor-pointer rounded p-1"
-            >
-              <IconArrowRightFill className="h-5 w-5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7">
-            {WEEKDAYS.map((day) => (
-              <div
-                key={day}
-                className="text-kor-label-1-semibold text-conx-common-black py-2 text-center"
+          <div className="flex flex-col gap-0.5">
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() => shiftMonth(-1)}
+                aria-label="이전 달"
+                className="hover:bg-conx-gray-100 cursor-pointer rounded p-1.5"
               >
-                {day}
-              </div>
-            ))}
+                <IconArrowLeftFill className="h-4.5 w-4.5" />
+              </button>
+              <span className="text-kor-body-1-bold text-conx-common-black">
+                {viewMonth.year}년 {viewMonth.month + 1}월
+              </span>
+              <button
+                type="button"
+                onClick={() => shiftMonth(1)}
+                aria-label="다음 달"
+                className="hover:bg-conx-gray-100 cursor-pointer rounded p-1.5"
+              >
+                <IconArrowRightFill className="h-4.5 w-4.5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7">
+              {WEEKDAYS.map((day) => (
+                <div
+                  key={day}
+                  className="text-kor-label-1-bold text-conx-common-black flex size-9 items-center justify-center"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7 gap-y-2">
+              {days.map(({ date, isOutOfMonth }, idx) => {
+                const isStart = visualStart && isSameDate(date, visualStart);
+                const isEnd = visualEnd && isSameDate(date, visualEnd);
+                const isSingleSelect = isStart && !visualEnd;
+                const isInRange =
+                  visualStart &&
+                  visualEnd &&
+                  date.getTime() > visualStart.getTime() &&
+                  date.getTime() < visualEnd.getTime();
+
+                let outerClass = 'flex h-9 items-center justify-center';
+                let innerClass =
+                  'text-kor-label-1-semibold flex size-9 items-center justify-center';
+
+                if (isOutOfMonth) {
+                  outerClass += ' cursor-default';
+                  innerClass += ' text-conx-gray-300';
+                } else if (isStart && visualEnd) {
+                  outerClass +=
+                    ' bg-[linear-gradient(to_right,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                  innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+                } else if (isEnd) {
+                  outerClass +=
+                    ' bg-[linear-gradient(to_left,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
+                  innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+                } else if (isSingleSelect) {
+                  outerClass += ' cursor-pointer';
+                  innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
+                } else if (isInRange) {
+                  outerClass += ' bg-conx-primary-100 cursor-pointer';
+                  innerClass += ' text-conx-common-black';
+                } else {
+                  outerClass += ' cursor-pointer';
+                  innerClass +=
+                    ' text-conx-common-black hover:bg-conx-opacity-gray-6 hover:rounded-full';
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => !isOutOfMonth && handleDateClick(date)}
+                    disabled={isOutOfMonth}
+                    className={outerClass}
+                  >
+                    <span className={innerClass}>{date.getDate()}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="grid grid-cols-7">
-            {days.map(({ date, isOutOfMonth }, idx) => {
-              const isStart = visualStart && isSameDate(date, visualStart);
-              const isEnd = visualEnd && isSameDate(date, visualEnd);
-              const isSingleSelect = isStart && !visualEnd;
-              const isInRange =
-                visualStart &&
-                visualEnd &&
-                date.getTime() > visualStart.getTime() &&
-                date.getTime() < visualEnd.getTime();
-
-              let outerClass = 'flex h-9 items-center justify-center';
-              let innerClass = 'text-kor-label-1-semibold flex size-9 items-center justify-center';
-
-              if (isOutOfMonth) {
-                outerClass += ' cursor-default';
-                innerClass += ' text-conx-gray-300';
-              } else if (isStart && visualEnd) {
-                outerClass +=
-                  ' bg-[linear-gradient(to_right,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
-                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
-              } else if (isEnd) {
-                outerClass +=
-                  ' bg-[linear-gradient(to_left,transparent_50%,var(--color-conx-primary-100)_50%)] cursor-pointer';
-                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
-              } else if (isSingleSelect) {
-                outerClass += ' cursor-pointer';
-                innerClass += ' bg-conx-primary-450 text-conx-common-white rounded-full';
-              } else if (isInRange) {
-                outerClass += ' bg-conx-primary-100 cursor-pointer';
-                innerClass += ' text-conx-common-black';
-              } else {
-                outerClass += ' cursor-pointer';
-                innerClass +=
-                  ' text-conx-common-black hover:bg-conx-opacity-gray-6 hover:rounded-full';
-              }
-
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => !isOutOfMonth && handleDateClick(date)}
-                  disabled={isOutOfMonth}
-                  className={outerClass}
-                >
-                  <span className={innerClass}>{date.getDate()}</span>
-                </button>
-              );
-            })}
+          <div className="flex items-center justify-between">
+            <Button variant="ghost" onClick={handleReset}>
+              초기화
+            </Button>
+            <div className="flex gap-2">
+              <Button variant="tertiary" onClick={handleCancel}>
+                취소
+              </Button>
+              <Button variant="secondary" onClick={handleConfirm}>
+                확인
+              </Button>
+            </div>
           </div>
         </div>
       )}
