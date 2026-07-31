@@ -130,6 +130,7 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
 
   const [payload, setPayload] = useState<ProjectDetailPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [matchedCrewImage, setMatchedCrewImage] = useState<string | null>(null);
 
@@ -144,6 +145,13 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
         const data = await res.json();
         if (res.ok && data.payload) {
           setPayload(data.payload);
+        } else {
+          const msg = data.message ?? '';
+          if (msg.includes('계약서')) {
+            setErrorMessage('계약서 작성 후 열람 가능합니다.');
+          } else {
+            setErrorMessage(msg || '프로젝트를 찾을 수 없습니다.');
+          }
         }
       } catch (e) {
         if (e instanceof DOMException && e.name === 'AbortError') return;
@@ -169,7 +177,20 @@ export default function CompanyProjectDetail({ projectId }: CompanyProjectDetail
     return (
       <div className="flex flex-col items-center gap-4 pt-20">
         <p className="text-kor-heading-3-semibold text-conx-gray-500">
-          프로젝트를 찾을 수 없습니다.
+          {errorMessage ?? '프로젝트를 찾을 수 없습니다.'}
+        </p>
+      </div>
+    );
+  }
+
+  if (
+    payload.common.projectStatus === 'RECRUITING' ||
+    payload.common.projectStatus === 'CONTRACT_PENDING'
+  ) {
+    return (
+      <div className="flex flex-col items-center gap-4 pt-20">
+        <p className="text-kor-heading-3-semibold text-conx-gray-500">
+          계약서 작성 후 열람 가능합니다.
         </p>
       </div>
     );
