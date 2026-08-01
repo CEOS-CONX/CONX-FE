@@ -41,12 +41,16 @@ export const CREW_TYPE_OPTIONS = [
 ];
 
 export const ACTIVITY_FIELD_OPTIONS = [
-  { value: 'MARKETING', label: '마케팅' },
+  { value: 'MARKETING', label: '마케팅 · 광고' },
   { value: 'DESIGN', label: '디자인' },
-  { value: 'BUSINESS', label: '경영·컨설팅' },
+  { value: 'BUSINESS', label: '전략 · 컨설팅' },
   { value: 'FINANCE', label: '금융' },
   { value: 'STARTUP', label: '창업' },
-  { value: 'DEV_IT', label: '개발·IT' },
+  { value: 'DEV_IT', label: '개발 · IT' },
+  // 신규 3종 — value(enum)는 백엔드 코드에 맞춰야 함(아래 값은 임시, 백엔드 확인 필요)
+  { value: 'ART', label: '공연 · 예술' },
+  { value: 'SPORTS', label: '스포츠' },
+  { value: 'VOLUNTEER', label: '봉사' },
 ];
 
 export const RATING_OPTIONS = [
